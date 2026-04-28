@@ -268,7 +268,7 @@
     <div style="font-size:1.8rem;flex-shrink:0">⏰</div>
     <div>
       <div style="color:#fff;font-size:.92rem;font-weight:600;letter-spacing:.02em">Bestel vóór 14:00 uur</div>
-      <div style="color:rgba(255,255,255,.85);font-size:.78rem;margin-top:3px;line-height:1.5">Bestellingen die na 14:00 binnenkomen worden de <strong style="color:#fff">volgende werkdag</strong> verwerkt. Weekenden en feestdagen worden overgeslagen.</div>
+      <div style="color:rgba(255,255,255,.85);font-size:.78rem;margin-top:3px;line-height:1.5">Grote bestellingen die na 14:00 binnenkomen worden de <strong style="color:#fff">volgende werkdag</strong> verwerkt. Weekenden en feestdagen worden overgeslagen.</div>
     </div>
   </div>
   <div class="landing-steps">
@@ -326,7 +326,7 @@
     <div class="field-row-2">
       <div class="field-row">
         <label>Projectnummer</label>
-        <input type="text" id="projectnummer" placeholder="P2600000" oninput="saveInfo()" />
+        <input type="text" id="projectnummer" value="P2600000" oninput="saveInfo()" style="color:var(--muted)" onfocus="this.style.color='var(--text)'" onblur="if(!this.value)this.value='P2600000'" />
       </div>
       <div class="field-row">
         <label>Projectnaam <span class="req">*</span></label>
@@ -347,7 +347,7 @@
     </div>
     <div class="field-row">
       <label>E-mail ontvanger 2 (optioneel)</label>
-      <input type="email" id="ontvanger2" placeholder="Jou eigen e-mailadres" oninput="saveInfo()" />
+      <input type="email" id="ontvanger2" placeholder="inkoop@emondt.nl" oninput="saveInfo()" />
     </div>
     <div class="field-row">
       <label>Opmerkingen (optioneel)</label>
@@ -944,7 +944,7 @@ function renderArtikelCard(artikel, container) {
     <div class="artikel-icon">${artikel.icon}</div>
     <div class="artikel-info">
       <div class="artikel-naam">${artikel.naam}</div>
-      <div class="artikel-code">${artikel.code}</div>
+      <div class="artikel-code">${artikel.code} · per ${artikel.eenheid}</div>
     </div>
     <div class="qty-control" onclick="event.stopPropagation()">
       <button class="qty-btn" onclick="changeQty('${artikel.code}',-1,event)">−</button>
@@ -1097,6 +1097,21 @@ function verstuurEmail() {
       document.getElementById(v.id).focus(); return;
     }
   }
+
+  // ── Waarschuwing na 14:00 ──────────────────────────────────
+  const nu = new Date();
+  const uur = nu.getHours();
+  const minuut = nu.getMinutes();
+  if (uur >= 14) {
+    const tijdStr = `${String(uur).padStart(2,'0')}:${String(minuut).padStart(2,'0')}`;
+    const doorgaan = confirm(
+      `⚠️ Let op: het is nu ${tijdStr}\n\n` +
+      `Bestellingen die na 14:00 binnenkomen worden verwerkt op de volgende werkdag.\n\n` +
+      `Wil je toch versturen?`
+    );
+    if (!doorgaan) return;
+  }
+
   let leverdatum = '';
   try { leverdatum = localStorage.getItem('leverdatum') || ''; } catch(e){}
   const datum = new Date().toLocaleDateString('nl-NL',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
