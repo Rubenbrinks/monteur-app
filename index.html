@@ -138,7 +138,7 @@
 
     /* ARTIKEL KAART */
     .artikel-grid{display:flex;flex-direction:column;gap:8px}
-    .artikel-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:flex-start;gap:12px;transition:border-color .2s,box-shadow .2s;box-shadow:0 1px 3px rgba(4,28,66,.05);cursor:pointer}
+    .artikel-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:flex-start;gap:12px;transition:border-color .2s,box-shadow .2s;box-shadow:0 1px 3px rgba(4,28,66,.05)}
     .artikel-card.selected{border-color:var(--green);background:var(--green-light);box-shadow:0 2px 8px rgba(174,195,54,.18)}
     .artikel-icon{width:40px;height:40px;border-radius:6px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem}
     .artikel-card.selected .artikel-icon{background:#e2eba3;border-color:var(--green)}
@@ -262,13 +262,13 @@
 <div class="section" id="tab-welkom" style="display:block">
   <div class="landing-hero">
     <h1>Welkom</h1>
-    <p>Hieronder een korte beschrijving hoe deze omgeving te gebruiken. Dit is een alternatief op onze "ouderwetse" materiaallijsten.</p>
+    <p>Hieronder een korte beschrijving hoe deze omgeving te gebruiken</p>
   </div>
   <div style="background:#e8471a;border-radius:var(--radius);padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:14px">
     <div style="font-size:1.8rem;flex-shrink:0">⏰</div>
     <div>
       <div style="color:#fff;font-size:.92rem;font-weight:600;letter-spacing:.02em">Bestel vóór 14:00 uur</div>
-      <div style="color:rgba(255,255,255,.85);font-size:.78rem;margin-top:3px;line-height:1.5">Grote bestellingen die na 14:00 binnenkomen worden de <strong style="color:#fff">volgende werkdag</strong> verwerkt. Weekenden en feestdagen worden overgeslagen.</div>
+      <div style="color:rgba(255,255,255,.85);font-size:.78rem;margin-top:3px;line-height:1.5">Bestellingen die na 14:00 binnenkomen worden de <strong style="color:#fff">volgende werkdag</strong> verwerkt. Weekenden en feestdagen worden overgeslagen.</div>
     </div>
   </div>
   <div class="landing-steps">
@@ -304,6 +304,11 @@
   <button class="landing-start-btn" onclick="showTab('artikelen')">
     📦 Ga naar artikelen →
   </button>
+
+  <div style="margin-top:18px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:.78rem;color:var(--muted);line-height:1.6;text-align:center">
+    Heb je op- of aanmerkingen over het gebruik van deze app of artikelen die ontbreken?<br>
+    Stuur dan even een mailtje naar <a href="mailto:r.brinks@emondt.nl" style="color:var(--green);text-decoration:none">r.brinks@emondt.nl</a>
+  </div>
 </div>
 
 <!-- TAB: MONTEUR INFO -->
@@ -952,7 +957,7 @@ function renderArtikelCard(artikel, container) {
         onchange="setQty('${artikel.code}',this)" onclick="this.select()" />
       <button class="qty-btn" onclick="changeQty('${artikel.code}',1,event)">+</button>
     </div>`;
-  el.onclick = e => { if (!e.target.closest('.qty-control')) changeQty(artikel.code, 1, e); };
+  el.onclick = null;
   container.appendChild(el);
 }
 
