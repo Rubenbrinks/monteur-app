@@ -14,7 +14,7 @@
   <!-- iOS / Safari -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Emondt" />
+  <meta name="apple-mobile-web-app-title" content="Emondt materiaalapp" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
 
@@ -24,7 +24,7 @@
 
   <!-- SEO / Share -->
   <meta name="description" content="Emondt Materiaalapp – Artikelen selecteren en bestellen voor monteurs." />
-  <meta name="application-name" content="Emondt" />
+  <meta name="application-name" content="Emondt materiaalapp" />
   <meta name="author" content="Emondt Groep" />
 
   <!-- Microsoft / Windows -->
@@ -262,7 +262,7 @@
 <div class="section" id="tab-welkom" style="display:block">
   <div class="landing-hero">
     <h1>Welkom</h1>
-    <p>Hieronder een korte beschrijving hoe deze omgeving te gebruiken, dit is een alternatief op onze "ouderwetse" materiaallijsten</p>
+    <p>Hieronder een korte beschrijving hoe deze omgeving te gebruiken</p>
   </div>
   <div style="background:#e8471a;border-radius:var(--radius);padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:14px">
     <div style="font-size:1.8rem;flex-shrink:0">⏰</div>
@@ -346,7 +346,7 @@
     <div class="field-row-2">
       <div class="field-row">
         <label>Projectnummer</label>
-        <input type="text" id="projectnummer" value="P2600000" oninput="saveInfo()" style="color:var(--muted)" onfocus="this.style.color='var(--text)'" onblur="if(!this.value)this.value='P2600000'" />
+        <input type="text" id="projectnummer" placeholder="P2600000" oninput="saveInfo()" />
       </div>
       <div class="field-row">
         <label>Projectnaam <span class="req">*</span></label>
@@ -355,7 +355,13 @@
     </div>
     <div class="field-row">
       <label>Afleveradres <span class="req">*</span></label>
-      <input type="text" id="locatie" placeholder="Marssteden 64, Enschede" oninput="saveInfo()" />
+      <select id="locatie-keuze" onchange="locatieKeuze(this)" style="margin-bottom:6px">
+        <option value="" disabled selected>Selecteer afleveradres...</option>
+        <option value="op de klus">Op de klus</option>
+        <option value="op de zaak">Op de zaak</option>
+        <option value="vrij">Vul in...</option>
+      </select>
+      <input type="text" id="locatie" placeholder="Vul afleveradres in..." oninput="saveInfo()" style="display:none" />
     </div>
   </div>
   <div class="info-card">
@@ -1159,7 +1165,7 @@ function verstuurEmail() {
   if (inf.opmerkingen) body += `\nOPMERKINGEN\n${inf.opmerkingen}\n`;
   body += `\n${'='.repeat(46)}\nVerstuurd via Emondt Materiaal bestellen App\nwww.emondt.nl`;
   const projref = inf.projectnummer||inf.projectnaam||'';
-  const subject = `Materiaal bestellen${projref?' '+projref:''} – ${inf.naam||'monteur'} – ${datum}`;
+  const subject = `Materiaal bestellen${projref?' '+projref:''}${inf.projectnaam?' – '+inf.projectnaam:''} – ${inf.naam||'monteur'} – ${datum}`;
   // Bouw ontvangers
   const to = [inf.ontvanger, inf.ontvanger2].filter(Boolean).join(',');
   window.location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -1176,6 +1182,19 @@ function verstuurEmail() {
 }
 
 // ── OPSLAAN / LADEN ───────────────────────────────────────────
+function locatieKeuze(sel) {
+  const input = document.getElementById('locatie');
+  if (sel.value === 'vrij') {
+    input.style.display = 'block';
+    input.value = '';
+    input.focus();
+  } else {
+    input.style.display = 'none';
+    input.value = sel.value;
+  }
+  saveInfo();
+}
+
 function saveInfo() {
   try { localStorage.setItem('emondt_info', JSON.stringify(getInfo())); } catch(e){}
 }
@@ -1186,10 +1205,26 @@ function loadInfo() {
       const el = document.getElementById(id);
       if (el && s[id] && id !== 'ontvanger') el.value = s[id];
     });
-    // Projectnummer: gebruik opgeslagen waarde of standaard P2600000
+    // Projectnummer: gebruik opgeslagen waarde of laat placeholder zien
     const pnr = document.getElementById('projectnummer');
-    if (pnr && (!s.projectnummer)) pnr.value = 'P2600000';
-    if (pnr && pnr.value === 'P2600000') pnr.style.color = 'var(--muted)';
+    if (pnr && !s.projectnummer) pnr.value = '';
+    // Herstel afleveradres dropdown
+    if (s.locatie) {
+      const sel = document.getElementById('locatie-keuze');
+      const input = document.getElementById('locatie');
+      if (sel && input) {
+        const vaste = ['op de klus', 'op de zaak'];
+        if (vaste.includes(s.locatie)) {
+          sel.value = s.locatie;
+          input.value = s.locatie;
+          input.style.display = 'none';
+        } else {
+          sel.value = 'vrij';
+          input.value = s.locatie;
+          input.style.display = 'block';
+        }
+      }
+    }
   } catch(e){}
 }
 function getInfo() {
