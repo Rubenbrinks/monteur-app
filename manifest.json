@@ -1,6 +1,6 @@
 {
   "name": "Emondt – Materiaal bestellen",
-  "short_name": "Emondt monteur-app",
+  "short_name": "Emondt app",
   "description": "Materiaalverzoeken voor Emondt monteurs. Selecteer artikelen en verstuur direct via e-mail.",
   "start_url": "./index.html",
   "scope": "./",
