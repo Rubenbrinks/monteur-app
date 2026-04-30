@@ -1,119 +1,94 @@
 // ── Emondt Materiaalapp – Service Worker ──────────────────────
-// Versie: bump dit getal na elke app-update om cache te vernieuwen
-const CACHE_NAAM = 'emondt-materiaalapp-v1';
+// Versie verhogen = cache automatisch vernieuwen bij volgende bezoek
+const CACHE_NAAM = 'emondt-materiaalapp-v3';
 
-// Bestanden die offline beschikbaar moeten zijn
-const TE_CACHEN = [
-  './',
-  './index.html',
+// Statische bestanden die gecached worden (iconen, fonts)
+const ASSETS_CACHEN = [
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
   './apple-touch-icon.png',
   './favicon-32.png',
-  // Google Fonts (worden gecached bij eerste bezoek)
-  'https://fonts.googleapis.com/css2?family=Questrial&display=swap',
 ];
 
-// ── INSTALL: cache alle app-bestanden ─────────────────────────
+// ── INSTALL ───────────────────────────────────────────────────
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAAM).then(cache => {
-      console.log('[SW] Bestanden in cache opslaan...');
-      // Fonts zijn cross-origin, cache ze apart met no-cors
-      const lokaal = TE_CACHEN.filter(url => !url.startsWith('http'));
-      const extern = TE_CACHEN.filter(url => url.startsWith('http'));
-      return cache.addAll(lokaal).then(() =>
-        Promise.all(
-          extern.map(url =>
-            fetch(url, { mode: 'no-cors' })
-              .then(res => cache.put(url, res))
-              .catch(() => {}) // Fonts zijn optioneel
-          )
-        )
-      );
-    }).then(() => {
-      console.log('[SW] Installatie voltooid');
-      return self.skipWaiting();
-    })
+    caches.open(CACHE_NAAM)
+      .then(cache => cache.addAll(ASSETS_CACHEN))
+      .then(() => self.skipWaiting()) // activeer direct, wacht niet
   );
 });
 
-// ── ACTIVATE: verwijder oude caches ───────────────────────────
+// ── ACTIVATE: verwijder ALLE oude caches ──────────────────────
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(namen =>
-      Promise.all(
+    caches.keys()
+      .then(namen => Promise.all(
         namen
           .filter(naam => naam !== CACHE_NAAM)
-          .map(naam => {
-            console.log('[SW] Oude cache verwijderd:', naam);
-            return caches.delete(naam);
-          })
-      )
-    ).then(() => {
-      console.log('[SW] Activatie voltooid');
-      return self.clients.claim();
-    })
+          .map(naam => caches.delete(naam))
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
-// ── FETCH: Cache-first strategie ──────────────────────────────
-// Probeer eerst de cache, dan het netwerk.
-// Zo werkt de app volledig offline na het eerste bezoek.
+// ── FETCH ─────────────────────────────────────────────────────
 self.addEventListener('fetch', event => {
-  // Sla POST-verzoeken (mailto) over
   if (event.request.method !== 'GET') return;
 
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) {
-        // Gevonden in cache: stuur terug en update op achtergrond
-        const netFetch = fetch(event.request)
-          .then(res => {
-            if (res && res.status === 200 && res.type !== 'opaque') {
-              caches.open(CACHE_NAAM).then(cache => cache.put(event.request, res.clone()));
-            }
-            return res;
-          })
-          .catch(() => {}); // Geen netwerk = geen probleem, cache volstaat
-        return cached;
-      }
+  const url = new URL(event.request.url);
 
-      // Niet in cache: probeer netwerk, sla daarna op in cache
-      return fetch(event.request)
+  // ── HTML (index.html / root): ALTIJD netwerk eerst ────────
+  // Zo laadt de app altijd de nieuwste versie als er verbinding is.
+  // Alleen als het netwerk faalt valt hij terug op cache.
+  if (event.request.destination === 'document' ||
+      url.pathname.endsWith('.html') ||
+      url.pathname === '/' ||
+      url.pathname === '') {
+
+    event.respondWith(
+      fetch(event.request, { cache: 'no-store' }) // nooit browser-cache
         .then(res => {
-          if (!res || res.status !== 200) return res;
-          const clone = res.clone();
-          caches.open(CACHE_NAAM).then(cache => cache.put(event.request, clone));
+          // Sla verse versie op in cache voor offline gebruik
+          if (res && res.status === 200) {
+            const clone = res.clone();
+            caches.open(CACHE_NAAM).then(c => c.put(event.request, clone));
+          }
           return res;
         })
         .catch(() => {
-          // Offline en niet gecached: toon de app-pagina als fallback
-          if (event.request.destination === 'document') {
-            return caches.match('./index.html');
-          }
-        });
-    })
-  );
-});
-
-// ── SYNC: Achtergrond-sync (toekomstige uitbreiding) ──────────
-self.addEventListener('sync', event => {
-  if (event.tag === 'sync-bestellingen') {
-    console.log('[SW] Achtergrond sync getriggerd');
-    // Uitbreidbaar: verstuur gecachte bestellingen als online
+          // Geen netwerk → gebruik gecachte versie als fallback
+          return caches.match('./index.html');
+        })
+    );
+    return;
   }
-});
 
-// ── PUSH: Notificaties (toekomstige uitbreiding) ──────────────
-self.addEventListener('push', event => {
-  const data = event.data?.json() || {};
-  event.waitUntil(
-    self.registration.showNotification(data.title || 'Emondt', {
-      body: data.body || '',
-      icon: './icon-192.png',
-      badge: './favicon-32.png',
+  // ── Externe requests (Sheets API, Google Fonts): altijd netwerk ──
+  if (!url.origin.includes(self.location.origin)) {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // ── Statische assets (iconen, manifest): cache-first ──────
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+      return fetch(event.request).then(res => {
+        if (res && res.status === 200) {
+          const clone = res.clone();
+          caches.open(CACHE_NAAM).then(c => c.put(event.request, clone));
+        }
+        return res;
+      });
     })
   );
+});
+
+// ── Update melding naar clients sturen ────────────────────────
+self.addEventListener('message', event => {
+  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
