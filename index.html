@@ -211,17 +211,9 @@
     </div>
   </div>
   <div class="drawer-section-label">Artikelcategorieën</div>
-  <div class="drawer-item" id="di-all" onclick="filterCategorie(null)"><span class="di-icon">📋</span> Alle artikelen</div>
+  <div class="drawer-item active" id="di-all" onclick="filterCategorie(null)"><span class="di-icon">📋</span> Alle artikelen</div>
   <div class="drawer-divider"></div>
-  <div class="drawer-item" id="di-afvoer" onclick="filterCategorie('Afvoermaterialen')"><span class="di-icon">🔧</span> Afvoermaterialen</div>
-  <div class="drawer-item" id="di-bevestiging" onclick="filterCategorie('Bevestigingsmateriaal')"><span class="di-icon">🔩</span> Bevestigingsmateriaal</div>
-  <div class="drawer-item" id="di-diversen" onclick="filterCategorie('Diversen')"><span class="di-icon">📦</span> Diversen</div>
-  <div class="drawer-item" id="di-elektra" onclick="filterCategorie('Elektra')"><span class="di-icon">⚡</span> Elektra</div>
-  <div class="drawer-item" id="di-isolatie" onclick="filterCategorie('Isolatie')"><span class="di-icon">🧱</span> Isolatie</div>
-  <div class="drawer-item" id="di-koeltech" onclick="filterCategorie('Koeltechnische hulpstukken')"><span class="di-icon">❄️</span> Koeltechnische hulpstukken</div>
-  <div class="drawer-item" id="di-koper" onclick="filterCategorie('Koperleiding')"><span class="di-icon">🟠</span> Koperleiding</div>
-  <div class="drawer-item" id="di-tape" onclick="filterCategorie('Tape &amp; Lijmen')"><span class="di-icon">🎗️</span> Tape &amp; Lijmen</div>
-  <div class="drawer-item" id="di-waterzijdig" onclick="filterCategorie('Waterzijdig')"><span class="di-icon">💧</span> Waterzijdig</div>
+  <div id="drawer-cat-lijst"></div>
   <div class="drawer-spacer"></div>
   <div class="drawer-bottom">
     <div class="drawer-divider"></div>
@@ -262,7 +254,7 @@
 <div class="section" id="tab-welkom" style="display:block">
   <div class="landing-hero">
     <h1>Welkom</h1>
-    <p>Hieronder een korte beschrijving hoe deze omgeving te gebruiken. Dit is een vervanging van onze "ouderwetse" materiaallijsten.</p>
+    <p>Hieronder een korte beschrijving hoe deze omgeving te gebruiken</p>
   </div>
   <div style="background:#e8471a;border-radius:var(--radius);padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:14px">
     <div style="font-size:1.8rem;flex-shrink:0">⏰</div>
@@ -290,7 +282,7 @@
       <div class="step-num">3</div>
       <div class="step-info">
         <h3>Bestelling versturen</h3>
-        <p>Tik rechtsbovenin op de 🛒 winkelmandknop om je bestelling te bekijken. Kies een gewenste leverdatum en tik op <strong>Versturen via E-mail</strong>.</p>
+        <p>Tik rechtsbovenin op de 🛒 winkelmandknop om je bestelling te bekijken. Kies een gewenste leverdatum en tik op <strong>Bestelling versturen</strong>.</p>
       </div>
     </div>
     <div class="landing-step">
@@ -335,6 +327,10 @@
       <input type="text" id="naam" placeholder="Jan de Vries" oninput="saveInfo()" />
     </div>
     <div class="field-row">
+      <label>Telefoonnummer</label>
+      <input type="tel" id="telefoon" placeholder="Jouw telefoonnummer" oninput="saveInfo()" />
+    </div>
+    <div class="field-row">
       <label>Afdeling <span class="req">*</span></label>
       <select id="afdeling" onchange="saveInfo()">
         <option value="" disabled selected>Selecteer afdeling...</option>
@@ -373,7 +369,7 @@
     </div>
     <div class="field-row">
       <label>E-mail ontvanger 2 (optioneel)</label>
-      <input type="email" id="ontvanger2" placeholder="inkoop@emondt.nl" oninput="saveInfo()" />
+      <input type="email" id="ontvanger2" placeholder="jouw e-mailadres" oninput="saveInfo()" />
     </div>
     <div class="field-row">
       <label>Opmerkingen (optioneel)</label>
@@ -419,166 +415,45 @@
 
 <!-- DEV BEHEER PAGINA -->
 <div class="section" id="tab-dev" style="display:none">
+
   <div class="info-card">
-    <h2>➕ Artikel toevoegen aan database</h2>
-    <div class="field-row-2">
-      <div class="field-row">
-        <label>Artikelnummer <span class="req">*</span></label>
-        <input type="text" id="dev-code" placeholder="bijv. 99XX0001" />
-      </div>
-      <div class="field-row">
-        <label>Eenheid</label>
-        <input type="text" id="dev-eenheid" placeholder="stuk" value="stuk" />
-      </div>
+    <h2>🔗 Google Sheets koppeling</h2>
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:12px;line-height:1.6">
+      De Sheets-URL is ingebakken in de code. Gebruik de testknop om de verbinding te controleren.
     </div>
-    <div class="field-row">
-      <label>Naam / Omschrijving <span class="req">*</span></label>
-      <input type="text" id="dev-naam" placeholder="bijv. Koppelstuk 22mm" />
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" onclick="testVerbinding()" style="margin-bottom:0;flex:1">🔍 Verbinding testen</button>
+      <button class="btn btn-primary" onclick="herlaadArtikelen()" style="margin-bottom:0;flex:1">🔄 Artikelen herladen</button>
     </div>
-    <div class="field-row">
-      <label>Categorie <span class="req">*</span></label>
-      <select id="dev-cat" onchange="devCatChange()">
-        <option value="">Selecteer categorie...</option>
-        <option>Afvoermaterialen</option><option>Bevestigingsmateriaal</option>
-        <option>Diversen</option><option>Elektra</option><option>Isolatie</option>
-        <option>Koeltechnische hulpstukken</option><option>Koperleiding</option>
-        <option>Tape &amp; Lijmen</option><option>Waterzijdig</option>
-      </select>
+    <div style="margin-top:8px">
+      <button class="btn btn-secondary" onclick="testBestellingLog()" style="margin-bottom:0">📋 Test bestelling loggen</button>
     </div>
-    <div class="field-row" id="dev-subcat-wrap" style="display:none">
-      <label>Subcategorie (optioneel)</label>
-      <input type="text" id="dev-subcat" placeholder="bijv. Bochten 90° M/M" />
+    <div id="sheets-status" style="margin-top:8px;font-size:.78rem"></div>
+  </div>
+
+  <div class="info-card">
+    <h2>🎨 Categorie-iconen instellen</h2>
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:12px;line-height:1.6">
+      Kies per categorie een emoji-icoon. Dit wordt opgeslagen in de browser.
     </div>
-    <button class="btn btn-primary" onclick="devVoegToe()" style="margin-bottom:0">➕ Toevoegen</button>
+    <div id="cat-icon-lijst"></div>
+    <button class="btn btn-primary" onclick="slaIconenOp()" style="margin-top:10px;margin-bottom:0">💾 Iconen opslaan</button>
   </div>
 
   <div class="info-card">
-    <h2>📂 CSV Importeren</h2>
-
-    <!-- Instructies -->
-    <div class="csv-info">
-      <strong>📋 Vereist kolomformaat (volgorde belangrijk):</strong><br>
-      <code>code , naam , cat , subcat , eenheid</code><br><br>
-      <strong>Kolom uitleg:</strong><br>
-      • <code>code</code> — Uniek artikelnummer (verplicht)<br>
-      • <code>naam</code> — Artikelomschrijving (verplicht)<br>
-      • <code>cat</code> — Categorie exact zoals in de app (verplicht)<br>
-      • <code>subcat</code> — Subcategorie (optioneel, mag leeg)<br>
-      • <code>eenheid</code> — bijv. stuk, meter, rol (optioneel, standaard: stuk)<br><br>
-      <strong>Geldige categorieën:</strong><br>
-      <code>Afvoermaterialen</code> · <code>Bevestigingsmateriaal</code> · <code>Diversen</code> · <code>Elektra</code> · <code>Isolatie</code> · <code>Koeltechnische hulpstukken</code> · <code>Koperleiding</code> · <code>Tape &amp; Lijmen</code> · <code>Waterzijdig</code><br><br>
-      <strong>Voorbeeld rijen:</strong><br>
-      <code>99XX0001,Koppelstuk 22mm,Koperleiding,Aircoleiding,stuk</code><br>
-      <code>EL-099,Verlengkabel 5m,Elektra,,stuk</code><br>
-      <code>ISO-050,Isolatiemat 50mm,Isolatie,,meter</code><br><br>
-      <strong>💡 Tips:</strong><br>
-      • Sla in Excel op als <em>CSV UTF-8 (kommagescheiden)</em><br>
-      • Geen headerrij nodig — begin direct met artikelen<br>
-      • Bestaande artikelnummers worden automatisch overgeslagen<br>
-      • Ongeldige categorieën worden als fout gemarkeerd
+    <h2>➕ Artikel toevoegen aan database</h2>
+    <div style="font-size:.84rem;color:var(--muted);line-height:1.6;margin-bottom:14px">
+      Artikelen worden beheerd via Google Sheets. Klik op de knop hieronder om de spreadsheet te openen en artikelen toe te voegen of aan te passen.
     </div>
-
-    <!-- Template downloaden -->
-    <button class="btn btn-secondary" onclick="csvDownloadTemplate()" style="margin-bottom:8px">
-      ⬇️ Download lege CSV-template
-    </button>
-
-    <!-- Database exporteren -->
-    <button class="btn btn-secondary" onclick="csvExportDatabase()" style="margin-bottom:8px">
-      📤 Exporteer huidige database als CSV
-    </button>
-
-    <!-- Bestand kiezen -->
-    <input type="file" id="csv-file" accept=".csv,.txt" style="display:none" onchange="csvLaadVoorvertoning()" />
-    <button class="btn btn-primary" onclick="document.getElementById('csv-file').click()" style="margin-bottom:8px">
-      📂 Kies CSV-bestand
-    </button>
-
-    <!-- Bestandsnaam indicator -->
-    <div id="csv-bestandsnaam" style="font-size:.78rem;color:var(--muted);margin-bottom:8px;display:none">
-      📄 <span id="csv-naam-tekst"></span>
-    </div>
-
-    <!-- Preview tabel -->
-    <div id="csv-preview-wrap" style="display:none;margin-bottom:10px">
-      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">
-        Voorvertoning (<span id="csv-preview-count">0</span> rijen geladen)
-      </div>
-      <div style="overflow-x:auto;border-radius:6px;border:1px solid var(--border)">
-        <table id="csv-preview-tabel" style="width:100%;border-collapse:collapse;font-size:.76rem">
-          <thead>
-            <tr style="background:var(--navy);color:var(--white)">
-              <th style="padding:7px 10px;text-align:left;white-space:nowrap">#</th>
-              <th style="padding:7px 10px;text-align:left;white-space:nowrap">Code</th>
-              <th style="padding:7px 10px;text-align:left;white-space:nowrap">Naam</th>
-              <th style="padding:7px 10px;text-align:left;white-space:nowrap">Categorie</th>
-              <th style="padding:7px 10px;text-align:left;white-space:nowrap">Subcat</th>
-              <th style="padding:7px 10px;text-align:left;white-space:nowrap">Eenheid</th>
-              <th style="padding:7px 10px;text-align:left;white-space:nowrap">Status</th>
-            </tr>
-          </thead>
-          <tbody id="csv-preview-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Importeren knop (verschijnt na preview) -->
-    <button id="csv-import-btn" class="btn btn-primary" onclick="csvBevestigImport()" style="display:none;margin-bottom:8px">
-      ✅ Bevestig import
-    </button>
-    <button id="csv-annuleer-btn" class="btn btn-secondary" onclick="csvAnnuleer()" style="display:none;margin-bottom:8px">
-      ✕ Annuleren
-    </button>
-
-    <!-- Resultaat -->
-    <div id="csv-resultaat" style="font-size:.82rem;margin-top:4px"></div>
-  </div>
-
-  <div class="info-card" id="dev-extra-card" style="display:none">
-    <h2>📋 Toegevoegde artikelen (sessie)</h2>
-    <div id="dev-extra-lijst"></div>
-    <button class="btn btn-danger" onclick="devLeegmaken()" style="margin-top:10px;margin-bottom:0">🗑 Alles verwijderen</button>
-  </div>
-
-
-  <div class="info-card" id="dev-edit-card" style="display:none">
-    <h2>✏️ Artikel bewerken</h2>
-    <input type="hidden" id="edit-code-orig" />
-    <div class="field-row-2">
-      <div class="field-row">
-        <label>Artikelnummer</label>
-        <input type="text" id="edit-code" />
-      </div>
-      <div class="field-row">
-        <label>Eenheid</label>
-        <input type="text" id="edit-eenheid" />
-      </div>
-    </div>
-    <div class="field-row">
-      <label>Naam</label>
-      <input type="text" id="edit-naam" />
-    </div>
-    <div class="field-row">
-      <label>Categorie</label>
-      <select id="edit-cat">
-        <option>Afvoermaterialen</option><option>Bevestigingsmateriaal</option>
-        <option>Diversen</option><option>Elektra</option><option>Isolatie</option>
-        <option>Koeltechnische hulpstukken</option><option>Koperleiding</option>
-        <option>Tape &amp; Lijmen</option><option>Waterzijdig</option>
-      </select>
-    </div>
-    <div class="field-row">
-      <label>Subcategorie</label>
-      <input type="text" id="edit-subcat" placeholder="Optioneel" />
-    </div>
-    <div style="display:flex;gap:8px;margin-top:4px">
-      <button class="btn btn-primary" onclick="devSlaBewerking()" style="margin-bottom:0;flex:1">💾 Opslaan</button>
-      <button class="btn btn-secondary" onclick="devAnnuleerBewerking()" style="margin-bottom:0;flex:1">✕ Annuleren</button>
-    </div>
+    <a href="https://docs.google.com/spreadsheets/d/1nVAoYUlm_MGBsFLvH2QsZmuZooqkxbsibreMykhPGws/edit" target="_blank" style="text-decoration:none">
+      <button class="btn btn-primary" style="margin-bottom:0">
+        📊 Open Google Spreadsheet
+      </button>
+    </a>
   </div>
 
   <div class="info-card">
-    <h2>✏️🗑 Artikel zoeken &amp; bewerken / verwijderen</h2>
+    <h2>🗑 Artikel zoeken &amp; verwijderen</h2>
     <div class="field-row">
       <label>Zoek op naam of artikelnummer</label>
       <input type="text" id="dev-zoek" placeholder="bijv. PVC bocht of 6923049..." oninput="devZoek()" />
@@ -607,292 +482,172 @@
 <div id="toast">✓ Toegevoegd</div>
 
 <script>
-const ARTIKELEN = [
-  // Afvoermaterialen
-  { code: '6809804', naam: 'PVC afvoerbuis 20 mm', cat: 'Afvoermaterialen', subcat: 'Buizen', eenheid: 'stuk', icon: '🔧' },
-  { code: '2324430', naam: 'PVC afvoerbuis 25 mm', cat: 'Afvoermaterialen', subcat: 'Buizen', eenheid: 'stuk', icon: '🔧' },
-  { code: '3008612', naam: 'PVC afvoerbuis 32 mm', cat: 'Afvoermaterialen', subcat: 'Buizen', eenheid: 'stuk', icon: '🔧' },
-  { code: '3008620', naam: 'PVC afvoerbuis 40 mm', cat: 'Afvoermaterialen', subcat: 'Buizen', eenheid: 'stuk', icon: '🔧' },
-  { code: '3008638', naam: 'PVC afvoerbuis 50 mm', cat: 'Afvoermaterialen', subcat: 'Buizen', eenheid: 'stuk', icon: '🔧' },
-  { code: '2473379', naam: 'PVC buis 16 mm (5/8)', cat: 'Afvoermaterialen', subcat: 'Buizen', eenheid: 'stuk', icon: '🔧' },
-  { code: '6923049', naam: 'PVC bocht 32 mm 45° m/m', cat: 'Afvoermaterialen', subcat: 'Bochten', eenheid: 'stuk', icon: '🔧' },
-  { code: '6923015', naam: 'PVC bocht 32 mm 45° m/s', cat: 'Afvoermaterialen', subcat: 'Bochten', eenheid: 'stuk', icon: '🔧' },
-  { code: '6923106', naam: 'PVC bocht 32 mm 90° m/m', cat: 'Afvoermaterialen', subcat: 'Bochten', eenheid: 'stuk', icon: '🔧' },
-  { code: '6923072', naam: 'PVC bocht 32 mm 90° m/s', cat: 'Afvoermaterialen', subcat: 'Bochten', eenheid: 'stuk', icon: '🔧' },
-  { code: '6923056', naam: 'PVC bocht 40 mm 45° m/m', cat: 'Afvoermaterialen', subcat: 'Bochten', eenheid: 'stuk', icon: '🔧' },
-  { code: '6923023', naam: 'PVC bocht 40 mm 45° m/s', cat: 'Afvoermaterialen', subcat: 'Bochten', eenheid: 'stuk', icon: '🔧' },
-  { code: '6923114', naam: 'PVC bocht 40 mm 90° m/m', cat: 'Afvoermaterialen', subcat: 'Bochten', eenheid: 'stuk', icon: '🔧' },
-  { code: '6923080', naam: 'PVC bocht 40 mm 90° m/s', cat: 'Afvoermaterialen', subcat: 'Bochten', eenheid: 'stuk', icon: '🔧' },
-  { code: '2326644', naam: 'PVC bocht 45° 20mm', cat: 'Afvoermaterialen', subcat: 'Bochten', eenheid: 'stuk', icon: '🔧' },
-  { code: '2326540', naam: 'PVC bocht 45° 25 mm', cat: 'Afvoermaterialen', subcat: 'Bochten', eenheid: 'stuk', icon: '🔧' },
-  { code: '2327839', naam: 'PVC bocht 90° 20 mm', cat: 'Afvoermaterialen', subcat: 'Bochten', eenheid: 'stuk', icon: '🔧' },
-  { code: '2326251', naam: 'PVC bocht 90° 25 mm', cat: 'Afvoermaterialen', subcat: 'Bochten', eenheid: 'stuk', icon: '🔧' },
-  { code: '2327835', naam: 'PVC sok 20 mm', cat: 'Afvoermaterialen', subcat: 'Sokken & Moffen', eenheid: 'stuk', icon: '🔧' },
-  { code: '2326410', naam: 'PVC sok 25 mm', cat: 'Afvoermaterialen', subcat: 'Sokken & Moffen', eenheid: 'stuk', icon: '🔧' },
-  { code: '6922967', naam: 'PVC sok 32 mm', cat: 'Afvoermaterialen', subcat: 'Sokken & Moffen', eenheid: 'stuk', icon: '🔧' },
-  { code: '6922975', naam: 'PVC sok 40 mm', cat: 'Afvoermaterialen', subcat: 'Sokken & Moffen', eenheid: 'stuk', icon: '🔧' },
-  { code: '6923296', naam: 'PVC lijmdop 32 mm', cat: 'Afvoermaterialen', subcat: 'Sokken & Moffen', eenheid: 'stuk', icon: '🔧' },
-  { code: '6923239', naam: 'PVC insteekverloop 40 mm x 32 mm', cat: 'Afvoermaterialen', subcat: 'Sokken & Moffen', eenheid: 'stuk', icon: '🔧' },
-  { code: '2326459', naam: 'PVC T-stuk 20 mm', cat: 'Afvoermaterialen', subcat: 'T-stukken', eenheid: 'stuk', icon: '🔧' },
-  { code: '2326547', naam: 'PVC T-stuk 25 mm', cat: 'Afvoermaterialen', subcat: 'T-stukken', eenheid: 'stuk', icon: '🔧' },
-  { code: '6923197', naam: 'PVC T-stuk 32 mm', cat: 'Afvoermaterialen', subcat: 'T-stukken', eenheid: 'stuk', icon: '🔧' },
-  { code: '6923130', naam: 'PVC T-stuk 32 mm 45°', cat: 'Afvoermaterialen', subcat: 'T-stukken', eenheid: 'stuk', icon: '🔧' },
-  { code: '6923205', naam: 'PVC T-stuk 40 mm', cat: 'Afvoermaterialen', subcat: 'T-stukken', eenheid: 'stuk', icon: '🔧' },
-  { code: '6923148', naam: 'PVC T-stuk 40 mm 45°', cat: 'Afvoermaterialen', subcat: 'T-stukken', eenheid: 'stuk', icon: '🔧' },
-  { code: '4273363', naam: 'PVC syfon 32 mm', cat: 'Afvoermaterialen', subcat: 'Syfons & Beugels', eenheid: 'stuk', icon: '🔧' },
-  { code: '4273371', naam: 'PVC syfon 40 mm', cat: 'Afvoermaterialen', subcat: 'Syfons & Beugels', eenheid: 'stuk', icon: '🔧' },
-  { code: '2327147', naam: 'PVC schroefwartel 32 mm', cat: 'Afvoermaterialen', subcat: 'Syfons & Beugels', eenheid: 'stuk', icon: '🔧' },
-  { code: '2323957', naam: 'PVC Ʊ beugel tbv 32 mm buis', cat: 'Afvoermaterialen', subcat: 'Syfons & Beugels', eenheid: 'stuk', icon: '🔧' },
-  { code: '4696494', naam: 'Slangklem 26-39 mm', cat: 'Afvoermaterialen', subcat: 'Syfons & Beugels', eenheid: 'stuk', icon: '🔧' },
-  // Bevestigingsmateriaal
-  { code: '166640', naam: 'Betonschroef 7,5x40 (kop14)', cat: 'Bevestigingsmateriaal', subcat: 'Schroeven & Bouten', eenheid: 'stuk', icon: '🔩' },
-  { code: '166649', naam: 'Betonschroef met m8/M10 koppelmoer', cat: 'Bevestigingsmateriaal', subcat: 'Schroeven & Bouten', eenheid: 'stuk', icon: '🔩' },
-  { code: '115166', naam: 'Hamerkopbout 40 mm', cat: 'Bevestigingsmateriaal', subcat: 'Schroeven & Bouten', eenheid: 'stuk', icon: '🔩' },
-  { code: '115175', naam: 'Hamerkopbout 50 mm', cat: 'Bevestigingsmateriaal', subcat: 'Schroeven & Bouten', eenheid: 'stuk', icon: '🔩' },
-  { code: '129702', naam: 'Houtdraaibout m8 120mm', cat: 'Bevestigingsmateriaal', subcat: 'Schroeven & Bouten', eenheid: 'stuk', icon: '🔩' },
-  { code: '129717', naam: 'Houtdraaibout m8 60mm', cat: 'Bevestigingsmateriaal', subcat: 'Schroeven & Bouten', eenheid: 'stuk', icon: '🔩' },
-  { code: '129725', naam: 'Houtdraaibout m8 80mm', cat: 'Bevestigingsmateriaal', subcat: 'Schroeven & Bouten', eenheid: 'stuk', icon: '🔩' },
-  { code: '105573', naam: 'Zeskantbout M10x30 (voor VCE-trillingsdemper)', cat: 'Bevestigingsmateriaal', subcat: 'Schroeven & Bouten', eenheid: 'stuk', icon: '🔩' },
-  { code: '113835', naam: 'Kruissleufbout m6 voor griplock', cat: 'Bevestigingsmateriaal', subcat: 'Schroeven & Bouten', eenheid: 'stuk', icon: '🔩' },
-  { code: '8896179', naam: 'Spaanplaatschroef 4x40 doos', cat: 'Bevestigingsmateriaal', subcat: 'Schroeven & Bouten', eenheid: 'stuk', icon: '🔩' },
-  { code: '106671', naam: 'Snijparker 19 mm (doos 1000stuks)', cat: 'Bevestigingsmateriaal', subcat: 'Schroeven & Bouten', eenheid: 'stuk', icon: '🔩' },
-  { code: '113319', naam: 'Koppelmoer m8', cat: 'Bevestigingsmateriaal', subcat: 'Moeren & Ringen', eenheid: 'stuk', icon: '🔩' },
-  { code: '105498', naam: 'Zeskant moer M8', cat: 'Bevestigingsmateriaal', subcat: 'Moeren & Ringen', eenheid: 'stuk', icon: '🔩' },
-  { code: '120043', naam: 'Schuif/glij moer M8 klein', cat: 'Bevestigingsmateriaal', subcat: 'Moeren & Ringen', eenheid: 'stuk', icon: '🔩' },
-  { code: '118040', naam: 'Schuif/glij moer M8 groot', cat: 'Bevestigingsmateriaal', subcat: 'Moeren & Ringen', eenheid: 'stuk', icon: '🔩' },
-  { code: '118013', naam: 'MPC schuifmoer m6 voor griplock', cat: 'Bevestigingsmateriaal', subcat: 'Moeren & Ringen', eenheid: 'stuk', icon: '🔩' },
-  { code: '127175', naam: 'Ring M6 (carros. ring) 18mm', cat: 'Bevestigingsmateriaal', subcat: 'Moeren & Ringen', eenheid: 'stuk', icon: '🔩' },
-  { code: '127253', naam: 'Ring M8 (carros. ring) 24mm', cat: 'Bevestigingsmateriaal', subcat: 'Moeren & Ringen', eenheid: 'stuk', icon: '🔩' },
-  { code: '165993', naam: 'Ring M8 (carros. ring) 30mm', cat: 'Bevestigingsmateriaal', subcat: 'Moeren & Ringen', eenheid: 'stuk', icon: '🔩' },
-  { code: '127088', naam: 'Ring M10 (carros. ring) 29mm', cat: 'Bevestigingsmateriaal', subcat: 'Moeren & Ringen', eenheid: 'stuk', icon: '🔩' },
-  { code: '132832', naam: 'Onderlegring M10 (voor VCE-trillingsdemper)', cat: 'Bevestigingsmateriaal', subcat: 'Moeren & Ringen', eenheid: 'stuk', icon: '🔩' },
-  { code: '113467', naam: 'Draadstang M10 1mtr', cat: 'Bevestigingsmateriaal', subcat: 'Draadstangen', eenheid: 'stuk', icon: '🔩' },
-  { code: '113486', naam: 'Draadstang M10 2mtr', cat: 'Bevestigingsmateriaal', subcat: 'Draadstangen', eenheid: 'stuk', icon: '🔩' },
-  { code: '113639', naam: 'Draadstang M8 1mtr', cat: 'Bevestigingsmateriaal', subcat: 'Draadstangen', eenheid: 'stuk', icon: '🔩' },
-  { code: '113651', naam: 'Draadstang M8 2mtr', cat: 'Bevestigingsmateriaal', subcat: 'Draadstangen', eenheid: 'stuk', icon: '🔩' },
-  { code: '118590', naam: 'MPC rails 28/30 L=2mtr', cat: 'Bevestigingsmateriaal', subcat: 'MPC Rail & Consoles', eenheid: 'stuk', icon: '🔩' },
-  { code: '156768', naam: 'MPC Railconsole 240mm 28/30', cat: 'Bevestigingsmateriaal', subcat: 'MPC Rail & Consoles', eenheid: 'stuk', icon: '🔩' },
-  { code: '156771', naam: 'MPC Railconsole 400mm 28/30', cat: 'Bevestigingsmateriaal', subcat: 'MPC Rail & Consoles', eenheid: 'stuk', icon: '🔩' },
-  { code: '156778', naam: 'MPC Railconsole 400mm 28/30 Zijde', cat: 'Bevestigingsmateriaal', subcat: 'MPC Rail & Consoles', eenheid: 'stuk', icon: '🔩' },
-  { code: '114439', naam: 'Stabiliseerschijf M8 28/30 rail', cat: 'Bevestigingsmateriaal', subcat: 'MPC Rail & Consoles', eenheid: 'stuk', icon: '🔩' },
-  { code: '118797', naam: 'Montage hoek 90° 28/30', cat: 'Bevestigingsmateriaal', subcat: 'MPC Rail & Consoles', eenheid: 'stuk', icon: '🔩' },
-  { code: '106002', naam: 'Eindkappen zw28/30 (einddop)', cat: 'Bevestigingsmateriaal', subcat: 'MPC Rail & Consoles', eenheid: 'stuk', icon: '🔩' },
-  { code: '113517', naam: 'Consoleset met geluiddemp. L=640', cat: 'Bevestigingsmateriaal', subcat: 'MPC Rail & Consoles', eenheid: 'stuk', icon: '🔩' },
-  { code: '130283', naam: 'Draagbalkklauw M8 38/40', cat: 'Bevestigingsmateriaal', subcat: 'MPC Rail & Consoles', eenheid: 'stuk', icon: '🔩' },
-  { code: '130260', naam: 'Draagbalkklem M8 binnendraad', cat: 'Bevestigingsmateriaal', subcat: 'MPC Rail & Consoles', eenheid: 'stuk', icon: '🔩' },
-  { code: '112407', naam: 'Grondplaat M8 (muurpl+moer)', cat: 'Bevestigingsmateriaal', subcat: 'MPC Rail & Consoles', eenheid: 'stuk', icon: '🔩' },
-  { code: '5250352', naam: 'Rapid dakplaatprofielhanger M8/M10', cat: 'Bevestigingsmateriaal', subcat: 'MPC Rail & Consoles', eenheid: 'stuk', icon: '🔩' },
-  { code: '5833874', naam: 'Fischer plug duopower 6x30 mm', cat: 'Bevestigingsmateriaal', subcat: 'Pluggen & Ankers', eenheid: 'stuk', icon: '🔩' },
-  { code: '5834063', naam: 'Fischer plug duopower 8x40 mm', cat: 'Bevestigingsmateriaal', subcat: 'Pluggen & Ankers', eenheid: 'stuk', icon: '🔩' },
-  { code: '5834070', naam: 'Fischer plug duopower 10x50 mm', cat: 'Bevestigingsmateriaal', subcat: 'Pluggen & Ankers', eenheid: 'stuk', icon: '🔩' },
-  { code: '99BB1002', naam: 'Grip Lock metalen beugel 1/4-1/2', cat: 'Bevestigingsmateriaal', subcat: 'Leidingbeugels', eenheid: 'stuk', icon: '🔩' },
-  { code: '99BB1004', naam: 'Grip Lock metalen beugel 3/8-5/8', cat: 'Bevestigingsmateriaal', subcat: 'Leidingbeugels', eenheid: 'stuk', icon: '🔩' },
-  { code: '99BB1006', naam: 'Grip Lock metalen beugel 1/2-7/8', cat: 'Bevestigingsmateriaal', subcat: 'Leidingbeugels', eenheid: 'stuk', icon: '🔩' },
-  { code: '99BB1008', naam: 'Grip Lock metalen beugel 5/8-1 1/8', cat: 'Bevestigingsmateriaal', subcat: 'Leidingbeugels', eenheid: 'stuk', icon: '🔩' },
-  { code: '99BB1012', naam: 'Plastic leidingdrager P2 3/8&5/8', cat: 'Bevestigingsmateriaal', subcat: 'Leidingbeugels', eenheid: 'stuk', icon: '🔩' },
-  { code: '99BB1014', naam: 'Plastic leidingdrager P3 1/2&7/8', cat: 'Bevestigingsmateriaal', subcat: 'Leidingbeugels', eenheid: 'stuk', icon: '🔩' },
-  { code: '99BB1016', naam: 'Plastic leidingdrager P4 5/8&1 1/8', cat: 'Bevestigingsmateriaal', subcat: 'Leidingbeugels', eenheid: 'stuk', icon: '🔩' },
-  { code: '151599', naam: 'Beugel (20-25) slagvaste buis 3/4"', cat: 'Bevestigingsmateriaal', subcat: 'Leidingbeugels', eenheid: 'stuk', icon: '🔩' },
-  { code: '142361', naam: 'Beugel tbv afvoer 32mm met rubber inleg', cat: 'Bevestigingsmateriaal', subcat: 'Leidingbeugels', eenheid: 'stuk', icon: '🔩' },
-  { code: '148502', naam: 'Schaal + beugel 3/8 & 1/2 leiding', cat: 'Bevestigingsmateriaal', subcat: 'Leidingbeugels', eenheid: 'stuk', icon: '🔩' },
-  { code: '148503', naam: 'Schaal + beugel 5/8 & 3/4 leiding', cat: 'Bevestigingsmateriaal', subcat: 'Leidingbeugels', eenheid: 'stuk', icon: '🔩' },
-  { code: '148504', naam: 'Schaal + beugel 7/8 leiding', cat: 'Bevestigingsmateriaal', subcat: 'Leidingbeugels', eenheid: 'stuk', icon: '🔩' },
-  { code: '148505', naam: 'Schaal + beugel 1 1/8 leiding', cat: 'Bevestigingsmateriaal', subcat: 'Leidingbeugels', eenheid: 'stuk', icon: '🔩' },
-  { code: '148506', naam: 'Schaal + beugel 1 3/8 leiding', cat: 'Bevestigingsmateriaal', subcat: 'Leidingbeugels', eenheid: 'stuk', icon: '🔩' },
-  { code: '148507', naam: 'Schaal + beugel 1 5/8 leiding', cat: 'Bevestigingsmateriaal', subcat: 'Leidingbeugels', eenheid: 'stuk', icon: '🔩' },
-  // Diversen
-  { code: '99KG5050', naam: 'Lasstaaf Fosfor 3mm 0.5 KG', cat: 'Diversen', subcat: 'Gereedschap', eenheid: 'stuk', icon: '📦' },
-  { code: '5810834', naam: 'Tu makita 835x13mm', cat: 'Diversen', subcat: 'Gereedschap', eenheid: 'stuk', icon: '📦' },
-  { code: '121404', naam: 'Bit voor betonschroef', cat: 'Diversen', subcat: 'Gereedschap', eenheid: 'stuk', icon: '📦' },
-  { code: '106551', naam: 'Dop 13', cat: 'Diversen', subcat: 'Gereedschap', eenheid: 'stuk', icon: '📦' },
-  { code: '178743', naam: 'SDS-betonboren M6 160mm lang (doos 10 stuks)', cat: 'Diversen', subcat: 'Gereedschap', eenheid: 'stuk', icon: '📦' },
-  // Elektra
-  { code: '5353167', naam: 'Kabel 3 x 2,5 mm² vaste kern', cat: 'Elektra', subcat: 'Kabels & Snoeren', eenheid: 'stuk', icon: '⚡' },
-  { code: '5355267', naam: 'Kabel 4 x 2,5 mm² vaste kern', cat: 'Elektra', subcat: 'Kabels & Snoeren', eenheid: 'stuk', icon: '⚡' },
-  { code: '5353972', naam: 'Kabel 5 x 2,5 mm² vaste kern', cat: 'Elektra', subcat: 'Kabels & Snoeren', eenheid: 'stuk', icon: '⚡' },
-  { code: '99KA1260', naam: 'Snoer 2 x 0,75 mm² niet afgeschermd halogeenvrij', cat: 'Elektra', subcat: 'Kabels & Snoeren', eenheid: 'stuk', icon: '⚡' },
-  { code: '99KA1272', naam: 'Snoer 2 x 1,5 mm² afgeschermd halogeenvrij', cat: 'Elektra', subcat: 'Kabels & Snoeren', eenheid: 'stuk', icon: '⚡' },
-  { code: '99KA1264', naam: 'Snoer 3 x 1,5 mm² soepel halogeenvrij', cat: 'Elektra', subcat: 'Kabels & Snoeren', eenheid: 'stuk', icon: '⚡' },
-  { code: '99KA1266', naam: 'Snoer 4 x 1,5 mm² soepel halogeenvrij', cat: 'Elektra', subcat: 'Kabels & Snoeren', eenheid: 'stuk', icon: '⚡' },
-  { code: '0426403', naam: 'Aansl snoer met stekker 3mtr', cat: 'Elektra', subcat: 'Kabels & Snoeren', eenheid: 'stuk', icon: '⚡' },
-  { code: '99AS3490', naam: 'Condensslang 30 mtr', cat: 'Elektra', subcat: 'Kabels & Snoeren', eenheid: 'stuk', icon: '⚡' },
-  { code: '2473387', naam: 'PVC buis 3/4', cat: 'Elektra', subcat: 'PVC Buis & Toebehoren', eenheid: 'stuk', icon: '⚡' },
-  { code: '4505053', naam: 'PVC buis 3/4 halogeenvrij', cat: 'Elektra', subcat: 'PVC Buis & Toebehoren', eenheid: 'stuk', icon: '⚡' },
-  { code: '0409441', naam: 'Sok PVC buis 3/4', cat: 'Elektra', subcat: 'PVC Buis & Toebehoren', eenheid: 'stuk', icon: '⚡' },
-  { code: '4504932', naam: 'Sok PVC buis 3/4 halogeenvrij', cat: 'Elektra', subcat: 'PVC Buis & Toebehoren', eenheid: 'stuk', icon: '⚡' },
-  { code: '1527969', naam: 'Schnabl zadel voor 3/4 buis', cat: 'Elektra', subcat: 'PVC Buis & Toebehoren', eenheid: 'stuk', icon: '⚡' },
-  { code: '0505966', naam: 'Duimplug voor schnabl', cat: 'Elektra', subcat: 'PVC Buis & Toebehoren', eenheid: 'stuk', icon: '⚡' },
-  { code: '1598804', naam: 'Kabeldoos Attema ak2', cat: 'Elektra', subcat: 'Verbinding & Aansluitingen', eenheid: 'stuk', icon: '⚡' },
-  { code: '3297116', naam: 'Stekker los zwart', cat: 'Elektra', subcat: 'Verbinding & Aansluitingen', eenheid: 'stuk', icon: '⚡' },
-  { code: '2020519', naam: 'Wartels M25', cat: 'Elektra', subcat: 'Verbinding & Aansluitingen', eenheid: 'stuk', icon: '⚡' },
-  { code: '2020782', naam: 'Contramoer M25', cat: 'Elektra', subcat: 'Verbinding & Aansluitingen', eenheid: 'stuk', icon: '⚡' },
-  { code: '676031', naam: 'Adereindhuls 0,75mm²', cat: 'Elektra', subcat: 'Verbinding & Aansluitingen', eenheid: 'stuk', icon: '⚡' },
-  { code: '676056', naam: 'Adereindhuls 1,5mm²', cat: 'Elektra', subcat: 'Verbinding & Aansluitingen', eenheid: 'stuk', icon: '⚡' },
-  { code: '1373886', naam: 'Adereindhuls ass. Doos', cat: 'Elektra', subcat: 'Verbinding & Aansluitingen', eenheid: 'stuk', icon: '⚡' },
-  { code: '99WS1014', naam: 'Montageplaat voor werkschakelaars', cat: 'Elektra', subcat: 'Verbinding & Aansluitingen', eenheid: 'stuk', icon: '⚡' },
-  { code: '1682319', naam: 'Ty-Raps 100st', cat: 'Elektra', subcat: 'Bevestiging & Beheer', eenheid: 'stuk', icon: '⚡' },
-  // Isolatie
-  { code: '5961203', naam: 'Isolatie 13/ leiding 10 (3/8)', cat: 'Isolatie', subcat: 'Armaflex 13mm', eenheid: 'stuk', icon: '🧱' },
-  { code: '5961204', naam: 'Isolatie 13/ leiding 12 (1/2)', cat: 'Isolatie', subcat: 'Armaflex 13mm', eenheid: 'stuk', icon: '🧱' },
-  { code: '5961205', naam: 'Isolatie 13/ leiding 15 (5/8)', cat: 'Isolatie', subcat: 'Armaflex 13mm', eenheid: 'stuk', icon: '🧱' },
-  { code: '5961206', naam: 'Isolatie 13/ leiding 19 (3/4)', cat: 'Isolatie', subcat: 'Armaflex 13mm', eenheid: 'stuk', icon: '🧱' },
-  { code: '5961208', naam: 'Isolatie 13/ leiding 22 (7/8)', cat: 'Isolatie', subcat: 'Armaflex 13mm', eenheid: 'stuk', icon: '🧱' },
-  { code: '5961210', naam: 'Isolatie 13/ leiding 28 (1 1/8)', cat: 'Isolatie', subcat: 'Armaflex 13mm', eenheid: 'stuk', icon: '🧱' },
-  { code: '5961213', naam: 'Isolatie 13/ leiding 35 (1 3/8)', cat: 'Isolatie', subcat: 'Armaflex 13mm', eenheid: 'stuk', icon: '🧱' },
-  { code: '5961215', naam: 'Isolatie 13/ leiding 42 (1 5/8)', cat: 'Isolatie', subcat: 'Armaflex 13mm', eenheid: 'stuk', icon: '🧱' },
-  // Koeltechnische hulpstukken
-  { code: '4104001', naam: 'Bocht 45° 1/4 ixi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 45° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4104002', naam: 'Bocht 45° 3/8 ixi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 45° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4104003', naam: 'Bocht 45° 1/2 ixi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 45° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4104004', naam: 'Bocht 45° 5/8 ixi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 45° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4104005', naam: 'Bocht 45° 3/4 ixi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 45° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4105021', naam: 'Bocht 45° 3/8 uxi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 45° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4105022', naam: 'Bocht 45° 1/2 uxi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 45° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4105023', naam: 'Bocht 45° 5/8 uxi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 45° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4105024', naam: 'Bocht 45° 3/4 uxi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 45° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4107002', naam: 'Bocht 90° 1/4 ixi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 90° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4107004', naam: 'Bocht 90° 3/8 ixi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 90° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4107006', naam: 'Bocht 90° 1/2 ixi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 90° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4107008', naam: 'Bocht 90° 5/8 ixi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 90° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4107011', naam: 'Bocht 90° 3/4 ixi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 90° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4107036', naam: 'Bocht 90° 1/4 uxi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 90° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4107037', naam: 'Bocht 90° 3/8 uxi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 90° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4107038', naam: 'Bocht 90° 1/2 uxi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 90° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4107043', naam: 'Bocht 90° 5/8 uxi', cat: 'Koeltechnische hulpstukken', subcat: 'Bochten 90° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4102001', naam: 'Inschuifsok uxi 3/8 x 1/4', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI', eenheid: 'stuk', icon: '❄️' },
-  { code: '4102003', naam: 'Inschuifsok uxi 1/2 x 1/4', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI', eenheid: 'stuk', icon: '❄️' },
-  { code: '4102002', naam: 'Inschuifsok uxi 1/2 x 3/8', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI', eenheid: 'stuk', icon: '❄️' },
-  { code: '4102005', naam: 'Inschuifsok uxi 5/8 x 3/8', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI', eenheid: 'stuk', icon: '❄️' },
-  { code: '4102004', naam: 'Inschuifsok uxi 5/8 x 1/2', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI', eenheid: 'stuk', icon: '❄️' },
-  { code: '4102007', naam: 'Inschuifsok uxi 3/4 x 1/2', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI', eenheid: 'stuk', icon: '❄️' },
-  { code: '4702003', naam: 'Inschuifsok uxi 1/2 x 3/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4702005', naam: 'Inschuifsok uxi 5/8 x 3/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4702004', naam: 'Inschuifsok uxi 5/8 x 1/2 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4702008', naam: 'Inschuifsok uxi 3/4 x 3/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4702007', naam: 'Inschuifsok uxi 3/4 x 1/2 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4702006', naam: 'Inschuifsok uxi 3/4 x 5/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4702012', naam: 'Inschuifsok uxi 7/8 x 3/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4702011', naam: 'Inschuifsok uxi 7/8 x 1/2 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4702010', naam: 'Inschuifsok uxi 7/8 x 5/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4702009', naam: 'Inschuifsok uxi 7/8 x 3/4 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4702016', naam: 'Inschuifsok uxi 1 1/8 x 1/2 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4702015', naam: 'Inschuifsok uxi 1 1/8 x 5/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4702014', naam: 'Inschuifsok uxi 1 1/8 x 3/4 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4702013', naam: 'Inschuifsok uxi 1 1/8 x 7/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4702017', naam: 'Inschuifsok uxi 1 3/8 x 1 1/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4702022', naam: 'Inschuifsok uxi 1 5/8 x 7/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4702020', naam: 'Inschuifsok uxi 1 5/8 x 1 3/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Inschuifsokken UXI K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4705002', naam: 'Bocht 45° 3/8 ixi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 45° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4705003', naam: 'Bocht 45° 1/2 ixi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 45° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4705004', naam: 'Bocht 45° 5/8 ixi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 45° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4705005', naam: 'Bocht 45° 3/4 ixi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 45° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4705006', naam: 'Bocht 45° 7/8 ixi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 45° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4705009', naam: 'Bocht 45° 1 1/8 ixi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 45° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4705011', naam: 'Bocht 45° 1 3/8 ixi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 45° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4705012', naam: 'Bocht 45° 1 5/8 ixi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 45° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4705024', naam: 'Bocht 45° 3/4 uxi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 45° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4705025', naam: 'Bocht 45° 7/8 uxi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 45° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4705026', naam: 'Bocht 45° 1 1/8 uxi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 45° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4705027', naam: 'Bocht 45° 1 3/8 uxi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 45° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4705028', naam: 'Bocht 45° 1 5/8 uxi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 45° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707004', naam: 'Bocht 90° 3/8 ixi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707006', naam: 'Bocht 90° 1/2 ixi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707008', naam: 'Bocht 90° 5/8 ixi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707011', naam: 'Bocht 90° 3/4 ixi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707014', naam: 'Bocht 90° 7/8 ixi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707019', naam: 'Bocht 90° 1 1/8 ixi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707023', naam: 'Bocht 90° 1 3/8 ixi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707026', naam: 'Bocht 90° 1 5/8 ixi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707028', naam: 'Bocht 90° 2 1/8 ixi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/M', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707037', naam: 'Bocht 90° 3/8 uxi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707038', naam: 'Bocht 90° 1/2 uxi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707040', naam: 'Bocht 90° 5/8 uxi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707043', naam: 'Bocht 90° 3/4 uxi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707044', naam: 'Bocht 90° 7/8 uxi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707047', naam: 'Bocht 90° 1 1/8 uxi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707049', naam: 'Bocht 90° 1 3/8 uxi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707050', naam: 'Bocht 90° 1 5/8 uxi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4707051', naam: 'Bocht 90° 2 1/8 uxi K65', cat: 'Koeltechnische hulpstukken', subcat: 'K65 Bochten 90° M/S', eenheid: 'stuk', icon: '❄️' },
-  { code: '4701004', naam: 'Sok 3/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Sokken K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4701005', naam: 'Sok 1/2 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Sokken K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4701006', naam: 'Sok 5/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Sokken K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4701007', naam: 'Sok 3/4 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Sokken K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4701008', naam: 'Sok 7/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Sokken K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4701010', naam: 'Sok 1 1/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'Sokken K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4109002', naam: 'T-stuk 1/4', cat: 'Koeltechnische hulpstukken', subcat: 'T-stukken 3x inwendig', eenheid: 'stuk', icon: '❄️' },
-  { code: '4109004', naam: 'T-stuk 3/8', cat: 'Koeltechnische hulpstukken', subcat: 'T-stukken 3x inwendig', eenheid: 'stuk', icon: '❄️' },
-  { code: '4109005', naam: 'T-stuk 1/2', cat: 'Koeltechnische hulpstukken', subcat: 'T-stukken 3x inwendig', eenheid: 'stuk', icon: '❄️' },
-  { code: '4109006', naam: 'T-stuk 5/8', cat: 'Koeltechnische hulpstukken', subcat: 'T-stukken 3x inwendig', eenheid: 'stuk', icon: '❄️' },
-  { code: '4109007', naam: 'T-stuk 3/4', cat: 'Koeltechnische hulpstukken', subcat: 'T-stukken 3x inwendig', eenheid: 'stuk', icon: '❄️' },
-  { code: '4709004', naam: 'T-stuk 3/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'T-stukken 3x inwendig K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4709005', naam: 'T-stuk 1/2 K65', cat: 'Koeltechnische hulpstukken', subcat: 'T-stukken 3x inwendig K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4709006', naam: 'T-stuk 5/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'T-stukken 3x inwendig K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4709007', naam: 'T-stuk 3/4 K65', cat: 'Koeltechnische hulpstukken', subcat: 'T-stukken 3x inwendig K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4709008', naam: 'T-stuk 7/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'T-stukken 3x inwendig K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4709010', naam: 'T-stuk 1 1/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'T-stukken 3x inwendig K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4709011', naam: 'T-stuk 1 3/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'T-stukken 3x inwendig K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4709012', naam: 'T-stuk 1 5/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'T-stukken 3x inwendig K65', eenheid: 'stuk', icon: '❄️' },
-  { code: '4709013', naam: 'T-stuk 2 1/8 K65', cat: 'Koeltechnische hulpstukken', subcat: 'T-stukken 3x inwendig K65', eenheid: 'stuk', icon: '❄️' },
-  // Koperleiding
-  { code: '99AC1002', naam: 'Aircoleiding rol 1/4" 30 m (met iso)', cat: 'Koperleiding', subcat: 'Aircoleiding', eenheid: 'stuk', icon: '🟠' },
-  { code: '99AC1004', naam: 'Aircoleiding rol 3/8" 30 m (met iso)', cat: 'Koperleiding', subcat: 'Aircoleiding', eenheid: 'stuk', icon: '🟠' },
-  { code: '99AC1006', naam: 'Aircoleiding rol 1/2" 30 m (met iso)', cat: 'Koperleiding', subcat: 'Aircoleiding', eenheid: 'stuk', icon: '🟠' },
-  { code: '99AC1008', naam: 'Aircoleiding rol 5/8" 30 m (met iso)', cat: 'Koperleiding', subcat: 'Aircoleiding', eenheid: 'stuk', icon: '🟠' },
-  { code: '99AC1010', naam: 'Aircoleiding rol 3/4" 20 m (met iso)', cat: 'Koperleiding', subcat: 'Aircoleiding', eenheid: 'stuk', icon: '🟠' },
-  { code: '99AC1012', naam: 'Aircoleiding rol 7/8" 20 m (met iso)', cat: 'Koperleiding', subcat: 'Aircoleiding', eenheid: 'stuk', icon: '🟠' },
-  { code: '99AC1022', naam: 'Combileiding 1/4--3/8" 20m (met iso)', cat: 'Koperleiding', subcat: 'Combileiding', eenheid: 'stuk', icon: '🟠' },
-  { code: '99AC1042', naam: 'Combileiding 1/4--3/8" 30m (met iso)', cat: 'Koperleiding', subcat: 'Combileiding', eenheid: 'stuk', icon: '🟠' },
-  { code: '99AC1024', naam: 'Combileiding 1/4--1/2" 20 m (met iso)', cat: 'Koperleiding', subcat: 'Combileiding', eenheid: 'stuk', icon: '🟠' },
-  { code: '99AC1044', naam: 'Combileiding 1/4--1/2" 30 m (met iso)', cat: 'Koperleiding', subcat: 'Combileiding', eenheid: 'stuk', icon: '🟠' },
-  { code: '99AC1028', naam: 'Combileiding 3/8--5/8" 20 m (met iso)', cat: 'Koperleiding', subcat: 'Combileiding', eenheid: 'stuk', icon: '🟠' },
-  { code: '99AC1048', naam: 'Combileiding 3/8--5/8" 30 m (met iso)', cat: 'Koperleiding', subcat: 'Combileiding', eenheid: 'stuk', icon: '🟠' },
-  { code: '3401014', naam: 'Koelleiding 3/8" lengte 5 mtr', cat: 'Koperleiding', subcat: 'Koelleiding (staven)', eenheid: 'stuk', icon: '🟠' },
-  { code: '3401015', naam: 'Koelleiding 1/2" lengte 5 mtr', cat: 'Koperleiding', subcat: 'Koelleiding (staven)', eenheid: 'stuk', icon: '🟠' },
-  { code: '3401016', naam: 'Koelleiding 5/8" lengte 5 mtr', cat: 'Koperleiding', subcat: 'Koelleiding (staven)', eenheid: 'stuk', icon: '🟠' },
-  { code: '3401017', naam: 'Koelleiding 3/4" (18mm) lengte 5 mtr', cat: 'Koperleiding', subcat: 'Koelleiding (staven)', eenheid: 'stuk', icon: '🟠' },
-  { code: '3401018', naam: 'Koelleiding 7/8" (22mm) lengte 5 mtr', cat: 'Koperleiding', subcat: 'Koelleiding (staven)', eenheid: 'stuk', icon: '🟠' },
-  { code: '3401006', naam: 'Koelleiding 1 1/8" lengte 5 mtr', cat: 'Koperleiding', subcat: 'Koelleiding (staven)', eenheid: 'stuk', icon: '🟠' },
-  { code: '3410007', naam: 'Koelleiding 1 3/8" lengte 5 mtr (K65)', cat: 'Koperleiding', subcat: 'Koelleiding (staven)', eenheid: 'stuk', icon: '🟠' },
-  { code: '3410008', naam: 'Koelleiding 1 5/8" lengte 5 mtr (K65)', cat: 'Koperleiding', subcat: 'Koelleiding (staven)', eenheid: 'stuk', icon: '🟠' },
-  // Tape & Lijmen
-  { code: '5501020', naam: 'Armaflex isolatietape á 15 mtr', cat: 'Tape & Lijmen', subcat: 'Isolatietape', eenheid: 'stuk', icon: '🎗️' },
-  { code: '5502001', naam: 'Armaflex lijm potje 0,25 l', cat: 'Tape & Lijmen', subcat: 'Lijmen', eenheid: 'stuk', icon: '🎗️' },
-  { code: '99TP0006', naam: 'Witte NITO tape', cat: 'Tape & Lijmen', subcat: 'NITO Tape', eenheid: 'stuk', icon: '🎗️' },
-  { code: '99TP0007', naam: 'Zwarte Nito tape', cat: 'Tape & Lijmen', subcat: 'NITO Tape', eenheid: 'stuk', icon: '🎗️' },
-  { code: '8999203', naam: 'ResQ-tape zwart 3,65mtr smal (25,4mm)', cat: 'Tape & Lijmen', subcat: 'ResQ Tape', eenheid: 'stuk', icon: '🎗️' },
-  { code: '8999266', naam: 'ResQ-tape zwart 3,65mtr breed (50,8mm)', cat: 'Tape & Lijmen', subcat: 'ResQ Tape', eenheid: 'stuk', icon: '🎗️' },
-  { code: '4181818', naam: 'Tape Rood', cat: 'Tape & Lijmen', subcat: 'Markeeringstape', eenheid: 'stuk', icon: '🎗️' },
-  { code: '4181825', naam: 'Tape Blauw', cat: 'Tape & Lijmen', subcat: 'Markeeringstape', eenheid: 'stuk', icon: '🎗️' },
-  // Waterzijdig
-  { code: '281274', naam: 'Aspen Channelclip voor flowfit (van Walraven)', cat: 'Waterzijdig', subcat: 'Flowfit', eenheid: 'stuk', icon: '💧' },
-  { code: '3947921', naam: 'Flowfit systeembuis D25 10mm iso rol 25mtr (blauw)', cat: 'Waterzijdig', subcat: 'Flowfit', eenheid: 'stuk', icon: '💧' },
-  { code: '8483919', naam: 'Flowfit systeembuis D25 10mm iso rol 25mtr (rood)', cat: 'Waterzijdig', subcat: 'Flowfit', eenheid: 'stuk', icon: '💧' },
-];
+// ── GOOGLE SHEETS API ────────────────────────────────────────
+// Vervang de URL hieronder met jouw Web App URL na deployment
+const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzoESGCrz5EX2QTYnfoC2tgbHIGzi761-XvQQ1jVCI-n9kn1ItGbbuOfi-FA--I5fPG9w/exec';
 
-const CAT_IDS = {
-  'Afvoermaterialen':'di-afvoer','Bevestigingsmateriaal':'di-bevestiging',
-  'Diversen':'di-diversen','Elektra':'di-elektra','Isolatie':'di-isolatie',
-  'Koeltechnische hulpstukken':'di-koeltech','Koperleiding':'di-koper',
-  'Tape & Lijmen':'di-tape','Waterzijdig':'di-waterzijdig',
-};
-const ICONS = {
+
+let ARTIKELEN = [];  // wordt geladen vanuit Google Sheets (of fallback)
+
+// Dynamisch gevuld na laden artikelen
+let CAT_IDS = {};
+let ICONS = {};
+
+// Standaard iconen als fallback
+const ICON_DEFAULTS = {
   'Afvoermaterialen':'🔧','Bevestigingsmateriaal':'🔩','Diversen':'📦',
   'Elektra':'⚡','Isolatie':'🧱','Koeltechnische hulpstukken':'❄️',
   'Koperleiding':'🟠','Tape & Lijmen':'🎗️','Waterzijdig':'💧'
 };
 
+// Alle beschikbare emoji-iconen om uit te kiezen
+const ICOON_OPTIES = [
+  '🔧','🔩','📦','⚡','🧱','❄️','🟠','🎗️','💧','🔨','🪛','🔌','💡',
+  '🏗️','🪝','🧲','🔑','🛠️','📐','📏','🪚','⚙️','🔗','🪣','🧪','🔋',
+  '🌡️','💨','🔥','❄','🌊','🏭','📦','🗜️','🔒','🪜','🧯','🪤'
+];
+
 let cart = {};
+
+function saveCart() {
+  try { localStorage.setItem('emondt_cart', JSON.stringify(cart)); } catch(e) {}
+}
+function loadCart() {
+  try {
+    const opgeslagen = localStorage.getItem('emondt_cart');
+    if (opgeslagen) cart = JSON.parse(opgeslagen);
+  } catch(e) {}
+}
 let activeCat = null;
 let customTeller = 0;
-let extraArtikelen = [];
+
 
 // ── INIT ──────────────────────────────────────────────────────
 window.onload = () => {
   loadInfo();
-  document.getElementById('di-all').classList.add('active');
-  renderArtikelen(ARTIKELEN);
+  loadCart();
+  laadOpgeslagenIconen();
+  document.getElementById('di-all')?.classList.add('active');
   showTab('welkom');
+  laadArtikelenUitSheets();
 };
+
+// ── LADEN UIT GOOGLE SHEETS ───────────────────────────────────
+function laadArtikelenUitSheets() {
+  const lijst = document.getElementById('artikel-lijst');
+
+  // ── Laag 1: sessionStorage (snelst, huidige browsersessie) ──
+  try {
+    const sesCache = sessionStorage.getItem('emondt_artikelen_sessie');
+    if (sesCache) {
+      ARTIKELEN = JSON.parse(sesCache);
+      bouwDrawerCats();
+      renderArtikelen(ARTIKELEN);
+      console.log('[Cache] Sessiecache geladen:', ARTIKELEN.length, 'artikelen');
+      // Ververs op achtergrond zonder laad-indicator
+      fetchSheets(false);
+      return;
+    }
+  } catch(e) {}
+
+  // ── Laag 2: localStorage (tot 24 uur geldig) ─────────────
+  if (lijst) lijst.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.86rem">📡 Artikelen laden...</div>';
+  try {
+    const cached = localStorage.getItem('emondt_artikelen_cache');
+    const ts     = localStorage.getItem('emondt_artikelen_ts');
+    const oud    = !ts || (Date.now() - parseInt(ts)) > 86400000; // 24 uur
+    if (cached && !oud) {
+      ARTIKELEN = JSON.parse(cached);
+      // Zet ook in sessiecache
+      try { sessionStorage.setItem('emondt_artikelen_sessie', cached); } catch(e) {}
+      bouwDrawerCats();
+      renderArtikelen(ARTIKELEN);
+      console.log('[Cache] LocalStorage cache geladen:', ARTIKELEN.length, 'artikelen');
+      // Ververs op achtergrond
+      fetchSheets(false);
+      return;
+    }
+  } catch(e) {}
+
+  // ── Laag 3: Sheets ophalen ────────────────────────────────
+  fetchSheets(true);
+}
+
+function fetchSheets(toonLaadindicator) {
+  const effectiveUrl = SHEETS_API_URL;
+  if (!effectiveUrl || effectiveUrl === 'JOUW_WEBAPP_URL_HIER') {
+    // Geen URL — toon cache als die er is, anders melding
+    const cached = (() => { try { return localStorage.getItem('emondt_artikelen_cache'); } catch(e){ return null; } })();
+    if (cached) {
+      ARTIKELEN = JSON.parse(cached);
+      bouwDrawerCats();
+      renderArtikelen(ARTIKELEN);
+      showToast('📦 Gecachte database geladen');
+    } else {
+      const lijst = document.getElementById('artikel-lijst');
+      if (lijst) lijst.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.86rem">⚙️ Koppel de Google Sheets API in de beheerpagina (hamburgermenu → Beheer).</div>';
+    }
+    return;
+  }
+
+  fetch(effectiveUrl + '?actie=lezen&t=' + Date.now())
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'ok' && Array.isArray(data.artikelen)) {
+        ARTIKELEN = data.artikelen.map(a => ({
+          code:        a.code        || '',
+          naam:        a.naam        || '',
+          cat:         a.cat         || '',
+          subcat:      a.subcat      || undefined,
+          eenheid:     a.eenheid     || 'stuk',
+          leverancier: a.leverancier || '',
+          icon:        ICONS[a.cat] || ICON_DEFAULTS[a.cat] || '📦',
+        })).filter(a => a.code && a.naam);
+
+        // Opslaan in beide caches
+        const json = JSON.stringify(ARTIKELEN);
+        try {
+          localStorage.setItem('emondt_artikelen_cache', json);
+          localStorage.setItem('emondt_artikelen_ts', Date.now().toString());
+          sessionStorage.setItem('emondt_artikelen_sessie', json);
+        } catch(e) {}
+
+        bouwDrawerCats();
+        renderArtikelen(ARTIKELEN);
+        console.log('[Sheets] Geladen:', ARTIKELEN.length, 'artikelen');
+        if (toonLaadindicator) showToast('✓ ' + ARTIKELEN.length + ' artikelen geladen');
+      } else {
+        console.error('[Sheets] Fout:', data);
+        laadUitCache('Sheets fout: ' + (data.message || 'onbekend'));
+      }
+    })
+    .catch(err => {
+      console.error('[Sheets] Netwerkfout:', err);
+      laadUitCache('Geen verbinding met Sheets');
+    });
+}
+
+// Laad uit localStorage als noodoplossing, toon melding
+function laadUitCache(reden) {
+  try {
+    const cached = localStorage.getItem('emondt_artikelen_cache');
+    if (cached) {
+      ARTIKELEN = JSON.parse(cached);
+      try { sessionStorage.setItem('emondt_artikelen_sessie', cached); } catch(e) {}
+      bouwDrawerCats();
+      renderArtikelen(ARTIKELEN);
+      const ts = localStorage.getItem('emondt_artikelen_ts');
+      const leeftijd = ts ? Math.round((Date.now() - parseInt(ts)) / 60000) : '?';
+      showToast(`📦 Cache geladen (${leeftijd} min oud)`);
+      console.warn('[Cache] Fallback op cache vanwege:', reden);
+      return;
+    }
+  } catch(e) {}
+  // Echt niets beschikbaar
+  const lijst = document.getElementById('artikel-lijst');
+  if (lijst) lijst.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--danger);font-size:.86rem">📵 ${reden} — geen cache beschikbaar.</div>`;
+  showToast('📵 Geen data beschikbaar');
+}
 
 // ── DRAWER ────────────────────────────────────────────────────
 function toggleDrawer() {
@@ -908,13 +663,50 @@ function closeDrawer() {
 function filterCategorie(cat) {
   activeCat = cat; closeDrawer();
   document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
-  document.getElementById(cat ? (CAT_IDS[cat] || 'di-all') : 'di-all').classList.add('active');
+  document.querySelectorAll('.drawer-item').forEach(el => el.classList.remove('active'));
+  if (cat) {
+    const id = CAT_IDS[cat];
+    if (id) document.getElementById(id)?.classList.add('active');
+  } else {
+    document.getElementById('di-all')?.classList.add('active');
+  }
   const banner = document.getElementById('cat-banner');
   if (cat) { document.getElementById('cat-banner-text').textContent = cat; banner.classList.add('visible'); }
   else { banner.classList.remove('visible'); }
   showTab('artikelen');
   applyFilters();
   document.getElementById('diversen-custom-wrap').style.display = (cat === 'Diversen') ? 'block' : 'none';
+}
+
+// ── DRAWER CATEGORIEËN DYNAMISCH OPBOUWEN ─────────────────────
+function bouwDrawerCats() {
+  const cats = [...new Set(ARTIKELEN.map(a => a.cat))].filter(Boolean).sort();
+  const container = document.getElementById('drawer-cat-lijst');
+  if (!container) return;
+
+  CAT_IDS = {};
+  container.innerHTML = '';
+
+  cats.forEach(cat => {
+    const id = 'di-cat-' + cat.replace(/[^a-zA-Z0-9]/g, '-');
+    CAT_IDS[cat] = id;
+    const icon = ICONS[cat] || ICON_DEFAULTS[cat] || '📦';
+    const el = document.createElement('div');
+    el.className = 'drawer-item';
+    el.id = id;
+    el.innerHTML = `<span class="di-icon">${icon}</span> ${cat}`;
+    el.onclick = () => filterCategorie(cat);
+    container.appendChild(el);
+  });
+
+  // Update dev categorie-dropdowns dynamisch
+  ['dev-cat'].forEach(selId => {
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    const huidig = sel.value;
+    sel.innerHTML = '<option value="">Selecteer categorie...</option>' +
+      cats.map(c => `<option value="${c}"${c===huidig?' selected':''}>${c}</option>`).join('');
+  });
 }
 
 function applyFilters() {
@@ -970,7 +762,7 @@ function renderArtikelCard(artikel, container) {
     <div class="artikel-icon">${artikel.icon}</div>
     <div class="artikel-info">
       <div class="artikel-naam">${artikel.naam}</div>
-      <div class="artikel-code">${artikel.code} · per ${artikel.eenheid}</div>
+      <div class="artikel-code">${artikel.code}${artikel.leverancier ? ' · ' + artikel.leverancier : ''} · per ${artikel.eenheid}</div>
     </div>
     <div class="qty-control" onclick="event.stopPropagation()">
       <button class="qty-btn" onclick="changeQty('${artikel.code}',-1,event)">−</button>
@@ -997,6 +789,7 @@ function setQty(code, input) {
 
 function _setCart(code, nieuw) {
   if (nieuw === 0) delete cart[code]; else cart[code] = nieuw;
+  saveCart();
   const qEl = document.getElementById('qty-' + code);
   const cEl = document.getElementById('card-' + code);
   if (qEl) qEl.value = nieuw;
@@ -1062,7 +855,7 @@ function renderCart() {
   </div>
   <button class="btn btn-primary" onclick="verstuurEmail()">
     <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 2 11 13M22 2 15 22l-4-9-9-4 20-7z"/></svg>
-    Versturen via E-mail
+    Bestelling versturen
   </button>
   <button class="btn btn-danger" onclick="leegMaken()">
     <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
@@ -1103,6 +896,7 @@ function removeItem(code) {
 function leegMaken() {
   if (!confirm('Hele bestelling wissen?')) return;
   cart = {};
+  try { localStorage.removeItem('emondt_cart'); } catch(e){}
   document.querySelectorAll('.qty-val').forEach(el => el.value = 0);
   document.querySelectorAll('.artikel-card').forEach(el => el.classList.remove('selected'));
   updateBadge(); renderCart();
@@ -1124,61 +918,110 @@ function verstuurEmail() {
     }
   }
 
-  // ── Waarschuwing na 14:00 ──────────────────────────────────
+  // ── Waarschuwing na 14:00 ─────────────────────────────────
   const nu = new Date();
   const uur = nu.getHours();
   const minuut = nu.getMinutes();
   if (uur >= 14) {
     const tijdStr = `${String(uur).padStart(2,'0')}:${String(minuut).padStart(2,'0')}`;
-    const doorgaan = confirm(
-      `⚠️ Let op: het is nu ${tijdStr}\n\n` +
-      `Bestellingen die na 14:00 binnenkomen worden verwerkt op de volgende werkdag.\n\n` +
-      `Wil je toch versturen?`
-    );
-    if (!doorgaan) return;
+    if (!confirm(`⚠️ Let op: het is nu ${tijdStr}
+
+Bestellingen die na 14:00 binnenkomen worden verwerkt op de volgende werkdag.
+
+Wil je toch versturen?`)) return;
   }
 
   let leverdatum = '';
   try { leverdatum = localStorage.getItem('leverdatum') || ''; } catch(e){}
+
   const datum = new Date().toLocaleDateString('nl-NL',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-  let body = `MATERIAAL BESTELLEN – EMONDT GROEP\n${'='.repeat(46)}\n\n`;
-  body += `Datum:           ${datum}\n`;
-  if (leverdatum) body += `Gewenste leverdatum: ${new Date(leverdatum).toLocaleDateString('nl-NL',{day:'2-digit',month:'2-digit',year:'numeric'})}\n`;
-  body += `Monteur:         ${inf.naam||'—'}\n`;
-  body += `Afdeling:        ${inf.afdeling||'—'}\n`;
-  body += `Projectnummer:   ${inf.projectnummer||'—'}\n`;
-  body += `Projectnaam:     ${inf.projectnaam||'—'}\n`;
-  body += `Afleveradres:    ${inf.locatie||'—'}\n\n`;
-  body += `GEVRAAGDE ARTIKELEN\n${'─'.repeat(46)}\n`;
-  let totaal = 0;
+  const projref = inf.projectnummer || inf.projectnaam || '';
+  const subject = `Materiaal bestellen${projref?' '+projref:''}${inf.projectnaam?' – '+inf.projectnaam:''} – ${inf.naam||'monteur'} – ${datum}`;
+  const to = [inf.ontvanger, inf.ontvanger2].filter(Boolean).join(',');
+
+  // ── Bouw e-mailbody (platte tekst) ────────────────────────
   const cats = [...new Set(items.map(([code]) => ARTIKELEN.find(x=>x.code===code)?.cat).filter(Boolean))];
+  let body = `MATERIAAL BESTELLEN – EMONDT GROEP
+${'='.repeat(46)}
+
+`;
+  body += `Datum:           ${datum}
+`;
+  if (leverdatum) body += `Leverdatum:      ${new Date(leverdatum).toLocaleDateString('nl-NL',{day:'2-digit',month:'2-digit',year:'numeric'})}
+`;
+  body += `Monteur:         ${inf.naam||'—'}
+`;
+  if (inf.telefoon) body += `Telefoon:        ${inf.telefoon}
+`;
+  body += `Afdeling:        ${inf.afdeling||'—'}
+`;
+  body += `Projectnummer:   ${inf.projectnummer||'—'}
+`;
+  body += `Projectnaam:     ${inf.projectnaam||'—'}
+`;
+  body += `Afleveradres:    ${inf.locatie||'—'}
+
+`;
+  body += `GEVRAAGDE ARTIKELEN
+${'─'.repeat(46)}
+`;
+  let totaal = 0;
+  const artikelItems = [];
   cats.forEach(cat => {
-    body += `\n[ ${cat.toUpperCase()} ]\n`;
-    items.forEach(([code,qty]) => {
+    body += `
+[ ${cat.toUpperCase()} ]
+`;
+    items.forEach(([code, qty]) => {
       const a = ARTIKELEN.find(x=>x.code===code);
-      if (!a||a.cat!==cat) return;
+      if (!a || a.cat !== cat) return;
       totaal += qty;
-      body += `  ${a.code.padEnd(12)} ${String(qty).padStart(4)} x  ${a.naam}\n`;
+      artikelItems.push({ code: a.code, naam: a.naam, cat: a.cat, qty });
+      body += `  ${a.code.padEnd(12)} ${String(qty).padStart(4)} x  ${a.naam}
+`;
     });
   });
-  body += `\n${'─'.repeat(46)}\nTOTAAL: ${totaal} artikelen\n`;
-  if (inf.opmerkingen) body += `\nOPMERKINGEN\n${inf.opmerkingen}\n`;
-  body += `\n${'='.repeat(46)}\nVerstuurd via Emondt Materiaal bestellen App\nwww.emondt.nl`;
-  const projref = inf.projectnummer||inf.projectnaam||'';
-  const subject = `Materiaal bestellen${projref?' '+projref:''}${inf.projectnaam?' – '+inf.projectnaam:''} – ${inf.naam||'monteur'} – ${datum}`;
-  // Bouw ontvangers
-  const to = [inf.ontvanger, inf.ontvanger2].filter(Boolean).join(',');
-  window.location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  // Winkelmand legen na versturen
+  body += `
+${'─'.repeat(46)}
+TOTAAL: ${totaal} artikelen
+`;
+  if (inf.opmerkingen) body += `
+OPMERKINGEN
+${inf.opmerkingen}
+`;
+  body += `
+${'='.repeat(46)}
+Emondt Materiaalapp · www.emondt.nl`;
+
+  // ── Verstuur via mailto ───────────────────────────────────
+  // ── Verstuur via Scripts (automatisch) of mailto (fallback) ──
+  // Script verstuurt de mail automatisch — geen mailto nodig
+  // logBestellingSheets handelt zowel mail als logging af
+
+  // ── Log bestelling in Google Sheets (+ mail via script) ──
+  logBestellingSheets({
+    datum,
+    naam:          inf.naam,
+    telefoon:      inf.telefoon,
+    afdeling:      inf.afdeling,
+    projectnummer: inf.projectnummer,
+    projectnaam:   inf.projectnaam,
+    locatie:       inf.locatie,
+    leverdatum,
+    opmerkingen:   inf.opmerkingen,
+    ontvanger2:    inf.ontvanger2 || '',
+    items:         artikelItems,
+  });
+
+  // ── Winkelmand legen ──────────────────────────────────────
   setTimeout(() => {
     cart = {};
-    try { localStorage.removeItem('leverdatum'); } catch(e){}
+    try { localStorage.removeItem('leverdatum'); localStorage.removeItem('emondt_cart'); } catch(e){}
     document.querySelectorAll('.qty-val').forEach(el => el.value = 0);
     document.querySelectorAll('.artikel-card').forEach(el => el.classList.remove('selected'));
     updateBadge();
     showTab('welkom');
   }, 800);
-  showToast('📧 E-mail app geopend – bestelling gewist');
+  showToast('⏳ Bestelling wordt verstuurd...');
 }
 
 // ── OPSLAAN / LADEN ───────────────────────────────────────────
@@ -1201,9 +1044,14 @@ function saveInfo() {
 function loadInfo() {
   try {
     const s = JSON.parse(localStorage.getItem('emondt_info')||'{}');
-    ['naam','afdeling','projectnummer','projectnaam','locatie','ontvanger2','opmerkingen'].forEach(id => {
+    // Nieuwe sessie = projectnummer en projectnaam wissen
+    const nieuweSessione = !sessionStorage.getItem('sessie_gestart');
+    sessionStorage.setItem('sessie_gestart', '1');
+    ['naam','telefoon','afdeling','projectnummer','projectnaam','locatie','ontvanger2','opmerkingen'].forEach(id => {
       const el = document.getElementById(id);
-      if (el && s[id] && id !== 'ontvanger') el.value = s[id];
+      if (!el || id === 'ontvanger') return;
+      if (nieuweSessione && (id === 'projectnummer' || id === 'projectnaam')) return; // wis bij nieuwe sessie
+      if (s[id]) el.value = s[id];
     });
     // Projectnummer: gebruik opgeslagen waarde of laat placeholder zien
     const pnr = document.getElementById('projectnummer');
@@ -1228,7 +1076,7 @@ function loadInfo() {
   } catch(e){}
 }
 function getInfo() {
-  return ['naam','afdeling','projectnummer','projectnaam','locatie','ontvanger','ontvanger2','opmerkingen']
+  return ['naam','telefoon','afdeling','projectnummer','projectnaam','locatie','ontvanger','ontvanger2','opmerkingen']
     .reduce((o,id) => { const el = document.getElementById(id); if(el) o[id]=el.value; return o; }, {});
 }
 function showToast(msg) {
@@ -1260,18 +1108,216 @@ function customArtikelToevoegen() {
 // ── DEV BEHEER ────────────────────────────────────────────────
 const DEV_PW = 'Eg@2026!#';
 
+function getSheetsUrl() {
+  return SHEETS_API_URL;
+}
+
+// Alle schrijfacties via GET (geen POST — werkt altijd cross-origin)
+function sheetsRequest(params) {
+  const url = getSheetsUrl();
+  if (!url) return Promise.resolve({ status: 'geen_url' });
+  const qs = Object.entries(params)
+    .map(([k, v]) => `${k}=${encodeURIComponent(typeof v === 'object' ? JSON.stringify(v) : v)}`)
+    .join('&');
+  return fetch(`${url}?${qs}&t=${Date.now()}`).then(r => r.json());
+}
+
+function testVerbinding() {
+  const status = document.getElementById('sheets-status');
+  status.innerHTML = '<span style="color:var(--muted)">⏳ Verbinding testen...</span>';
+  fetch(SHEETS_API_URL + '?actie=lezen&t=' + Date.now())
+    .then(r => r.json())
+    .then(data => {
+      status.innerHTML = data.status === 'ok'
+        ? `<span style="color:green">✅ Verbinding OK — ${data.count} artikelen in Sheets.</span>`
+        : `<span style="color:var(--danger)">❌ Script fout: ${data.message || JSON.stringify(data)}</span>`;
+    })
+    .catch(err => {
+      status.innerHTML = `<span style="color:var(--danger)">❌ Geen verbinding: ${err.message}</span>`;
+    });
+}
+
+function herlaadArtikelen() {
+  try { localStorage.removeItem('emondt_artikelen_ts'); sessionStorage.removeItem('emondt_artikelen_sessie'); } catch(e) {}
+  laadArtikelenUitSheets();
+  showToast('🔄 Artikelen worden herladen...');
+  showTab('artikelen');
+}
+
+function testBestellingLog() {
+  const statusEl = document.getElementById('sheets-status');
+  if (statusEl) statusEl.innerHTML = '<span style="color:var(--muted)">⏳ Test bestelling loggen...</span>';
+
+  const testData = {
+    datum:         new Date().toLocaleString('nl-NL'),
+    naam:          'TEST Monteur',
+    telefoon:      '0600000000',
+    afdeling:      'Test',
+    projectnummer: 'TEST-001',
+    projectnaam:   'Testproject',
+    locatie:       'Testlocatie',
+    leverdatum:    '',
+    opmerkingen:   'Dit is een testbestelling',
+    items:         [{ code: 'TEST-001', naam: 'Testartikel', cat: 'Diversen', qty: 1 }],
+  };
+
+  const artikelStr = testData.items.map(i => `${i.code}×${i.qty}`).join('|');
+  const url = getSheetsUrl();
+  if (!url) {
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--danger)">❌ Geen URL ingesteld</span>';
+    return;
+  }
+
+  const params = new URLSearchParams({
+    actie: 'bestelling',
+    datum: testData.datum, naam: testData.naam, telefoon: testData.telefoon,
+    afdeling: testData.afdeling, projectnummer: testData.projectnummer,
+    projectnaam: testData.projectnaam, locatie: testData.locatie,
+    leverdatum: '', opmerkingen: testData.opmerkingen,
+    artikelen: artikelStr, totaal: 1, t: Date.now(),
+  });
+
+  const fullUrl = `${url}?${params.toString()}`;
+  if (statusEl) statusEl.innerHTML = `<span style="color:var(--muted)">📡 URL lengte: ${fullUrl.length} tekens</span>`;
+
+  fetch(fullUrl)
+    .then(r => r.json())
+    .then(r => {
+      if (statusEl) statusEl.innerHTML = r.status === 'ok'
+        ? '<span style="color:green">✅ Test bestelling gelogd in Sheets!</span>'
+        : `<span style="color:var(--danger)">❌ Script fout: ${r.message || JSON.stringify(r)}</span>`;
+    })
+    .catch(err => {
+      if (statusEl) statusEl.innerHTML = `<span style="color:var(--danger)">❌ Fetch fout: ${err.message}<br><small>Controleer of de URL van de <strong>nieuwste implementatie</strong> is.</small></span>`;
+    });
+}
+
+// Bestelling loggen — compact GET request
+function logBestellingSheets(data) {
+  const url = getSheetsUrl();
+  if (!url) return;
+
+  // Comprimeer artikelen naar korte string: "code×qty|code×qty"
+  // Formaat: code×qty×naam|code×qty×naam
+  const artikelStr = (data.items || [])
+    .map(i => `${i.code}×${i.qty}×${(i.naam||'').replace(/[×|]/g,'')}`)
+    .join('|');
+
+  // Bouw compact payload — geen JSON nesting, directe parameters
+  const params = new URLSearchParams({
+    actie:          'bestelling',
+    datum:          data.datum          || '',
+    naam:           data.naam           || '',
+    telefoon:       data.telefoon       || '',
+    afdeling:       data.afdeling       || '',
+    projectnummer:  data.projectnummer  || '',
+    projectnaam:    data.projectnaam    || '',
+    locatie:        data.locatie        || '',
+    leverdatum:     data.leverdatum     || '',
+    opmerkingen:    data.opmerkingen    || '',
+    ontvanger2:     data.ontvanger2     || '',
+    artikelen:      artikelStr,
+    totaal:         (data.items || []).reduce((s, i) => s + (parseInt(i.qty)||0), 0),
+    t:              Date.now(),
+  });
+
+  fetch(`${url}?${params.toString()}`)
+    .then(r => r.json())
+    .then(r => {
+      if (r.status === 'ok') {
+        showToast('✅ Bestelling verstuurd!');
+      } else {
+        showToast('⚠️ Fout: ' + (r.message || r.status));
+        console.warn('[Sheets] Fout:', r);
+      }
+    })
+    .catch(err => {
+      showToast('⚠️ Verbinding mislukt');
+      console.warn('[Sheets] Mislukt:', err.message);
+    });
+}
+
+
+
 function openDev() {
+  // Al ingelogd in deze sessie?
+  if (sessionStorage.getItem('dev_auth') === '1') {
+    closeDrawer();
+    showTab('dev');
+      initDevPage();
+    return;
+  }
+  closeDrawer();
   document.getElementById('dev-overlay').classList.add('open');
   document.getElementById('dev-pw').value = '';
   document.getElementById('dev-pw-err').style.display = 'none';
   setTimeout(() => document.getElementById('dev-pw').focus(), 100);
 }
 
+function initDevPage() {
+  bouwIconKiezer();
+}
+
+function bouwIconKiezer() {
+  const container = document.getElementById('cat-icon-lijst');
+  if (!container) return;
+  const cats = [...new Set(ARTIKELEN.map(a => a.cat))].filter(Boolean).sort();
+  if (!cats.length) {
+    container.innerHTML = '<div style="color:var(--muted);font-size:.8rem">Laad eerst artikelen om iconen in te stellen.</div>';
+    return;
+  }
+  container.innerHTML = cats.map(cat => {
+    const huidig = ICONS[cat] || ICON_DEFAULTS[cat] || '📦';
+    const opties = ICOON_OPTIES.map(ic =>
+      `<option value="${ic}"${ic===huidig?' selected':''}>${ic}</option>`
+    ).join('');
+    return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:1.1rem;width:28px;text-align:center">${huidig}</span>
+      <span style="flex:1;font-size:.84rem">${cat}</span>
+      <select data-cat="${cat}" style="background:var(--bg);border:1.5px solid var(--border);border-radius:6px;font-size:1rem;padding:4px 6px;color:var(--text);outline:none" onchange="previewIcon(this)">
+        ${opties}
+      </select>
+    </div>`;
+  }).join('');
+}
+
+function previewIcon(sel) {
+  const icoon = sel.value;
+  const preview = sel.parentElement.querySelector('span:first-child');
+  if (preview) preview.textContent = icoon;
+}
+
+function slaIconenOp() {
+  const selects = document.querySelectorAll('#cat-icon-lijst select[data-cat]');
+  selects.forEach(sel => {
+    const cat = sel.dataset.cat;
+    ICONS[cat] = sel.value;
+  });
+  // Opslaan in localStorage
+  try { localStorage.setItem('emondt_icons', JSON.stringify(ICONS)); } catch(e) {}
+  // Drawer vernieuwen
+  bouwDrawerCats();
+  // Artikellijst vernieuwen (iconen in kaartjes updaten)
+  renderArtikelen(activeCat ? ARTIKELEN.filter(a=>a.cat===activeCat) : ARTIKELEN);
+  showToast('✅ Iconen opgeslagen');
+}
+
+function laadOpgeslagenIconen() {
+  try {
+    const opgeslagen = localStorage.getItem('emondt_icons');
+    if (opgeslagen) {
+      const parsed = JSON.parse(opgeslagen);
+      Object.assign(ICONS, parsed);
+    }
+  } catch(e) {}
+}
+
 function checkPw() {
   if (document.getElementById('dev-pw').value === DEV_PW) {
+    sessionStorage.setItem('dev_auth', '1');
     document.getElementById('dev-overlay').classList.remove('open');
     showTab('dev');
-    devRenderExtraLijst();
+      initDevPage();
   } else {
     document.getElementById('dev-pw-err').style.display = 'block';
     document.getElementById('dev-pw').value = '';
@@ -1288,50 +1334,27 @@ function devVoegToe() {
   const naam = document.getElementById('dev-naam').value.trim();
   const cat  = document.getElementById('dev-cat').value;
   const eenheid = document.getElementById('dev-eenheid').value.trim() || 'stuk';
-  const subcat  = document.getElementById('dev-subcat').value.trim();
+  const subcat      = document.getElementById('dev-subcat').value.trim();
+  const leverancier = document.getElementById('dev-leverancier')?.value.trim() || '';
   if (!code) { alert('Vul een artikelnummer in.'); return; }
   if (!naam)  { alert('Vul een naam in.'); return; }
   if (!cat)   { alert('Selecteer een categorie.'); return; }
-  if (ARTIKELEN.find(a=>a.code===code)||extraArtikelen.find(a=>a.code===code)) { alert('Artikelnummer bestaat al.'); return; }
-  const nieuw = {code,naam,cat,eenheid,icon:ICONS[cat]||'📦'};
+  if (ARTIKELEN.find(a=>a.code===code)) { alert('Artikelnummer bestaat al.'); return; }
+  const nieuw = {code,naam,cat,eenheid,icon:ICONS[cat]||ICON_DEFAULTS[cat]||'📦'};
   if (subcat) nieuw.subcat = subcat;
-  ARTIKELEN.push(nieuw); extraArtikelen.push(nieuw);
+  if (leverancier) nieuw.leverancier = leverancier;
+  ARTIKELEN.push(nieuw);
+  bouwDrawerCats();
   document.getElementById('dev-code').value = '';
   document.getElementById('dev-naam').value = '';
   document.getElementById('dev-eenheid').value = 'stuk';
   document.getElementById('dev-subcat').value = '';
-  devRenderExtraLijst();
+  const lev = document.getElementById('dev-leverancier'); if (lev) lev.value = '';
   showToast('✓ Artikel toegevoegd');
 }
 
-function devRenderExtraLijst() {
-  const card = document.getElementById('dev-extra-card');
-  const lijst = document.getElementById('dev-extra-lijst');
-  if (!extraArtikelen.length) { card.style.display='none'; return; }
-  card.style.display='block';
-  lijst.innerHTML = extraArtikelen.map((a,i) => `
-    <div class="dev-artikel-row">
-      <div class="info"><strong>${a.naam}</strong><span>${a.code} · ${a.cat}${a.subcat?' › '+a.subcat:''}</span></div>
-      <button class="remove-btn" onclick="devVerwijderExtra(${i})">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>`).join('');
-}
 
-function devVerwijderExtra(i) {
-  const a = extraArtikelen[i];
-  const idx = ARTIKELEN.findIndex(x=>x.code===a.code);
-  if (idx>-1) ARTIKELEN.splice(idx,1);
-  extraArtikelen.splice(i,1);
-  devRenderExtraLijst(); showToast('🗑 Verwijderd');
-}
 
-function devLeegmaken() {
-  if (!confirm('Alle toegevoegde artikelen verwijderen?')) return;
-  extraArtikelen.forEach(a => { const i=ARTIKELEN.findIndex(x=>x.code===a.code); if(i>-1) ARTIKELEN.splice(i,1); });
-  extraArtikelen=[];
-  devRenderExtraLijst();
-}
 
 function devZoek() {
   const q = document.getElementById('dev-zoek').value.toLowerCase().trim();
@@ -1350,311 +1373,42 @@ function devZoek() {
         <strong style="font-size:.86rem;display:block;word-break:break-word">${a.naam}</strong>
         <span style="font-size:.7rem;color:var(--muted)">${a.code} · ${a.cat}${a.subcat ? ' › ' + a.subcat : ''}</span>
       </div>
-      <button data-code="${a.code}" class="btn-edit-artikel" style="background:var(--green);border:none;color:var(--navy);padding:6px 10px;border-radius:6px;cursor:pointer;font-size:.82rem;flex-shrink:0">✏️</button>
-      <button data-code="${a.code}" class="btn-del-artikel" style="background:#fdecea;border:1px solid #f5c6c2;color:var(--danger);padding:6px 10px;border-radius:6px;cursor:pointer;font-size:.82rem;flex-shrink:0">🗑</button>
+      <button data-code="${a.code}" class="btn-del-artikel" style="background:#fdecea;border:1px solid #f5c6c2;color:var(--danger);padding:6px 10px;border-radius:6px;cursor:pointer;font-size:.82rem;flex-shrink:0">🗑 Verwijderen</button>
     </div>`).join('');
 
   // Bind events via delegation-safe approach
-  res.querySelectorAll('.btn-edit-artikel').forEach(btn => {
-    btn.addEventListener('click', () => devBewerkArtikel(btn.dataset.code));
-  });
   res.querySelectorAll('.btn-del-artikel').forEach(btn => {
     btn.addEventListener('click', () => devVerwijderArtikel(btn.dataset.code));
   });
 }
 
 function devVerwijderArtikel(code) {
-  const a = ARTIKELEN.find(x=>x.code===code);
-  if (!a||!confirm(`Artikel "${a.naam}" verwijderen?`)) return;
-  ARTIKELEN.splice(ARTIKELEN.findIndex(x=>x.code===code),1);
-  const ei = extraArtikelen.findIndex(x=>x.code===code);
-  if (ei>-1) { extraArtikelen.splice(ei,1); devRenderExtraLijst(); }
-  if (cart[code]) { delete cart[code]; updateBadge(); }
-  devZoek(); showToast('🗑 Verwijderd');
-}
-
-// ── CSV IMPORT ────────────────────────────────────────────────
-// ── CSV IMPORT ────────────────────────────────────────────────
-const GELDIGE_CATS = ['Afvoermaterialen','Bevestigingsmateriaal','Diversen','Elektra',
-  'Isolatie','Koeltechnische hulpstukken','Koperleiding','Tape & Lijmen','Waterzijdig'];
-
-let csvRijen = [];  // geparsde rijen voor voorvertoning en bevestiging
-
-function csvDownloadTemplate() {
-  const inhoud = [
-    '# Emondt Materiaalapp - CSV Template',
-    '# Kolommen: code,naam,cat,subcat,eenheid',
-    '# Verwijder deze regels (beginnen met #) voor het importeren',
-    '# Geldige categorieën: ' + GELDIGE_CATS.join(' | '),
-    '',
-    '99XX0001,Koppelstuk 22mm,Koperleiding,Aircoleiding,stuk',
-    'EL-099,Verlengkabel 5m,Elektra,,stuk',
-    'ISO-050,Isolatiemat 50mm,Isolatie,,meter',
-  ].join('\n');
-  const blob = new Blob([inhoud], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'emondt_artikel_template.csv';
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
-  showToast('⬇️ Template gedownload');
-}
-
-function csvExportDatabase() {
-  const datum = new Date().toLocaleDateString('nl-NL', {day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');
-
-  // Helper: escape field voor CSV (quotes als het komma's of aanhalingstekens bevat)
-  const esc = v => {
-    const s = String(v || '');
-    return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
-  };
-
-  const regels = [
-    `# Emondt Materiaalapp - Database export ${datum}`,
-    `# Totaal: ${ARTIKELEN.length} artikelen`,
-    `# Kolommen: code,naam,cat,subcat,eenheid`,
-    '',
-    ...ARTIKELEN.map(a => [
-      esc(a.code),
-      esc(a.naam),
-      esc(a.cat),
-      esc(a.subcat || ''),
-      esc(a.eenheid || 'stuk'),
-    ].join(','))
-  ];
-
-  const inhoud = '\uFEFF' + regels.join('\n'); // BOM voor Excel UTF-8
-  const blob = new Blob([inhoud], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `emondt_database_${datum}.csv`;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
-  showToast(`📤 ${ARTIKELEN.length} artikelen geëxporteerd`);
-}
-
-function csvParseerRegel(line) {
-  // Handles quoted fields with commas inside
-  const result = [];
-  let cur = '', inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') { inQ = !inQ; }
-    else if (c === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
-    else { cur += c; }
-  }
-  result.push(cur.trim());
-  return result;
-}
-
-function csvLaadVoorvertoning() {
-  const file = document.getElementById('csv-file').files[0];
-  if (!file) return;
-
-  // Toon bestandsnaam
-  document.getElementById('csv-bestandsnaam').style.display = 'block';
-  document.getElementById('csv-naam-tekst').textContent = `${file.name} (${(file.size/1024).toFixed(1)} KB)`;
-  document.getElementById('csv-resultaat').textContent = '';
-  document.getElementById('csv-import-btn').style.display = 'none';
-  document.getElementById('csv-annuleer-btn').style.display = 'none';
-
-  const reader = new FileReader();
-  reader.onload = e => {
-    // Try UTF-8, fall back gracefully
-    const tekst = e.target.result;
-    const regels = tekst.split(/\r?\n/).filter(l => l.trim() && !l.trim().startsWith('#'));
-
-    csvRijen = [];
-    const tbody = document.getElementById('csv-preview-body');
-    tbody.innerHTML = '';
-    let nOke = 0, nWaarschuwing = 0, nFout = 0;
-
-    regels.forEach((regel, i) => {
-      const delen = csvParseerRegel(regel);
-      const [code = '', naam = '', cat = '', subcat = '', eenheid = ''] = delen;
-
-      let status = '', kleur = '', toelichting = [];
-
-      // Validaties
-      if (!code) toelichting.push('Code ontbreekt');
-      if (!naam) toelichting.push('Naam ontbreekt');
-      if (!cat) toelichting.push('Categorie ontbreekt');
-      else if (!GELDIGE_CATS.includes(cat)) toelichting.push(`Onbekende categorie: "${cat}"`);
-      if (code && ARTIKELEN.find(a => a.code === code)) toelichting.push('Code bestaat al → overgeslagen');
-
-      const isBestaand = code && ARTIKELEN.find(a => a.code === code);
-      const isFout = !code || !naam || !cat;
-      const isOnbekendCat = cat && !GELDIGE_CATS.includes(cat);
-
-      if (isFout || isOnbekendCat) {
-        status = '❌ Fout'; kleur = '#fdecea'; nFout++;
-      } else if (isBestaand) {
-        status = '⚠️ Bestaat al'; kleur = '#fff8e1'; nWaarschuwing++;
-      } else {
-        status = '✅ OK'; kleur = '#f0f5d6'; nOke++;
-      }
-
-      csvRijen.push({ code, naam, cat, subcat, eenheid: eenheid || 'stuk', geldig: !isFout && !isOnbekendCat && !isBestaand });
-
-      const tr = document.createElement('tr');
-      tr.style.background = kleur;
-      tr.innerHTML = `
-        <td style="padding:6px 10px;border-bottom:1px solid var(--border)">${i+1}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid var(--border);font-family:monospace;white-space:nowrap">${code||'—'}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid var(--border);word-break:break-word;max-width:160px">${naam||'—'}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid var(--border);white-space:nowrap">${cat||'—'}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid var(--border)">${subcat||'—'}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid var(--border)">${eenheid||'stuk'}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid var(--border);white-space:nowrap;font-size:.75rem" title="${toelichting.join(', ')}">${status}${toelichting.length ? ' ⓘ' : ''}</td>`;
-      tbody.appendChild(tr);
-    });
-
-    document.getElementById('csv-preview-count').textContent = regels.length;
-    document.getElementById('csv-preview-wrap').style.display = 'block';
-
-    // Samenvatting
-    const res = document.getElementById('csv-resultaat');
-    res.innerHTML = `<span style="color:var(--anthracite)">
-      Geladen: <strong>${regels.length} rijen</strong> &nbsp;·&nbsp;
-      <span style="color:green">✅ ${nOke} importeerbaar</span> &nbsp;·&nbsp;
-      <span style="color:#e6a817">⚠️ ${nWaarschuwing} overgeslagen</span> &nbsp;·&nbsp;
-      <span style="color:var(--danger)">❌ ${nFout} fouten</span>
-    </span>`;
-
-    if (nOke > 0) {
-      document.getElementById('csv-import-btn').style.display = 'block';
-      document.getElementById('csv-import-btn').textContent = `✅ Bevestig import (${nOke} artikelen)`;
-      document.getElementById('csv-annuleer-btn').style.display = 'block';
-    }
-  };
-  reader.readAsText(file, 'UTF-8');
-}
-
-function csvBevestigImport() {
-  let toegevoegd = 0;
-  csvRijen.filter(r => r.geldig).forEach(r => {
-    const nieuw = { code: r.code, naam: r.naam, cat: r.cat, eenheid: r.eenheid, icon: ICONS[r.cat] || '📦' };
-    if (r.subcat) nieuw.subcat = r.subcat;
-    ARTIKELEN.push(nieuw);
-    extraArtikelen.push(nieuw);
-    toegevoegd++;
-  });
-  devRenderExtraLijst();
-  document.getElementById('csv-resultaat').innerHTML =
-    `<span style="color:green;font-weight:600">✅ ${toegevoegd} artikel(en) succesvol geïmporteerd!</span>`;
-  document.getElementById('csv-import-btn').style.display = 'none';
-  document.getElementById('csv-annuleer-btn').style.display = 'none';
-  document.getElementById('csv-file').value = '';
-  csvRijen = [];
-  showToast(`✅ ${toegevoegd} artikelen geïmporteerd`);
-}
-
-function csvAnnuleer() {
-  document.getElementById('csv-preview-wrap').style.display = 'none';
-  document.getElementById('csv-bestandsnaam').style.display = 'none';
-  document.getElementById('csv-import-btn').style.display = 'none';
-  document.getElementById('csv-annuleer-btn').style.display = 'none';
-  document.getElementById('csv-resultaat').textContent = '';
-  document.getElementById('csv-file').value = '';
-  csvRijen = [];
-}
-
-// ── ARTIKEL BEWERKEN ─────────────────────────────────────────
-function devBewerkArtikel(code) {
   const a = ARTIKELEN.find(x => x.code === code);
-  if (!a) return;
-  document.getElementById('dev-edit-card').style.display = 'block';
-  document.getElementById('edit-code-orig').value = code;
-  document.getElementById('edit-code').value = a.code;
-  document.getElementById('edit-naam').value = a.naam;
-  document.getElementById('edit-cat').value = a.cat;
-  document.getElementById('edit-subcat').value = a.subcat || '';
-  document.getElementById('edit-eenheid').value = a.eenheid || 'stuk';
-  document.getElementById('dev-edit-card').scrollIntoView({behavior:'smooth', block:'start'});
-}
-
-function devSlaBewerking() {
-  const origCode = document.getElementById('edit-code-orig').value;
-  const idx = ARTIKELEN.findIndex(x => x.code === origCode);
-  if (idx === -1) { alert('Artikel niet gevonden.'); return; }
-  const newCode = document.getElementById('edit-code').value.trim();
-  const naam    = document.getElementById('edit-naam').value.trim();
-  const cat     = document.getElementById('edit-cat').value;
-  const subcat  = document.getElementById('edit-subcat').value.trim();
-  const eenheid = document.getElementById('edit-eenheid').value.trim() || 'stuk';
-  if (!newCode || !naam) { alert('Code en naam zijn verplicht.'); return; }
-  // Check duplicate code (only if changed)
-  if (newCode !== origCode && ARTIKELEN.find(x => x.code === newCode)) {
-    alert('Dit artikelnummer bestaat al.'); return;
-  }
-  ARTIKELEN[idx] = { code: newCode, naam, cat, eenheid, icon: ICONS[cat] || '📦', ...(subcat ? {subcat} : {}) };
-  // Update cart key if code changed
-  if (newCode !== origCode && cart[origCode] !== undefined) {
-    cart[newCode] = cart[origCode];
-    delete cart[origCode];
-    updateBadge();
-  }
-  devAnnuleerBewerking();
+  if (!a || !confirm(`Artikel "${a.naam}" (${code}) verwijderen uit de database?`)) return;
+  ARTIKELEN.splice(ARTIKELEN.findIndex(x => x.code === code), 1);
+  if (cart[code]) { delete cart[code]; saveCart(); updateBadge(); }
+  bouwDrawerCats();
   devZoek();
-  showToast('✓ Artikel bijgewerkt');
+
+  // Verwijder uit Sheets
+  sheetsRequest({ actie: 'verwijderen', code })
+    .then(data => showToast(data.status === 'ok' ? '🗑 Verwijderd uit Sheets' : '⚠️ ' + (data.message||data.status)))
+    .catch(() => showToast('🗑 Lokaal verwijderd (Sheets niet bereikbaar)'));
 }
 
-function devAnnuleerBewerking() {
-  document.getElementById('dev-edit-card').style.display = 'none';
-}
+// ── CSV IMPORT ────────────────────────────────────────────────
+// ── CSV IMPORT ────────────────────────────────────────────────
+  // geparsde rijen voor voorvertoning en bevestiging
 
-</script>
-<!-- ── FOOTER ── -->
-<footer style="text-align:center;padding:20px 16px;margin-top:8px;font-size:.72rem;color:var(--muted);letter-spacing:.06em;border-top:1px solid var(--border)">
-  Ontworpen door Ruben Brinks
-</footer>
 
-<!-- ── PWA INSTALL BANNER ── -->
-<div id="pwa-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:var(--navy);border-top:2px solid var(--green);padding:14px 16px;z-index:9998;box-shadow:0 -4px 20px rgba(4,28,66,.3)">
-  <div style="display:flex;align-items:center;gap:12px;max-width:480px;margin:0 auto">
-    <img src="icon-192.png" style="width:40px;height:40px;border-radius:8px;flex-shrink:0" />
-    <div style="flex:1;min-width:0">
-      <div style="font-size:.88rem;color:var(--white);font-family:Questrial,sans-serif">Installeer de app</div>
-      <div style="font-size:.72rem;color:var(--muted);margin-top:2px">Voeg toe aan je beginscherm voor snelle toegang</div>
-    </div>
-    <button id="pwa-install-btn" style="background:var(--green);color:var(--navy);border:none;border-radius:6px;padding:8px 14px;font-family:Questrial,sans-serif;font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;flex-shrink:0">Installeren</button>
-    <button onclick="document.getElementById('pwa-banner').style.display='none';localStorage.setItem('pwa-banner-dismissed','1')" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;font-size:1.1rem;flex-shrink:0">✕</button>
-  </div>
-</div>
 
-<!-- ── OFFLINE INDICATOR ── -->
-<div id="offline-bar" style="display:none;position:fixed;top:62px;left:0;right:0;background:#e6a817;color:#000;font-size:.75rem;text-align:center;padding:5px;z-index:150;letter-spacing:.05em">
-  📵 Geen internetverbinding – de app werkt offline door
-</div>
 
-<script>
-// ── SERVICE WORKER REGISTRATIE ────────────────────────────────
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => {
-        console.log('[PWA] Service Worker geregistreerd:', reg.scope);
-        // Check voor updates
-        reg.addEventListener('updatefound', () => {
-          const worker = reg.installing;
-          worker.addEventListener('statechange', () => {
-            if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-              // Nieuwe versie beschikbaar
-              if (confirm('Er is een update beschikbaar. Nu herladen?')) {
-                worker.postMessage({ type: 'SKIP_WAITING' });
-                window.location.reload();
-              }
-            }
-          });
-        });
-      })
-      .catch(err => console.log('[PWA] SW registratie mislukt:', err));
-  });
-}
 
-// ── ONLINE/OFFLINE STATUS ─────────────────────────────────────
-const offlineBar = document.getElementById('offline-bar');
+
+
+
+
+
 function updateOnlineStatus() {
   offlineBar.style.display = navigator.onLine ? 'none' : 'block';
 }
@@ -1704,5 +1458,10 @@ window.addEventListener('appinstalled', () => {
   console.log('[PWA] App geïnstalleerd');
 });
 </script>
+<!-- ── FOOTER ── -->
+<footer style="text-align:center;padding:20px 16px;margin-top:8px;font-size:.72rem;color:var(--muted);letter-spacing:.06em;border-top:1px solid var(--border)">
+  Ontwerp en concept door Ruben Brinks
+</footer>
+
 </body>
 </html>
