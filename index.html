@@ -1,0 +1,2461 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0a1628" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Emondt" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png" />
+  <meta name="description" content="Emondt Materiaalapp – Artikelen selecteren en bestellen voor monteurs." />
+  <title>Emondt – Materiaal bestellen</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#f0f2f5;
+      --surface:#ffffff;
+      --border:#e2e6ec;
+      --navy:#041c42;
+      --navy2:#0d2d5e;
+      --green:#AEC336;
+      --green-dark:#8fa028;
+      --green-light:#f2f6d8;
+      --muted:#7a8aa0;
+      --text:#1a2332;
+      --white:#fff;
+      --danger:#e53e3e;
+      --danger-light:#fff5f5;
+      --radius:14px;
+      --radius-sm:10px;
+      --shadow:0 2px 12px rgba(4,28,66,.08);
+      --shadow-lg:0 8px 32px rgba(4,28,66,.14);
+      --nav-h:72px;
+      --header-h:64px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;padding-bottom:var(--nav-h)}
+
+    /* ═══ HEADER ═══════════════════════════════════════════════ */
+    header{
+      background:var(--navy);
+      height:var(--header-h);
+      position:sticky;top:0;z-index:200;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 16px;
+      box-shadow:0 2px 16px rgba(4,28,66,.3);
+    }
+    .h-left{display:flex;align-items:center;gap:14px}
+    .h-logo{display:flex;align-items:center;gap:10px}
+    .h-logo img{width:30px;height:30px;object-fit:contain}
+    .h-brand{display:flex;flex-direction:column}
+    .h-name{font-size:1.15rem;font-weight:700;color:var(--white);letter-spacing:-.01em}
+    .h-sub{font-size:.62rem;color:var(--green);text-transform:uppercase;letter-spacing:.14em;margin-top:-1px}
+    .menu-btn{
+      width:44px;height:44px;
+      background:rgba(255,255,255,.1);
+      border:none;border-radius:10px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+      cursor:pointer;transition:background .2s;flex-shrink:0;
+    }
+    .menu-btn:active{background:rgba(255,255,255,.2)}
+    .menu-btn span{display:block;width:20px;height:2px;background:var(--white);border-radius:2px;transition:all .25s}
+    .menu-btn.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+    .menu-btn.open span:nth-child(2){opacity:0}
+    .menu-btn.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+    .cart-fab{
+      background:var(--green);color:var(--navy);
+      border:none;border-radius:22px;
+      height:40px;padding:0 16px;
+      font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;
+      display:flex;align-items:center;gap:7px;
+      cursor:pointer;transition:transform .15s,opacity .15s;
+      box-shadow:0 2px 8px rgba(174,195,54,.4);
+    }
+    .cart-fab:active{transform:scale(.95);opacity:.9}
+    .cart-fab .badge{background:var(--navy);color:var(--white);border-radius:10px;padding:1px 7px;font-size:.78rem}
+
+    /* ═══ SIDE DRAWER ═══════════════════════════════════════════ */
+    .overlay{position:fixed;inset:0;background:rgba(4,28,66,.5);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(2px)}
+    .overlay.open{opacity:1;pointer-events:all}
+    .drawer{
+      position:fixed;top:0;left:0;bottom:0;width:300px;
+      background:var(--navy);z-index:400;
+      transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+      display:flex;flex-direction:column;
+      box-shadow:6px 0 32px rgba(4,28,66,.4);
+      overflow:hidden;
+    }
+    .drawer.open{transform:translateX(0)}
+
+    .drawer-head{
+      padding:24px 20px 18px;
+      border-bottom:1px solid rgba(255,255,255,.1);
+      flex-shrink:0;
+      display:flex;align-items:center;gap:12px;
+    }
+    .drawer-head img{width:32px;height:32px;object-fit:contain;opacity:.9}
+    .drawer-head-text .t1{font-size:1.1rem;font-weight:700;color:var(--white)}
+    .drawer-head-text .t2{font-size:.62rem;color:var(--green);text-transform:uppercase;letter-spacing:.14em}
+
+    .drawer-scroll{flex:1;overflow-y:auto;padding:12px 0}
+    .drawer-scroll::-webkit-scrollbar{width:3px}
+    .drawer-scroll::-webkit-scrollbar-track{background:transparent}
+    .drawer-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+
+    .d-item{
+      display:flex;align-items:center;gap:14px;
+      padding:15px 20px;
+      color:rgba(255,255,255,.7);font-size:1rem;font-weight:500;
+      cursor:pointer;transition:all .15s;
+      border-left:3px solid transparent;
+    }
+    .d-item:active,.d-item.active{
+      background:rgba(174,195,54,.12);color:var(--white);
+      border-left-color:var(--green);
+    }
+    .d-item .ico{font-size:1.3rem;width:26px;text-align:center;flex-shrink:0}
+
+    .d-divider{height:1px;background:rgba(255,255,255,.08);margin:10px 20px}
+    .d-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.16em;color:rgba(174,195,54,.7);padding:16px 20px 6px}
+
+    .d-group-btn{
+      display:flex;align-items:center;gap:14px;
+      padding:15px 20px;
+      color:rgba(255,255,255,.8);font-size:1rem;font-weight:500;
+      cursor:pointer;transition:background .15s;user-select:none;
+    }
+    .d-group-btn:active{background:rgba(255,255,255,.07)}
+    .d-group-btn .ico{font-size:1.3rem;width:26px;text-align:center;flex-shrink:0}
+    .d-group-btn .arrow{margin-left:auto;font-size:.7rem;color:rgba(255,255,255,.35);transition:transform .25s}
+    .d-group-btn.open .arrow{transform:rotate(90deg)}
+
+    .d-submenu{overflow:hidden;max-height:0;transition:max-height .4s cubic-bezier(.4,0,.2,1)}
+    .d-submenu.open{max-height:70vh;overflow-y:auto}
+    .d-submenu .d-item{padding-left:38px;font-size:.96rem}
+
+    .d-subgroup-btn{
+      display:flex;align-items:center;gap:10px;
+      padding:12px 20px 12px 38px;
+      color:rgba(255,255,255,.6);font-size:.92rem;
+      cursor:pointer;transition:background .15s;user-select:none;
+    }
+    .d-subgroup-btn:active{background:rgba(255,255,255,.05)}
+    .d-subgroup-btn .arrow{margin-left:auto;font-size:.65rem;color:rgba(255,255,255,.3);transition:transform .2s}
+    .d-subgroup-btn.open .arrow{transform:rotate(90deg)}
+
+    .d-subsubmenu{overflow:hidden;max-height:0;transition:max-height .3s ease}
+    .d-subsubmenu.open{max-height:400px}
+    .d-subsubmenu .d-item{padding-left:54px;font-size:.88rem;color:rgba(255,255,255,.5)}
+    .d-subsubmenu .d-item:active,.d-subsubmenu .d-item.active{color:var(--white)}
+
+    .d-foot{border-top:1px solid rgba(255,255,255,.08);padding:12px 0;flex-shrink:0}
+
+    .d-coming{
+      display:flex;align-items:center;gap:14px;
+      padding:15px 20px;
+      color:rgba(255,255,255,.3);font-size:1rem;
+      pointer-events:none;
+    }
+    .d-coming .ico{font-size:1.3rem;width:26px;text-align:center}
+
+    /* ═══ BOTTOM NAVIGATION ═════════════════════════════════════ */
+    .bottom-nav{
+      position:fixed;bottom:0;left:0;right:0;
+      height:var(--nav-h);z-index:150;
+      background:var(--white);
+      border-top:1px solid var(--border);
+      display:flex;align-items:stretch;
+      box-shadow:0 -4px 20px rgba(4,28,66,.1);
+    }
+    .nav-btn{
+      flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+      border:none;background:none;cursor:pointer;
+      color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.7rem;font-weight:500;
+      transition:color .15s;padding-bottom:4px;
+      position:relative;
+    }
+    .nav-btn.active{color:var(--navy)}
+    .nav-btn.active::before{
+      content:'';position:absolute;top:0;left:20%;right:20%;height:3px;
+      background:var(--green);border-radius:0 0 4px 4px;
+    }
+    .nav-btn svg{width:24px;height:24px;stroke-width:1.8}
+    .nav-cart-badge{
+      position:absolute;top:8px;right:calc(50% - 22px);
+      background:var(--green);color:var(--navy);
+      font-size:.62rem;font-weight:700;
+      min-width:18px;height:18px;border-radius:9px;
+      display:flex;align-items:center;justify-content:center;
+      padding:0 4px;
+    }
+
+    /* ═══ MAIN CONTENT ══════════════════════════════════════════ */
+    .screen{display:none;padding:16px 16px 8px;min-height:calc(100dvh - var(--header-h) - var(--nav-h))}
+    .screen.active{display:block}
+
+    /* ═══ ARTIKEL TOP ═══════════════════════════════════════════ */
+    .artikel-top{ padding:14px 16px 0; }
+    .zoek-filter-rij{ display:flex;gap:10px;align-items:center;margin-bottom:10px }
+
+    /* ═══ ZOEKBALK ══════════════════════════════════════════════ */
+    .search-box{
+      flex:1;display:flex;align-items:center;gap:10px;
+      background:var(--white);
+      border:2px solid var(--border);border-radius:var(--radius);
+      padding:0 14px;box-shadow:var(--shadow);
+      transition:border-color .2s;
+    }
+    .search-box:focus-within{border-color:var(--navy)}
+    .search-box svg{color:var(--muted);flex-shrink:0;width:20px;height:20px}
+    .search-box input{
+      flex:1;border:none;background:transparent;
+      font-family:'DM Sans',sans-serif;font-size:1rem;color:var(--text);
+      padding:13px 0;outline:none;
+    }
+    .search-box input::placeholder{color:#b0bec8}
+
+    /* ═══ FILTER KNOP ═══════════════════════════════════════════ */
+    .filter-btn{
+      display:flex;align-items:center;gap:7px;
+      padding:0 16px;height:50px;
+      background:var(--white);border:2px solid var(--border);border-radius:var(--radius);
+      font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;color:var(--navy);
+      cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;
+      box-shadow:var(--shadow);
+    }
+    .filter-btn:active{transform:scale(.97)}
+    .filter-btn.actief{background:var(--navy);border-color:var(--navy);color:var(--white)}
+
+    /* ═══ FILTER BOTTOM SHEET ═══════════════════════════════════ */
+    .filter-sheet{
+      background:var(--white);border-radius:20px 20px 0 0;
+      width:100%;max-width:560px;
+      max-height:82vh;display:flex;flex-direction:column;
+      box-shadow:0 -12px 40px rgba(4,28,66,.2);
+    }
+    .filter-sheet-handle{
+      width:36px;height:4px;background:var(--border);
+      border-radius:2px;margin:14px auto 0;flex-shrink:0;
+    }
+    .filter-sheet-header{
+      display:flex;align-items:center;gap:12px;
+      padding:14px 20px 12px;border-bottom:1.5px solid var(--border);
+      flex-shrink:0;
+    }
+    .filter-sheet-inhoud{
+      flex:1;overflow-y:auto;padding:8px 0;
+    }
+    .filter-sheet-footer{
+      display:flex;gap:10px;padding:14px 20px;
+      border-top:1.5px solid var(--border);flex-shrink:0;
+    }
+    .filter-rij{
+      display:flex;align-items:center;
+      padding:16px 20px;cursor:pointer;
+      transition:background .15s;gap:14px;
+      border-bottom:1px solid var(--border);
+    }
+    .filter-rij:last-child{border-bottom:none}
+    .filter-rij:active{background:var(--bg)}
+    .filter-rij.actief{background:var(--green-light)}
+    .filter-rij-ico{font-size:1.4rem;width:32px;text-align:center;flex-shrink:0}
+    .filter-rij-tekst{flex:1}
+    .filter-rij-naam{font-size:1rem;font-weight:600;color:var(--text)}
+    .filter-rij-aantal{font-size:.78rem;color:var(--muted);margin-top:2px}
+    .filter-rij-arrow{color:var(--muted);font-size:.85rem;flex-shrink:0}
+    .filter-rij.actief .filter-rij-naam{color:var(--navy)}
+    .filter-rij.actief .filter-rij-arrow{color:var(--green)}
+
+    /* Verberg oude filter-elementen */
+    .cat-banner,.cat-banner.visible{display:none !important}
+    #subcat-balk{display:none !important}
+    #tab-artikelen{padding-top:0}
+
+    /* ═══ CATEGORIE / SUBCAT LABELS ═════════════════════════════ */
+    .cat-label{
+      font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+      color:var(--navy);
+      display:inline-flex;align-items:center;gap:8px;
+      margin:20px 0 10px;
+      padding:0 0 8px;
+      border-bottom:2px solid var(--green);
+    }
+    .cat-label:first-child{margin-top:4px}
+    .cat-label .cat-emoji{font-size:1.1rem}
+    .subcat-label{
+      font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+      color:var(--white);background:var(--navy2);
+      padding:5px 12px;border-radius:6px;
+      margin:14px 0 8px;display:inline-block;
+    }
+    .subsubcat-label{
+      font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;
+      color:var(--muted);padding:4px 0 4px 10px;
+      margin:10px 0 6px;border-left:3px solid var(--green);display:block;
+    }
+
+    /* ═══ ARTIKEL GRID ══════════════════════════════════════════ */
+    .artikel-grid{display:flex;flex-direction:column;gap:10px}
+
+    .artikel-card{
+      background:var(--white);
+      border:2px solid var(--border);
+      border-radius:var(--radius);
+      padding:14px;
+      display:flex;align-items:center;gap:14px;
+      transition:border-color .2s,box-shadow .2s;
+      box-shadow:var(--shadow);
+      position:relative;
+      cursor:pointer;
+    }
+    .artikel-card.selected{border-color:var(--green);box-shadow:0 4px 16px rgba(174,195,54,.2)}
+    .artikel-card.selected::before{
+      content:'';position:absolute;top:0;left:0;bottom:0;width:4px;
+      background:var(--green);border-radius:var(--radius) 0 0 var(--radius);
+    }
+
+    .artikel-img{
+      width:64px;height:64px;border-radius:10px;
+      background:var(--bg);border:1.5px solid var(--border);
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.8rem;flex-shrink:0;overflow:hidden;
+    }
+    .artikel-img img{width:100%;height:100%;object-fit:cover;border-radius:9px}
+    .artikel-card.selected .artikel-img{border-color:var(--green)}
+
+    .artikel-body{flex:1;min-width:0}
+    .artikel-naam{font-size:1rem;font-weight:600;color:var(--text);line-height:1.3;word-break:break-word}
+    .artikel-meta{font-size:.78rem;color:var(--muted);margin-top:3px;font-family:'DM Mono',monospace;letter-spacing:.02em}
+    .artikel-warning-tag{
+      display:inline-flex;align-items:center;gap:5px;
+      background:#fff8e1;border:1.5px solid #f0c040;border-radius:6px;
+      padding:4px 10px;margin-top:6px;
+      font-size:.76rem;font-weight:600;color:#7a6000;
+    }
+
+    /* QTY CONTROL */
+    .qty-wrap{display:flex;align-items:center;gap:4px;flex-shrink:0}
+    .qty-btn{
+      width:40px;height:40px;
+      background:var(--bg);border:2px solid var(--border);
+      color:var(--navy);font-size:1.3rem;font-weight:700;
+      cursor:pointer;transition:all .15s;
+      display:flex;align-items:center;justify-content:center;
+      border-radius:10px;
+    }
+    .qty-btn:active{background:var(--navy);color:var(--white);border-color:var(--navy);transform:scale(.92)}
+    .artikel-card.selected .qty-btn{border-color:var(--green)}
+    .qty-val{
+      width:48px;height:40px;text-align:center;
+      border:2px solid var(--border);border-radius:10px;
+      font-family:'DM Sans',sans-serif;font-size:1.05rem;font-weight:700;
+      color:var(--navy);background:var(--bg);outline:none;
+      cursor:text;padding:0 4px;
+      -moz-appearance:textfield;
+    }
+    .qty-val::-webkit-inner-spin-button,.qty-val::-webkit-outer-spin-button{-webkit-appearance:none}
+    .qty-val:focus{border-color:var(--navy);background:var(--white)}
+    .artikel-card.selected .qty-val{border-color:var(--green);background:var(--white)}
+
+    /* ═══ VERPAKKING POPUP ══════════════════════════════════════ */
+    .verpakking-popup{
+      position:absolute;bottom:calc(100% + 8px);left:0;right:0;
+      background:var(--navy);color:var(--white);
+      font-size:.84rem;padding:10px 14px;
+      border-radius:10px;box-shadow:var(--shadow-lg);
+      z-index:50;line-height:1.5;pointer-events:none;
+    }
+    .verpakking-popup::after{
+      content:'';position:absolute;top:100%;left:24px;
+      border:6px solid transparent;border-top-color:var(--navy);
+    }
+
+    /* ═══ LANDING / WELKOM ══════════════════════════════════════ */
+    .welkom-hero{
+      background:var(--navy);border-radius:var(--radius);
+      padding:32px 22px 28px;margin-bottom:20px;
+      text-align:center;position:relative;overflow:hidden;
+    }
+    .welkom-hero::before{
+      content:'';position:absolute;top:-40px;right:-40px;
+      width:160px;height:160px;border-radius:50%;
+      background:rgba(174,195,54,.08);
+    }
+    .welkom-hero h1{font-size:2rem;font-weight:700;color:var(--white);letter-spacing:-.02em;margin-bottom:8px}
+    .welkom-hero p{font-size:.92rem;color:rgba(255,255,255,.65);line-height:1.7}
+    .welkom-hero .pill{
+      display:inline-block;background:rgba(174,195,54,.2);color:var(--green);
+      font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;
+      padding:4px 12px;border-radius:20px;margin-bottom:14px;
+    }
+    .stap-kaarten{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+    .stap{
+      background:var(--white);border-radius:var(--radius);
+      padding:16px 18px;display:flex;gap:16px;align-items:flex-start;
+      box-shadow:var(--shadow);border:1.5px solid var(--border);
+    }
+    .stap-num{
+      background:var(--green);color:var(--navy);
+      width:32px;height:32px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.9rem;font-weight:700;flex-shrink:0;
+    }
+    .stap h3{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:3px}
+    .stap p{font-size:.82rem;color:var(--muted);line-height:1.5}
+    .start-btn{
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      width:100%;padding:18px;
+      background:var(--green);color:var(--navy);
+      border:none;border-radius:var(--radius);
+      font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;
+      letter-spacing:.04em;text-transform:uppercase;
+      cursor:pointer;transition:opacity .15s,transform .1s;
+      box-shadow:0 4px 16px rgba(174,195,54,.35);
+    }
+    .start-btn:active{opacity:.88;transform:scale(.98)}
+
+    /* ═══ MONTEUR FORM ══════════════════════════════════════════ */
+    .form-card{
+      background:var(--white);border-radius:var(--radius);
+      padding:20px;margin-bottom:14px;
+      box-shadow:var(--shadow);border:1.5px solid var(--border);
+    }
+    .form-card-title{
+      font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;
+      color:var(--green);margin-bottom:16px;padding-bottom:10px;
+      border-bottom:1.5px solid var(--border);
+    }
+    .onthoud-toggle{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.72rem;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;white-space:nowrap}
+    .onthoud-toggle input[type=checkbox]{width:16px;height:16px;accent-color:var(--navy);cursor:pointer;flex-shrink:0}
+    .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+    .field:last-child{margin-bottom:0}
+    .field-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    label{font-size:.78rem;font-weight:600;color:var(--muted);letter-spacing:.02em}
+    .req{color:var(--green)}
+    input,textarea,select{
+      background:var(--bg);border:2px solid var(--border);border-radius:10px;
+      color:var(--text);font-family:'DM Sans',sans-serif;font-size:1rem;
+      padding:13px 14px;width:100%;outline:none;
+      transition:border-color .2s,background .2s;
+      -webkit-appearance:none;
+    }
+    input:focus,textarea:focus,select:focus{border-color:var(--navy);background:var(--white)}
+    input::placeholder,textarea::placeholder{color:#b8c4cf}
+    textarea{resize:vertical;min-height:80px}
+    select{
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237a8aa0' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right 14px center;
+      padding-right:40px;cursor:pointer;
+    }
+
+    /* ═══ DATUM ROW ═════════════════════════════════════════════ */
+    .datum-row{
+      background:var(--white);border:2px solid var(--border);border-radius:var(--radius);
+      padding:16px 18px;margin-bottom:14px;
+      display:flex;align-items:center;gap:12px;
+      box-shadow:var(--shadow);
+    }
+    .datum-row label{font-size:.82rem;font-weight:600;color:var(--muted);flex-shrink:0;margin-bottom:0}
+    .datum-row input{border:2px solid var(--border);border-radius:10px;font-size:.98rem;padding:10px 12px;flex:1}
+
+    /* ═══ CART ══════════════════════════════════════════════════ */
+    .empty-cart{text-align:center;padding:60px 20px;color:var(--muted)}
+    .empty-cart svg{opacity:.15;margin-bottom:16px;color:var(--navy);width:64px;height:64px}
+    .empty-cart p{font-size:.92rem;line-height:1.7}
+
+    .cart-item{
+      background:var(--white);border:2px solid var(--border);border-radius:var(--radius);
+      padding:14px 16px;display:flex;align-items:center;gap:12px;
+      margin-bottom:10px;box-shadow:var(--shadow);
+    }
+    .cart-badge{
+      background:var(--navy);color:var(--white);
+      width:38px;height:38px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.95rem;font-weight:700;flex-shrink:0;
+    }
+    .cart-info{flex:1;min-width:0}
+    .cart-naam{font-size:.95rem;font-weight:600;color:var(--text);line-height:1.3;word-break:break-word}
+    .cart-code{font-size:.76rem;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace}
+    .del-btn{
+      width:38px;height:38px;border:none;border-radius:10px;
+      background:var(--bg);color:var(--muted);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;transition:all .15s;flex-shrink:0;
+    }
+    .del-btn:active{background:var(--danger-light);color:var(--danger)}
+
+    /* ═══ SUMMARY BOX ═══════════════════════════════════════════ */
+    .summary-box{
+      background:var(--navy);border-radius:var(--radius);
+      padding:18px 20px;margin-bottom:16px;
+    }
+    .s-row{display:flex;justify-content:space-between;padding:4px 0;font-size:.88rem;color:rgba(255,255,255,.55)}
+    .s-row span:last-child{color:rgba(255,255,255,.9)}
+    .s-row.total{border-top:1px solid rgba(255,255,255,.12);margin-top:10px;padding-top:12px;font-size:1rem;color:var(--white)}
+    .s-row.total span:last-child{color:var(--green);font-weight:700}
+
+    /* ═══ BUTTONS ═══════════════════════════════════════════════ */
+    .btn{
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      width:100%;padding:17px;border-radius:var(--radius);border:none;
+      font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;
+      letter-spacing:.04em;text-transform:uppercase;
+      cursor:pointer;transition:opacity .15s,transform .1s;margin-bottom:10px;
+    }
+    .btn:active{transform:scale(.98);opacity:.88}
+    .btn-primary{background:var(--green);color:var(--navy);box-shadow:0 4px 16px rgba(174,195,54,.3)}
+    .btn-danger{background:var(--danger-light);color:var(--danger);border:2px solid #fca5a5}
+    .btn-secondary{background:var(--bg);color:var(--muted);border:2px solid var(--border)}
+
+    /* ═══ TOAST ═════════════════════════════════════════════════ */
+    #toast{
+      position:fixed;bottom:calc(var(--nav-h) + 14px);left:50%;
+      transform:translateX(-50%) translateY(100px);
+      background:var(--navy);color:var(--white);
+      font-size:.9rem;font-weight:500;
+      padding:12px 22px;border-radius:30px;
+      border-left:4px solid var(--green);
+      z-index:9999;transition:transform .3s ease;
+      white-space:nowrap;pointer-events:none;
+      box-shadow:var(--shadow-lg);
+    }
+    #toast.show{transform:translateX(-50%) translateY(0)}
+
+    /* ═══ DEV MODAL ═════════════════════════════════════════════ */
+    #dev-overlay{position:fixed;inset:0;background:rgba(4,28,66,.7);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+    #dev-overlay.open{display:flex}
+    .dev-modal{background:var(--white);border-radius:var(--radius);padding:28px 24px;width:100%;max-width:360px;box-shadow:var(--shadow-lg)}
+    .dev-titel{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--green);margin-bottom:14px}
+    .dev-artikel-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1.5px solid var(--border);font-size:.9rem}
+    .dev-artikel-row:last-child{border-bottom:none}
+    .dev-artikel-row .info{flex:1;min-width:0}
+    .dev-artikel-row .info span{display:block;font-size:.74rem;color:var(--muted)}
+    .csv-info{background:var(--green-light);border:1.5px solid var(--green);border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:.82rem;color:var(--text);line-height:1.7}
+    .csv-info code{background:rgba(0,0,0,.08);padding:1px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:.85rem}
+
+    /* ═══ PWA BANNER ════════════════════════════════════════════ */
+    #pwa-banner{
+      display:none;position:fixed;bottom:var(--nav-h);left:0;right:0;
+      background:var(--navy);border-top:3px solid var(--green);
+      padding:14px 18px;z-index:9000;align-items:center;gap:12px;
+      box-shadow:0 -4px 20px rgba(4,28,66,.25);
+    }
+    #pwa-banner .txt{flex:1;font-size:.86rem;color:var(--white);line-height:1.5}
+    #pwa-banner strong{color:var(--green)}
+
+    /* ═══ VRIJ ARTIKEL MODAL ════════════════════════════════════ */
+    #vrij-overlay{
+      display:none;position:fixed;inset:0;
+      background:rgba(4,28,66,.55);z-index:600;
+      align-items:flex-end;justify-content:center;
+      backdrop-filter:blur(3px);
+    }
+    .vrij-sheet{
+      background:var(--white);border-radius:20px 20px 0 0;
+      width:100%;max-width:520px;
+      padding:24px 20px 36px;
+      box-shadow:0 -12px 40px rgba(4,28,66,.2);
+    }
+    .vrij-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+    .vrij-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:4px}
+    .vrij-sub{font-size:.82rem;color:var(--muted);margin-bottom:20px}
+
+    /* ═══ BEHEER TAB ════════════════════════════════════════════ */
+    .beheer-sect{background:var(--white);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:var(--shadow);border:1.5px solid var(--border)}
+    .beheer-titel{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--green);margin-bottom:14px;padding-bottom:10px;border-bottom:1.5px solid var(--border)}
+
+    /* ═══ LOADING ════════════════════════════════════════════════ */
+    .laad-indicator{display:flex;flex-direction:column;align-items:center;gap:12px;padding:50px 20px;color:var(--muted)}
+    .laad-spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ACHTERGROND LOGO */
+    body::before{
+      content:'';
+      position:fixed;
+      bottom:-5%;right:-5%;
+      width:70vmin;height:70vmin;
+      background:url('data:image/png;base64,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') no-repeat center/contain;
+      opacity:.08;
+      pointer-events:none;
+      z-index:0;
+    }
+    body>*{position:relative;z-index:1}
+  </style>
+</head>
+<body>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+
+<!-- DRAWER -->
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyMy4wLjMsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCIgWw0KCTwhRU5USVRZIG5zX2V4dGVuZCAiaHR0cDovL25zLmFkb2JlLmNvbS9FeHRlbnNpYmlsaXR5LzEuMC8iPg0KCTwhRU5USVRZIG5zX2FpICJodHRwOi8vbnMuYWRvYmUuY29tL0Fkb2JlSWxsdXN0cmF0b3IvMTAuMC8iPg0KCTwhRU5USVRZIG5zX2dyYXBocyAiaHR0cDovL25zLmFkb2JlLmNvbS9HcmFwaHMvMS4wLyI+DQoJPCFFTlRJVFkgbnNfdmFycyAiaHR0cDovL25zLmFkb2JlLmNvbS9WYXJpYWJsZXMvMS4wLyI+DQoJPCFFTlRJVFkgbnNfaW1yZXAgImh0dHA6Ly9ucy5hZG9iZS5jb20vSW1hZ2VSZXBsYWNlbWVudC8xLjAvIj4NCgk8IUVOVElUWSBuc19zZncgImh0dHA6Ly9ucy5hZG9iZS5jb20vU2F2ZUZvcldlYi8xLjAvIj4NCgk8IUVOVElUWSBuc19jdXN0b20gImh0dHA6Ly9ucy5hZG9iZS5jb20vR2VuZXJpY0N1c3RvbU5hbWVzcGFjZS8xLjAvIj4NCgk8IUVOVElUWSBuc19hZG9iZV94cGF0aCAiaHR0cDovL25zLmFkb2JlLmNvbS9YUGF0aC8xLjAvIj4NCl0+DQo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zOng9IiZuc19leHRlbmQ7IiB4bWxuczppPSImbnNfYWk7IiB4bWxuczpncmFwaD0iJm5zX2dyYXBoczsiDQoJIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgMjgzNSAyODM1Ig0KCSBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAyODM1IDI4MzU7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLnN0MHtmaWxsOiMwNDFDNDI7fQ0KCS5zdDF7Y2xpcC1wYXRoOnVybCgjU1ZHSURfMl8pO30NCgkuc3Qye2NsaXAtcGF0aDp1cmwoI1NWR0lEXzRfKTtmaWxsOiNBMkM0NEM7fQ0KPC9zdHlsZT4NCjxtZXRhZGF0YT4NCgk8c2Z3ICB4bWxucz0iJm5zX3NmdzsiPg0KCQk8c2xpY2VzPjwvc2xpY2VzPg0KCQk8c2xpY2VTb3VyY2VCb3VuZHMgIGJvdHRvbUxlZnRPcmlnaW49InRydWUiIGhlaWdodD0iNDY0OS43MyIgd2lkdGg9IjUzNjEiIHg9Ii0xMzk3IiB5PSItMzY2OC43MyI+PC9zbGljZVNvdXJjZUJvdW5kcz4NCgk8L3Nmdz4NCjwvbWV0YWRhdGE+DQo8cmVjdCB4PSItMzIiIHk9Ii0zMiIgY2xhc3M9InN0MCIgd2lkdGg9IjI4OTUiIGhlaWdodD0iMjg5NSIvPg0KPGc+DQoJPGc+DQoJCTxkZWZzPg0KCQkJPHJlY3QgaWQ9IlNWR0lEXzFfIiB4PSItMTM5NyIgeT0iLTk4MSIgd2lkdGg9IjUzNjEiIGhlaWdodD0iNDY0OS43MyIvPg0KCQk8L2RlZnM+DQoJCTxjbGlwUGF0aCBpZD0iU1ZHSURfMl8iPg0KCQkJPHVzZSB4bGluazpocmVmPSIjU1ZHSURfMV8iICBzdHlsZT0ib3ZlcmZsb3c6dmlzaWJsZTsiLz4NCgkJPC9jbGlwUGF0aD4NCgkJPGcgY2xhc3M9InN0MSI+DQoJCQk8ZGVmcz4NCgkJCQk8cmVjdCBpZD0iU1ZHSURfM18iIHg9Ii0xMzk3IiB5PSItOTgxIiB3aWR0aD0iNTM2MSIgaGVpZ2h0PSI0NjQ5LjczIi8+DQoJCQk8L2RlZnM+DQoJCQk8Y2xpcFBhdGggaWQ9IlNWR0lEXzRfIj4NCgkJCQk8dXNlIHhsaW5rOmhyZWY9IiNTVkdJRF8zXyIgIHN0eWxlPSJvdmVyZmxvdzp2aXNpYmxlOyIvPg0KCQkJPC9jbGlwUGF0aD4NCgkJCTxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik02ODEuNzUsMTQ4My40MWMyNDAuOTEsMjExLjA1LDUyMy4xMywzNzQuMTMsMTAwNC4yMyw0OTguOTRjMzg5LjczLDEwMS4xLDc2MS43MSw0NC4wMyw3NjEuNzEsNDQuMDMNCgkJCQlsMjQuNTksMzYzLjI1YzAsMC00ODQuNTEsNjQuOTItOTM5Ljc5LTcxLjE1Yy00NTUuMjgtMTM2LjA1LTgyNS4wMy0zMzYuMTMtMTAwNy40My00ODUuMjlMNjgxLjc1LDE0ODMuNDF6Ii8+DQoJCQk8cGF0aCBjbGFzcz0ic3QyIiBkPSJNNDIzLjgxLDEwMjMuOTJjMTQwLjgzLDE1NS4yMSwzODcuOTcsMzg4LjM4LDc1Ny43LDU2Ny4wM2MzMTYuNDUsMTUyLjg4LDYwNC42MSwyMDguNzksNzk5LjUsMjMwLjg2DQoJCQkJbDU3LjcyLTEwNTUuNjJjMCwwLTQwMi42Mi05NS41My04MjguOC00ODMuNTdsLTI0MC4zOSw1MzAuNmMwLDAsMTQ1LDE0NS4xMSwzMTEuMjgsMjI1LjM3bDYwLjIxLTE5NS4zOA0KCQkJCWMwLDAsMTc4LjI4LDEwOS44MywzMjMuNjMsMTcxLjlsLTYzLjM5LDM1NC44MWMwLDAtNTMxLjg5LTEzOC4wMS05NzkuNDctNjczLjgzTDQyMy44MSwxMDIzLjkyeiIvPg0KCQk8L2c+DQoJPC9nPg0KPC9nPg0KPC9zdmc+DQo=" alt="Emondt" />
+    <div class="drawer-head-text">
+      <div class="t1">emondt</div>
+      <div class="t2">Materiaal bestellen</div>
+    </div>
+  </div>
+  <div class="drawer-scroll">
+    <div class="d-item active" id="di-all" onclick="filterCategorie(null)"><span class="ico">📋</span> Alle artikelen</div>
+    <div class="d-divider"></div>
+    <div class="d-group-btn" id="di-installatie-toggle" onclick="toggleDrawerGroep()">
+      <span class="ico">🔧</span><span>Installatiemateriaal</span><span class="arrow">▶</span>
+    </div>
+    <div class="d-submenu" id="drawer-cat-lijst"></div>
+    <div class="d-coming"><span class="ico">🕐</span> Meer komt binnenkort</div>
+  </div>
+  <div class="d-foot">
+    <div class="d-item" onclick="openVrijArtikel()"><span class="ico">✏️</span> Vrij artikel toevoegen</div>
+    <div class="d-divider"></div>
+    <div class="d-item" onclick="openDev()"><span class="ico">⚙️</span> Beheer</div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="h-left">
+    <button class="menu-btn" id="hamburger" onclick="toggleDrawer()">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="h-logo">
+      <div class="h-brand">
+        <div class="h-name">emondt</div>
+        <div class="h-sub">Materiaal bestellen</div>
+      </div>
+    </div>
+  </div>
+  <button class="cart-fab" onclick="showTab('winkelwagen')">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    <span id="cart-label">0 items</span>
+  </button>
+</header>
+
+<!-- CAT BANNER -->
+<div class="cat-banner" id="cat-banner">
+  <span class="cat-banner-text" id="cat-banner-text">Filter actief</span>
+  <button class="cat-banner-wis" onclick="filterCategorie(null)">✕ Wissen</button>
+</div>
+
+<!-- FILTER CHIPS -->
+<div id="subcat-balk"></div>
+
+<!-- SCREENS -->
+<div class="screen active" id="tab-welkom">
+  <div class="welkom-hero">
+    <div class="pill">Emondt Groep</div>
+    <h1>Materiaal bestellen</h1>
+    <p>Selecteer artikelen, vul je gegevens in en verstuur de bestelling direct naar het magazijn.</p>
+  </div>
+  <div class="stap-kaarten">
+    <div class="stap"><div class="stap-num">1</div><div><h3>Blader door de catalogus</h3><p>Gebruik het hamburgermenu om te filteren op categorie, of zoek direct op naam of artikelnummer.</p></div></div>
+    <div class="stap"><div class="stap-num">2</div><div><h3>Voeg artikelen toe</h3><p>Tik op + om artikelen aan je bestelling toe te voegen. Pas de hoeveelheid aan met de knoppen.</p></div></div>
+    <div class="stap"><div class="stap-num">3</div><div><h3>Vul je gegevens in</h3><p>Ga naar het tabblad Monteur en vul je naam, telefoonnummer en leveringsgegevens in.</p></div></div>
+    <div class="stap"><div class="stap-num">4</div><div><h3>Verstuur de bestelling</h3><p>Controleer je winkelwagen en druk op Versturen. De bestelling gaat direct naar het magazijn.</p></div></div>
+    <div class="stap"><div class="stap-num">5</div><div><h3>Vrij artikel toevoegen</h3><p>Staat een artikel niet in de lijst? Tik op het hamburgermenu en kies Vrij artikel toevoegen.</p></div></div>
+  </div>
+  <button class="start-btn" onclick="showTab('artikelen')">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    Start met bestellen
+  </button>
+</div>
+
+<div class="screen" id="tab-artikelen">
+  <div class="artikel-top">
+    <div class="zoek-filter-rij">
+      <div class="search-box">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="zoek" placeholder="Zoek op naam, code of leverancier..." oninput="applyFilters()" autocomplete="off" />
+        <button id="zoek-wis" onclick="wisZoek()" style="display:none;background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:4px 2px;line-height:1">✕</button>
+      </div>
+      <button class="filter-btn" id="filter-btn" onclick="openFilterSheet()">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+        <span id="filter-btn-label">Filter</span>
+      </button>
+    </div>
+    <div id="actief-filter-label" style="display:none;padding:6px 0 10px;font-size:.82rem;color:var(--navy);font-weight:600;align-items:center;gap:8px">
+      <span id="actief-filter-tekst"></span>
+      <button onclick="wisFilter()" style="background:none;border:none;color:var(--muted);font-size:.9rem;cursor:pointer;padding:2px">✕ wissen</button>
+    </div>
+  </div>
+  <div class="artikel-grid" id="artikel-lijst"></div>
+</div>
+
+<!-- FILTER BOTTOM SHEET -->
+<div id="filter-overlay" style="display:none;position:fixed;inset:0;background:rgba(4,28,66,.5);z-index:600;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px)" onclick="if(event.target===this)sluitFilterSheet()">
+  <div class="filter-sheet" onclick="event.stopPropagation()">
+    <div class="filter-sheet-handle"></div>
+    <div class="filter-sheet-header">
+      <button id="filter-terug-btn" onclick="filterSheetTerug()" style="display:none;background:none;border:none;padding:0;cursor:pointer;color:var(--navy);display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+        Terug
+      </button>
+      <span id="filter-sheet-titel" style="font-size:1.05rem;font-weight:700;color:var(--text)">Filter op categorie</span>
+      <button onclick="sluitFilterSheet()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:4px;margin-left:auto">✕</button>
+    </div>
+    <div id="filter-sheet-inhoud" class="filter-sheet-inhoud"></div>
+    <div class="filter-sheet-footer">
+      <button class="btn btn-secondary" onclick="event.stopPropagation();wisFilter();sluitFilterSheet()" style="margin-bottom:0;flex:1">Wis filter</button>
+      <button class="btn btn-primary" onclick="event.stopPropagation();sluitFilterSheet()" style="margin-bottom:0;flex:2">Toon resultaten</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="tab-info">
+  <div class="form-card">
+    <div class="form-card-title">👷 Mijn gegevens</div>
+    <div class="field">
+      <label>Naam <span class="req">*</span></label>
+      <input type="text" id="naam" placeholder="Volledige naam" oninput="saveInfo()" />
+    </div>
+    <div class="field">
+      <label>Telefoonnummer <span class="req">*</span></label>
+      <input type="tel" id="telefoon" placeholder="06 – – – – – – – –" oninput="saveInfo()" />
+    </div>
+    <div class="field">
+      <label>Afdeling <span class="req">*</span></label>
+      <select id="afdeling" onchange="saveInfo()">
+        <option value="">Selecteer afdeling...</option>
+        <option value="Koeltechniek">Koeltechniek</option>
+        <option value="Multiclima">Multiclima</option>
+        <option value="Werkplaats">Werkplaats</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>E-mailadres (optioneel)</label>
+      <input type="email" id="ontvanger2" placeholder="jouw@email.nl" oninput="saveInfo()" />
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="tab-winkelwagen">
+  <div class="form-card">
+    <div class="form-card-title" style="display:flex;align-items:center;justify-content:space-between">
+      📋 Project
+      <label class="onthoud-toggle">
+        <input type="checkbox" id="onthoud-project" onchange="toggleOnthoudProject(this)" />
+        <span>Onthoud projectgegevens</span>
+      </label>
+    </div>
+    <div class="field-2">
+      <div class="field">
+        <label>Projectnummer</label>
+        <input type="text" id="projectnummer" placeholder="bijv. 2024-0123" oninput="saveInfo()" />
+      </div>
+      <div class="field">
+        <label>Projectnaam <span class="req">*</span></label>
+        <input type="text" id="projectnaam" placeholder="Omschrijving" oninput="saveInfo()" />
+      </div>
+    </div>
+  </div>
+  <div class="form-card">
+    <div class="form-card-title" style="display:flex;align-items:center;justify-content:space-between">
+      📦 Levering
+      <label class="onthoud-toggle">
+        <input type="checkbox" id="onthoud-locatie" onchange="toggleOnthoudLocatie(this)" />
+        <span>Onthoud afleveradres</span>
+      </label>
+    </div>
+    <div class="field">
+      <label>Afleveradres <span class="req">*</span></label>
+      <select id="locatie-keuze" onchange="kiesLocatie(this)">
+        <option value="">Selecteer locatie...</option>
+        <option value="op de klus">Op de klus</option>
+        <option value="op de zaak">Op de zaak</option>
+        <option value="vrij">Ander adres...</option>
+      </select>
+      <input type="text" id="locatie" placeholder="Vul adres in..." oninput="saveInfo()" style="display:none;margin-top:8px" />
+    </div>
+    <div class="field">
+      <label>Opmerkingen (optioneel)</label>
+      <textarea id="opmerkingen" placeholder="Spoed, graag voor 14:00 leveren..." oninput="saveInfo()"></textarea>
+    </div>
+  </div>
+  <div id="cart-content"></div>
+</div>
+
+<div class="screen" id="tab-dev">
+  <div class="beheer-sect">
+    <div class="beheer-titel">🔗 Google Sheets koppeling</div>
+    <p style="font-size:.84rem;color:var(--muted);margin-bottom:14px;line-height:1.6">Gebruik de testknop om de verbinding te controleren en te bevestigen dat het script bereikbaar is.</p>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <button class="btn btn-primary" onclick="testVerbinding()" style="margin-bottom:0;flex:1">🔍 Verbinding testen</button>
+      <button class="btn btn-primary" onclick="herlaadArtikelen()" style="margin-bottom:0;flex:1">🔄 Herladen</button>
+    </div>
+    <button class="btn btn-secondary" onclick="testBestellingLog()" style="margin-bottom:8px">📋 Test bestelling loggen</button>
+    <div id="sheets-status" style="font-size:.84rem;line-height:1.6"></div>
+  </div>
+  <div class="beheer-sect">
+    <div class="beheer-titel">📊 Artikeldatabase</div>
+    <div class="csv-info">
+      De artikeldatabase wordt beheerd via Google Sheets. Kolomtitels: <code>code</code>, <code>naam</code>, <code>cat</code>, <code>subcat</code>, <code>subsubcat</code>, <code>eenheid</code>, <code>warning</code>, <code>verpakking</code>, <code>afbeelding</code>.
+    </div>
+    <a href="https://docs.google.com/spreadsheets/d/1nVAoYUlm_MGBsFLvH2QsZmuZooqkxbsibreMykhPGws/edit" target="_blank" style="text-decoration:none">
+      <button class="btn btn-primary" style="margin-bottom:0">📊 Open Google Spreadsheet</button>
+    </a>
+  </div>
+  <div class="beheer-sect">
+    <div class="beheer-titel">🗑 Artikel zoeken &amp; verwijderen</div>
+    <div class="field">
+      <label>Zoek op naam of artikelnummer</label>
+      <input type="text" id="dev-zoek" placeholder="bijv. PVC bocht of 6923049..." oninput="devZoek()" />
+    </div>
+    <div id="dev-zoek-resultaten" style="margin-top:8px"></div>
+  </div>
+  <button class="btn btn-secondary" onclick="showTab('artikelen')" style="margin-top:4px">← Terug</button>
+</div>
+
+<!-- DEV LOGIN -->
+<div id="dev-overlay">
+  <div class="dev-modal">
+    <div class="dev-titel">🔐 Beheer toegang</div>
+    <p style="font-size:.88rem;color:var(--muted);margin-bottom:16px">Voer het beheerwachtwoord in.</p>
+    <input type="password" id="dev-pw" placeholder="Wachtwoord..." onkeydown="if(event.key==='Enter')checkPw()" style="margin-bottom:10px" />
+    <div id="dev-pw-err" style="color:var(--danger);font-size:.8rem;margin-bottom:12px;display:none">Onjuist wachtwoord</div>
+    <div style="display:flex;gap:10px">
+      <button onclick="checkPw()" style="flex:1;padding:14px;background:var(--green);color:var(--navy);border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;text-transform:uppercase;cursor:pointer">Inloggen</button>
+      <button onclick="document.getElementById('dev-overlay').classList.remove('open')" style="flex:1;padding:14px;background:var(--bg);color:var(--muted);border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;text-transform:uppercase;cursor:pointer">Annuleren</button>
+    </div>
+  </div>
+</div>
+
+<!-- PWA BANNER -->
+<div id="pwa-banner">
+  <div class="txt"><strong>Installeer de app</strong><br><span style="color:rgba(255,255,255,.7)">Voeg toe aan beginscherm voor snelle toegang</span></div>
+  <button id="pwa-install-btn" style="background:var(--green);color:var(--navy);border:none;border-radius:10px;padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;text-transform:uppercase;cursor:pointer;flex-shrink:0">Installeer</button>
+  <button onclick="document.getElementById('pwa-banner').style.display='none';localStorage.setItem('pwa-banner-dismissed','1')" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:1.3rem;cursor:pointer;padding:4px;flex-shrink:0">✕</button>
+</div>
+
+<!-- VRIJ ARTIKEL -->
+<div id="vrij-overlay">
+  <div class="vrij-sheet">
+    <div class="vrij-handle"></div>
+    <div class="vrij-title">✏️ Vrij artikel toevoegen</div>
+    <div class="vrij-sub">Staat het artikel niet in de lijst?</div>
+    <div class="field">
+      <label>Artikelnummer (optioneel)</label>
+      <input type="text" id="custom-code" placeholder="bijv. 99XX0001" />
+    </div>
+    <div class="field">
+      <label>Omschrijving <span class="req">*</span></label>
+      <input type="text" id="custom-naam" placeholder="Omschrijf het artikel..." />
+    </div>
+    <div class="field" style="margin-bottom:20px">
+      <label>Aantal <span class="req">*</span></label>
+      <input type="number" id="custom-qty" min="1" value="1" />
+    </div>
+    <button id="vrij-toevoegen-btn" class="btn btn-primary" style="margin-bottom:0">➕ Toevoegen aan bestelling</button>
+    <button id="vrij-sluit-btn" class="btn btn-secondary" style="margin-bottom:0;margin-top:8px">Annuleren</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAVIGATION -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-welkom" onclick="showTab('welkom')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Start
+  </button>
+  <button class="nav-btn" id="nav-artikelen" onclick="showTab('artikelen')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    Artikelen
+  </button>
+  <button class="nav-btn" id="nav-info" onclick="showTab('info')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Monteur
+  </button>
+  <button class="nav-btn" id="nav-winkelwagen" onclick="showTab('winkelwagen')" style="position:relative">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    <span class="nav-cart-badge" id="nav-badge" style="display:none">0</span>
+    Bestelling
+  </button>
+</nav>
+
+<div id="toast">✓ Toegevoegd</div>
+
+<script>
+// ── GOOGLE SHEETS API ────────────────────────────────────────
+// Vervang de URL hieronder met jouw Web App URL na deployment
+const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbxs_wOCwvD3Go_wKEiBB2LgbdeNfmE5UW8W0XY4scu6lOe1rCP40_HGL9ezpEk5Hn09ng/exec';
+
+
+let ARTIKELEN = [];  // wordt geladen vanuit Google Sheets (of fallback)
+
+// Dynamisch gevuld na laden artikelen
+let CAT_IDS = {};
+let ICONS = {};
+
+// Standaard iconen als fallback
+const ICON_DEFAULTS = {
+  'Afvoermaterialen':'🔧','Bevestigingsmateriaal':'🔩','Diversen':'📦',
+  'Elektra':'⚡','Isolatie':'🧱','Koeltechnische hulpstukken':'❄️',
+  'Koperleiding':'🟠','Tape & Lijmen':'🎗️','Waterzijdig':'💧'
+};
+
+// Alle beschikbare emoji-iconen om uit te kiezen
+const ICOON_OPTIES = [
+  '🔧','🔩','📦','⚡','🧱','❄️','🟠','🎗️','💧','🔨','🪛','🔌','💡',
+  '🏗️','🪝','🧲','🔑','🛠️','📐','📏','🪚','⚙️','🔗','🪣','🧪','🔋',
+  '🌡️','💨','🔥','❄','🌊','🏭','📦','🗜️','🔒','🪜','🧯','🪤'
+];
+
+let cart = {};
+
+function saveCart() {
+  try { localStorage.setItem('emondt_cart', JSON.stringify(cart)); } catch(e) {}
+}
+function loadCart() {
+  try {
+    const opgeslagen = localStorage.getItem('emondt_cart');
+    if (opgeslagen) cart = JSON.parse(opgeslagen);
+  } catch(e) {}
+  updateBadge();
+}
+let activeCat = null;
+let activeSubcat = null;
+let activeSubsubcat = null;
+let customTeller = 0;
+
+function updateSubcatBalk() {
+  const balk = document.getElementById('subcat-balk');
+  balk.innerHTML = '';
+  balk.style.flexDirection = 'column';
+  balk.style.gap = '10px';
+
+  // Zet juiste top op basis van cat-banner zichtbaarheid
+  const bannerZichtbaar = document.getElementById('cat-banner').classList.contains('visible');
+  balk.classList.toggle('met-banner', bannerZichtbaar);
+
+  if (!activeCat) {
+    // Geen hoofdfilter → toon alle hoofdcategorieën als chips
+    const cats = [...new Set(ARTIKELEN.map(a => a.cat).filter(Boolean))].sort();
+    if (!cats.length) {
+      balk.style.display = 'none';
+      document.getElementById('tab-artikelen').classList.remove('heeft-chips');
+      return;
+    }
+    balk.style.display = 'flex';
+    balk.style.flexDirection = 'row';
+    const rij = document.createElement('div');
+    rij.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px';
+    cats.forEach(cat => {
+      const chip = document.createElement('button');
+      chip.className = 'chip';
+      chip.textContent = (ICONS[cat] || ICON_DEFAULTS[cat] || '📦') + ' ' + cat;
+      chip.onclick = () => filterCategorie(cat);
+      rij.appendChild(chip);
+    });
+    balk.appendChild(rij);
+    requestAnimationFrame(() => {
+      const h = balk.offsetHeight;
+      document.documentElement.style.setProperty('--chips-h', h + 'px');
+      document.getElementById('tab-artikelen').classList.add('heeft-chips');
+    });
+    return;
+  }
+
+  balk.style.display = 'flex';
+
+  // Rij 1: hoofdcategorie-chip (actief) + wis-knop
+  const rij0 = document.createElement('div');
+  rij0.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;align-items:center';
+  const catChip = document.createElement('button');
+  catChip.className = 'chip active';
+  catChip.textContent = (ICONS[activeCat] || ICON_DEFAULTS[activeCat] || '📦') + ' ' + activeCat;
+  catChip.title = 'Klik om filter te wissen';
+  catChip.onclick = () => filterCategorie(null);
+  rij0.appendChild(catChip);
+  balk.appendChild(rij0);
+
+  // Rij 2: subcat chips
+  const subcats = [...new Set(
+    ARTIKELEN.filter(a => a.cat === activeCat).map(a => a.subcat).filter(Boolean)
+  )].sort();
+
+  if (!subcats.length) {
+    balk.style.display = 'none';
+    document.getElementById('tab-artikelen').classList.remove('heeft-chips');
+    return;
+  }
+
+  balk.style.display = 'flex';
+
+  const rij1 = document.createElement('div');
+  rij1.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;padding-left:8px;border-left:2px solid var(--border)';
+  alChip.textContent = 'Alle';
+  alChip.onclick = () => { activeSubcat = null; activeSubsubcat = null; updateSubcatBalk(); applyFilters(); };
+  rij1.appendChild(alChip);
+
+  subcats.forEach(sub => {
+    const chip = document.createElement('button');
+    chip.className = 'chip' + (activeSubcat === sub ? ' active' : '');
+    chip.textContent = sub;
+    chip.onclick = () => { activeSubcat = sub; activeSubsubcat = null; updateSubcatBalk(); applyFilters(); };
+    rij1.appendChild(chip);
+  });
+  balk.appendChild(rij1);
+
+  // Rij 3: subsubcat chips (alleen als subcat actief is)
+  if (activeSubcat) {
+    const subsubcats = [...new Set(
+      ARTIKELEN
+        .filter(a => a.cat === activeCat && a.subcat === activeSubcat)
+        .map(a => a.subsubcat).filter(Boolean)
+    )].sort();
+
+    if (subsubcats.length) {
+      const rij2 = document.createElement('div');
+      rij2.style.cssText = 'display:flex;flex-wrap:wrap;gap:5px;padding-left:16px;border-left:2px solid var(--border)';
+
+      const alSub = document.createElement('button');
+      alSub.className = 'chip' + (!activeSubsubcat ? ' active' : '');
+      alSub.style.fontSize = '.68rem';
+      alSub.textContent = 'Alle';
+      alSub.onclick = () => { activeSubsubcat = null; updateSubcatBalk(); applyFilters(); };
+      rij2.appendChild(alSub);
+
+      subsubcats.forEach(subsub => {
+        const chip = document.createElement('button');
+        chip.className = 'chip' + (activeSubsubcat === subsub ? ' active' : '');
+        chip.style.fontSize = '.68rem';
+        chip.textContent = subsub;
+        chip.onclick = () => { activeSubsubcat = subsub; updateSubcatBalk(); applyFilters(); };
+        rij2.appendChild(chip);
+      });
+      balk.appendChild(rij2);
+    }
+  }
+  // Pas padding-top van artikelen-tab aan op balk-hoogte
+  requestAnimationFrame(() => {
+    const h = balk.offsetHeight;
+    document.documentElement.style.setProperty('--chips-h', h + 'px');
+    document.getElementById('tab-artikelen').classList.add('heeft-chips');
+  });
+}
+
+// ── VRIJ ARTIKEL ─────────────────────────────────────────────
+function openVrijArtikel() {
+  closeDrawer();
+  document.getElementById('vrij-overlay').style.display = 'flex';
+  setTimeout(() => document.getElementById('custom-naam').focus(), 100);
+}
+function sluitVrijArtikel() {
+  document.getElementById('vrij-overlay').style.display = 'none';
+  document.getElementById('custom-naam').value = '';
+  document.getElementById('custom-code').value = '';
+  document.getElementById('custom-qty').value = '1';
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+window.onload = () => {
+  loadInfo();
+  loadCart();
+  laadOpgeslagenIconen();
+  document.getElementById('di-all')?.classList.add('active');
+  showTab('welkom');
+  laadArtikelenUitSheets();
+  document.getElementById('vrij-sluit-btn').addEventListener('click', sluitVrijArtikel);
+  document.getElementById('vrij-overlay').addEventListener('click', function(e) { if (e.target === this) sluitVrijArtikel(); });
+  document.getElementById('vrij-toevoegen-btn').addEventListener('click', customArtikelToevoegen);
+
+  // ── SW update forceren bij elke app-open ──────────────────
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistration().then(reg => {
+      if (!reg) return;
+      reg.update(); // Controleer altijd op nieuwe SW
+      reg.addEventListener('updatefound', () => {
+        const nieuweSW = reg.installing;
+        nieuweSW.addEventListener('statechange', () => {
+          if (nieuweSW.state === 'installed' && navigator.serviceWorker.controller) {
+            // Nieuwe versie beschikbaar — reload automatisch
+            nieuweSW.postMessage({ type: 'SKIP_WAITING' });
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+              window.location.reload();
+            });
+          }
+        });
+      });
+    });
+  }
+};
+
+// ── LADEN UIT GOOGLE SHEETS ───────────────────────────────────
+function laadArtikelenUitSheets() {
+  const lijst = document.getElementById('artikel-lijst');
+
+  // ── Laag 1: sessionStorage (snelst, huidige browsersessie) ──
+  try {
+    const sesCache = sessionStorage.getItem('emondt_artikelen_sessie');
+    if (sesCache) {
+      ARTIKELEN = JSON.parse(sesCache);
+      bouwDrawerCats(); bouwCatPills(); bouwCatPills();
+      renderArtikelen(ARTIKELEN);
+      console.log('[Cache] Sessiecache geladen:', ARTIKELEN.length, 'artikelen');
+      // Ververs op achtergrond zonder laad-indicator
+      fetchSheets(false);
+      return;
+    }
+  } catch(e) {}
+
+  // ── Laag 2: localStorage (tot 24 uur geldig) ─────────────
+  if (lijst) lijst.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.86rem">📡 Artikelen laden...</div>';
+  try {
+    const cached = localStorage.getItem('emondt_artikelen_cache');
+    const ts     = localStorage.getItem('emondt_artikelen_ts');
+    const oud    = !ts || (Date.now() - parseInt(ts)) > 86400000; // 24 uur
+    if (cached && !oud) {
+      ARTIKELEN = JSON.parse(cached);
+      // Zet ook in sessiecache
+      try { sessionStorage.setItem('emondt_artikelen_sessie', cached); } catch(e) {}
+      bouwDrawerCats(); bouwCatPills(); bouwCatPills();
+      renderArtikelen(ARTIKELEN);
+      console.log('[Cache] LocalStorage cache geladen:', ARTIKELEN.length, 'artikelen');
+      // Ververs op achtergrond
+      fetchSheets(false);
+      return;
+    }
+  } catch(e) {}
+
+  // ── Laag 3: Sheets ophalen ────────────────────────────────
+  fetchSheets(true);
+}
+
+function fetchSheets(toonLaadindicator) {
+  if (!SHEETS_API_URL || SHEETS_API_URL === 'JOUW_WEBAPP_URL_HIER') {
+    // Geen URL — toon cache als die er is, anders melding
+    const cached = (() => { try { return localStorage.getItem('emondt_artikelen_cache'); } catch(e){ return null; } })();
+    if (cached) {
+      ARTIKELEN = JSON.parse(cached);
+      bouwDrawerCats(); bouwCatPills(); bouwCatPills();
+      renderArtikelen(ARTIKELEN);
+      showToast('📦 Gecachte database geladen');
+    } else {
+      const lijst = document.getElementById('artikel-lijst');
+      if (lijst) lijst.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.86rem">⚙️ Koppel de Google Sheets API in de beheerpagina (hamburgermenu → Beheer).</div>';
+    }
+    return;
+  }
+
+  fetch(SHEETS_API_URL + '?actie=lezen&t=' + Date.now())
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'ok' && Array.isArray(data.artikelen)) {
+        ARTIKELEN = data.artikelen.map(a => ({
+          code:        a.code        || '',
+          naam:        a.naam        || '',
+          cat:         a.cat         || '',
+          subcat:      a.subcat      || undefined,
+          eenheid:     a.eenheid     || 'stuk',
+          leverancier: a.leverancier || '',
+          warning:     a.warning     || '',
+          verpakking:  a.verpakking  || '',
+          afbeelding:  a.afbeelding  || '',
+          subsubcat:   a.subsubcat   || '',
+          icon:        ICONS[a.cat] || ICON_DEFAULTS[a.cat] || '📦',
+        })).filter(a => a.code && a.naam);
+
+        // Opslaan in beide caches
+        const json = JSON.stringify(ARTIKELEN);
+        try {
+          localStorage.setItem('emondt_artikelen_cache', json);
+          localStorage.setItem('emondt_artikelen_ts', Date.now().toString());
+          sessionStorage.setItem('emondt_artikelen_sessie', json);
+        } catch(e) {}
+
+        bouwDrawerCats(); bouwCatPills(); bouwCatPills();
+        renderArtikelen(ARTIKELEN);
+        console.log('[Sheets] Geladen:', ARTIKELEN.length, 'artikelen');
+        if (toonLaadindicator) showToast('✓ ' + ARTIKELEN.length + ' artikelen geladen');
+      } else {
+        console.error('[Sheets] Fout:', data);
+        laadUitCache('Sheets fout: ' + (data.message || 'onbekend'));
+      }
+    })
+    .catch(err => {
+      console.error('[Sheets] Netwerkfout:', err);
+      laadUitCache('Geen verbinding met Sheets');
+    });
+}
+
+// Laad uit localStorage als noodoplossing, toon melding
+function laadUitCache(reden) {
+  try {
+    const cached = localStorage.getItem('emondt_artikelen_cache');
+    if (cached) {
+      ARTIKELEN = JSON.parse(cached);
+      try { sessionStorage.setItem('emondt_artikelen_sessie', cached); } catch(e) {}
+      bouwDrawerCats(); bouwCatPills(); bouwCatPills();
+      renderArtikelen(ARTIKELEN);
+      const ts = localStorage.getItem('emondt_artikelen_ts');
+      const leeftijd = ts ? Math.round((Date.now() - parseInt(ts)) / 60000) : '?';
+      showToast(`📦 Cache geladen (${leeftijd} min oud)`);
+      console.warn('[Cache] Fallback op cache vanwege:', reden);
+      return;
+    }
+  } catch(e) {}
+  // Echt niets beschikbaar
+  const lijst = document.getElementById('artikel-lijst');
+  if (lijst) lijst.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--danger);font-size:.86rem">📵 ${reden} — geen cache beschikbaar.</div>`;
+  showToast('📵 Geen data beschikbaar');
+}
+
+// ── DRAWER ────────────────────────────────────────────────────
+function toggleDrawer() {
+  const d = document.getElementById('drawer'), o = document.getElementById('overlay'), h = document.getElementById('hamburger');
+  const open = d.classList.toggle('open');
+  o.classList.toggle('open', open); h.classList.toggle('open', open);
+}
+function closeDrawer() {
+  ['drawer','overlay','hamburger'].forEach(id => document.getElementById(id).classList.remove('open'));
+}
+
+// ── CATEGORIE FILTER ──────────────────────────────────────────
+function toggleDrawerGroep() {
+  const toggle = document.getElementById('di-installatie-toggle');
+  const menu   = document.getElementById('drawer-cat-lijst');
+  const isOpen = menu.classList.contains('open');
+  toggle.classList.toggle('open', !isOpen);
+  menu.classList.toggle('open', !isOpen);
+}
+
+function openDrawerGroep() {
+  document.getElementById('di-installatie-toggle').classList.add('open');
+  document.getElementById('drawer-cat-lijst').classList.add('open');
+}
+
+function filterSubcat(cat, sub) {
+  activeCat = cat; activeSubcat = sub; activeSubsubcat = null;
+  closeDrawer(); openDrawerGroep();
+  const banner = document.getElementById('cat-banner');
+  document.getElementById('cat-banner-text').textContent = cat + ' › ' + sub;
+  banner.classList.add('visible');
+  updateSubcatBalk(); showTab('artikelen'); applyFilters();
+}
+
+function filterSubsubcat(cat, sub, subsub) {
+  activeCat = cat; activeSubcat = sub; activeSubsubcat = subsub;
+  closeDrawer(); openDrawerGroep();
+  const banner = document.getElementById('cat-banner');
+  document.getElementById('cat-banner-text').textContent = cat + ' › ' + sub + ' › ' + subsub;
+  banner.classList.add('visible');
+  updateSubcatBalk(); showTab('artikelen'); applyFilters();
+}
+
+
+function filterCategorie(cat) {
+  activeCat = cat;
+  activeSubcat = null; activeSubsubcat = null;
+  filterPad = cat ? [{ cat }] : [];
+  closeDrawer();
+  updateFilterUI();
+  showTab('artikelen');
+  applyFilters();
+}
+
+// ── DRAWER CATEGORIEËN DYNAMISCH OPBOUWEN ─────────────────────
+function bouwDrawerCats() {
+  const cats = [...new Set(ARTIKELEN.map(a => a.cat))].filter(Boolean).sort();
+  const container = document.getElementById('drawer-cat-lijst');
+  if (!container) return;
+
+  CAT_IDS = {};
+  container.innerHTML = '';
+
+  cats.forEach(cat => {
+    const catId = 'di-cat-' + cat.replace(/[^a-zA-Z0-9]/g, '-');
+    CAT_IDS[cat] = catId;
+    const icon = ICONS[cat] || ICON_DEFAULTS[cat] || '📦';
+
+    // Subcats voor deze cat
+    const subcats = [...new Set(
+      ARTIKELEN.filter(a => a.cat === cat).map(a => a.subcat).filter(Boolean)
+    )].sort();
+
+    if (!subcats.length) {
+      // Geen subcats → gewoon een item
+      const el = document.createElement('div');
+      el.className = 'd-item';
+      el.id = catId;
+      el.innerHTML = `<span class="di-icon">${icon}</span> ${cat}`;
+      el.onclick = () => filterCategorie(cat);
+      container.appendChild(el);
+      return;
+    }
+
+    // Heeft subcats → toon als uitklapbare subgroep
+    const toggle = document.createElement('div');
+    toggle.className = 'd-subgroup-btn';
+    toggle.innerHTML = `<span class="di-icon">${icon}</span> <span>${cat}</span> <span class="arrow">▶</span>`;
+
+    const submenu = document.createElement('div');
+    submenu.className = 'd-subsubmenu';
+    submenu.id = catId + '-sub';
+
+    // Cat-niveau item ("Alle [cat]") bovenaan submenu
+    const alEl = document.createElement('div');
+    alEl.className = 'd-item';
+    alEl.id = catId;
+    alEl.innerHTML = `<span class="di-icon" style="font-size:.75rem">📋</span> Alle ${cat}`;
+    alEl.onclick = () => filterCategorie(cat);
+    submenu.appendChild(alEl);
+
+    subcats.forEach(sub => {
+      // Subsubcats voor deze subcat
+      const subsubcats = [...new Set(
+        ARTIKELEN.filter(a => a.cat === cat && a.subcat === sub).map(a => a.subsubcat).filter(Boolean)
+      )].sort();
+
+      if (!subsubcats.length) {
+        const subEl = document.createElement('div');
+        subEl.className = 'd-item';
+        subEl.innerHTML = `<span style="opacity:.5;font-size:.8rem">—</span> ${sub}`;
+        subEl.onclick = () => { filterSubcat(cat, sub); };
+        submenu.appendChild(subEl);
+      } else {
+        // Subcat met eigen subsubcats → nog een niveau
+        const subToggle = document.createElement('div');
+        subToggle.className = 'd-item';
+        subToggle.style.cssText = 'flex-direction:column;align-items:flex-start;gap:4px;cursor:pointer';
+
+        const subHeader = document.createElement('div');
+        subHeader.style.cssText = 'display:flex;align-items:center;gap:8px;width:100%';
+        subHeader.innerHTML = `<span style="opacity:.5;font-size:.8rem">—</span> <span style="flex:1">${sub}</span> <span style="font-size:.6rem;color:rgba(255,255,255,.3)" class="ssarrow">▶</span>`;
+
+        const ssContainer = document.createElement('div');
+        ssContainer.style.cssText = 'display:none;flex-direction:column;width:100%;padding-left:12px';
+
+        const alSsEl = document.createElement('div');
+        alSsEl.style.cssText = 'padding:4px 0;font-size:.75rem;color:rgba(255,255,255,.5);cursor:pointer';
+        alSsEl.textContent = `Alle ${sub}`;
+        alSsEl.onclick = (e) => { e.stopPropagation(); filterSubcat(cat, sub); };
+        ssContainer.appendChild(alSsEl);
+
+        subsubcats.forEach(subsub => {
+          const ssEl = document.createElement('div');
+          ssEl.style.cssText = 'padding:4px 0;font-size:.75rem;color:rgba(255,255,255,.5);cursor:pointer';
+          ssEl.textContent = '· ' + subsub;
+          ssEl.onmouseenter = () => ssEl.style.color = 'var(--white)';
+          ssEl.onmouseleave = () => ssEl.style.color = 'rgba(255,255,255,.5)';
+          ssEl.onclick = (e) => { e.stopPropagation(); filterSubsubcat(cat, sub, subsub); };
+          ssContainer.appendChild(ssEl);
+        });
+
+        subToggle.appendChild(subHeader);
+        subToggle.appendChild(ssContainer);
+        subHeader.onclick = () => {
+          const open = ssContainer.style.display === 'flex';
+          ssContainer.style.display = open ? 'none' : 'flex';
+          subHeader.querySelector('.ssarrow').style.transform = open ? '' : 'rotate(90deg)';
+        };
+        submenu.appendChild(subToggle);
+      }
+    });
+
+    toggle.onclick = () => {
+      const isOpen = submenu.classList.contains('open');
+      submenu.classList.toggle('open', !isOpen);
+      toggle.classList.toggle('open', !isOpen);
+    };
+
+    container.appendChild(toggle);
+    container.appendChild(submenu);
+  });
+
+  // Update dev categorie-dropdowns dynamisch
+  ['dev-cat'].forEach(selId => {
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    const huidig = sel.value;
+    sel.innerHTML = '<option value="">Selecteer categorie...</option>' +
+      cats.map(c => `<option value="${c}"${c===huidig?' selected':''}>${c}</option>`).join('');
+  });
+}
+
+// ── FILTER BOTTOM SHEET ───────────────────────────────────────
+let filterPad = []; // breadcrumb: [{label, niveau, cat, sub, subsub}]
+
+function openFilterSheet() {
+  // Herstel filterPad op basis van huidige actieve filters
+  filterPad = [];
+  if (activeCat) filterPad.push({ cat: activeCat });
+  if (activeSubcat) filterPad.push({ sub: activeSubcat });
+
+  toonFilterNiveau();
+  document.getElementById('filter-overlay').style.display = 'flex';
+}
+
+function sluitFilterSheet() {
+  document.getElementById('filter-overlay').style.display = 'none';
+  applyFilters();
+}
+
+function filterSheetTerug() {
+  filterPad.pop();
+  toonFilterNiveau();
+}
+
+function toonFilterNiveau() {
+  const inhoud  = document.getElementById('filter-sheet-inhoud');
+  const titel   = document.getElementById('filter-sheet-titel');
+  const terugBtn = document.getElementById('filter-terug-btn');
+  inhoud.innerHTML = '';
+
+  const niveau = filterPad.length;
+  terugBtn.style.display = niveau > 0 ? 'flex' : 'none';
+
+  if (niveau === 0) {
+    // Niveau 0: hoofdcategorieën
+    titel.textContent = 'Categorie';
+    const cats = [...new Set(ARTIKELEN.map(a => a.cat).filter(Boolean))].sort();
+
+    // "Alles" optie
+    const alleRij = maakFilterRij('📋', 'Alle artikelen', ARTIKELEN.length, false, null,
+      () => { wisFilter(); sluitFilterSheet(); });
+    if (!activeCat && !activeSubcat) alleRij.classList.add('actief');
+    inhoud.appendChild(alleRij);
+
+    cats.forEach(cat => {
+      const n = ARTIKELEN.filter(a => a.cat === cat).length;
+      const heeftSubs = ARTIKELEN.some(a => a.cat === cat && a.subcat);
+      const ico = ICONS[cat] || ICON_DEFAULTS[cat] || '📦';
+      const rij = maakFilterRij(ico, cat, n, heeftSubs, cat === activeCat,
+        () => {
+          if (heeftSubs) {
+            filterPad.push({ cat });
+            activeCat = cat; activeSubcat = null; activeSubsubcat = null;
+            toonFilterNiveau();
+          } else {
+            activeCat = cat; activeSubcat = null; activeSubsubcat = null;
+            updateFilterUI(); sluitFilterSheet(); applyFilters();
+          }
+        });
+      inhoud.appendChild(rij);
+    });
+
+  } else if (niveau === 1) {
+    // Niveau 1: subcategorieën van activeCat
+    const cat = filterPad[0].cat;
+    titel.textContent = cat;
+    const subcats = [...new Set(ARTIKELEN.filter(a => a.cat === cat).map(a => a.subcat).filter(Boolean))].sort();
+
+    const alleRij = maakFilterRij('📋', `Alle ${cat}`, ARTIKELEN.filter(a => a.cat === cat).length, false,
+      !activeSubcat, () => { activeSubcat = null; activeSubsubcat = null; updateFilterUI(); sluitFilterSheet(); applyFilters(); });
+    inhoud.appendChild(alleRij);
+
+    subcats.forEach(sub => {
+      const n = ARTIKELEN.filter(a => a.cat === cat && a.subcat === sub).length;
+      const heeftSubs = ARTIKELEN.some(a => a.cat === cat && a.subcat === sub && a.subsubcat);
+      const rij = maakFilterRij('—', sub, n, heeftSubs, sub === activeSubcat,
+        () => {
+          activeSubcat = sub; activeSubsubcat = null;
+          if (heeftSubs) { filterPad.push({ sub }); toonFilterNiveau(); }
+          else { updateFilterUI(); sluitFilterSheet(); applyFilters(); }
+        });
+      inhoud.appendChild(rij);
+    });
+
+  } else if (niveau === 2) {
+    // Niveau 2: subsubcategorieën
+    const cat = filterPad[0].cat, sub = filterPad[1].sub || activeSubcat;
+    titel.textContent = sub;
+    const subsubcats = [...new Set(ARTIKELEN.filter(a => a.cat === cat && a.subcat === sub).map(a => a.subsubcat).filter(Boolean))].sort();
+
+    const alleRij = maakFilterRij('📋', `Alle ${sub}`, ARTIKELEN.filter(a => a.cat === cat && a.subcat === sub).length, false,
+      !activeSubsubcat, () => { activeSubsubcat = null; updateFilterUI(); toonFilterNiveau(); });
+    inhoud.appendChild(alleRij);
+
+    subsubcats.forEach(subsub => {
+      const n = ARTIKELEN.filter(a => a.cat === cat && a.subcat === sub && a.subsubcat === subsub).length;
+      const rij = maakFilterRij('·', subsub, n, false, subsub === activeSubsubcat,
+        () => {
+          activeSubsubcat = subsub;
+          updateFilterUI();
+          toonFilterNiveau(); // herlaad niveau zodat actief-class zichtbaar wordt
+        });
+      inhoud.appendChild(rij);
+    });
+  }
+}
+
+
+
+function maakFilterRij(ico, naam, aantal, heeftKinderen, actief, onClick) {
+  const rij = document.createElement('div');
+  rij.className = 'filter-rij' + (actief ? ' actief' : '');
+  rij.innerHTML = `
+    <div class="filter-rij-ico">${ico}</div>
+    <div class="filter-rij-tekst">
+      <div class="filter-rij-naam">${naam}</div>
+      <div class="filter-rij-aantal">${aantal} artikel${aantal !== 1 ? 'en' : ''}</div>
+    </div>
+    <div class="filter-rij-arrow">${heeftKinderen ? '›' : actief ? '✓' : ''}</div>`;
+  rij.onclick = (e) => { e.stopPropagation(); onClick(); };
+  return rij;
+}
+
+function updateFilterUI() {
+  const btn = document.getElementById('filter-btn');
+  const label = document.getElementById('filter-btn-label');
+  const actiefLabel = document.getElementById('actief-filter-label');
+  const actiefTekst = document.getElementById('actief-filter-tekst');
+
+  const delen = [activeCat, activeSubcat, activeSubsubcat, activeSubsubsubcat].filter(Boolean);
+  if (delen.length) {
+    btn.classList.add('actief');
+    label.textContent = 'Filter (' + delen.length + ')';
+    actiefLabel.style.display = 'flex';
+    actiefTekst.textContent = delen.join(' › ');
+  } else {
+    btn.classList.remove('actief');
+    label.textContent = 'Filter';
+    actiefLabel.style.display = 'none';
+  }
+
+  // Update drawer actieve staat
+  document.querySelectorAll('.d-item').forEach(el => el.classList.remove('active'));
+  if (activeCat) { const id = CAT_IDS[activeCat]; if (id) document.getElementById(id)?.classList.add('active'); }
+  else { document.getElementById('di-all')?.classList.add('active'); }
+}
+
+function wisFilter() {
+  activeCat = null; activeSubcat = null; activeSubsubcat = null;
+  filterPad = [];
+  updateFilterUI();
+  applyFilters();
+}
+
+function bouwCatPills() { /* vervangen door filter sheet */ }
+
+function wisZoek() {
+  const el = document.getElementById('zoek');
+  el.value = '';
+  document.getElementById('zoek-wis').style.display = 'none';
+  applyFilters();
+  el.focus();
+}
+
+function applyFilters() {
+  const q = document.getElementById('zoek').value.trim();
+  const wisBtn = document.getElementById('zoek-wis');
+  if (wisBtn) wisBtn.style.display = q ? 'block' : 'none';
+
+  const trefwoorden = q.toLowerCase().split(/\s+/).filter(Boolean);
+  let lijst = ARTIKELEN;
+  if (activeCat)          lijst = lijst.filter(a => a.cat === activeCat);
+  if (activeSubcat)       lijst = lijst.filter(a => a.subcat === activeSubcat);
+  if (activeSubsubcat)    lijst = lijst.filter(a => a.subsubcat === activeSubsubcat);
+  if (trefwoorden.length) {
+    lijst = lijst.filter(a => {
+      const t = [a.naam, a.code, a.leverancier, a.cat, a.subcat, a.subsubcat].join(' ').toLowerCase();
+      return trefwoorden.every(w => t.includes(w));
+    });
+  }
+  renderArtikelen(lijst);
+}
+
+// ── TABS ──────────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const navBtn = document.getElementById('nav-' + name);
+  if (navBtn) navBtn.classList.add('active');
+  if (name === 'winkelwagen') renderCart();
+}
+
+// ── ARTIKELEN ─────────────────────────────────────────────────
+function renderArtikelen(lijst) {
+  const c = document.getElementById('artikel-lijst');
+  c.innerHTML = '';
+  if (!lijst.length) { c.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.86rem">Geen artikelen gevonden.</div>'; return; }
+  [...new Set(lijst.map(a => a.cat))].forEach(cat => {
+    const icon = ICONS[cat] || ICON_DEFAULTS[cat] || '📦';
+    const lbl = document.createElement('div'); lbl.className = 'cat-label'; lbl.innerHTML = `<span>${icon}</span> ${cat}`; c.appendChild(lbl);
+    const catItems = lijst.filter(a => a.cat === cat);
+    const hasSubcats = catItems.some(a => a.subcat);
+    if (hasSubcats) {
+      [...new Set(catItems.map(a => a.subcat).filter(Boolean))].forEach(sub => {
+        const sl = document.createElement('div'); sl.className = 'subcat-label'; sl.textContent = sub; c.appendChild(sl);
+        const subItems = catItems.filter(a => a.subcat === sub);
+        const hasSubsubcats = subItems.some(a => a.subsubcat);
+        if (hasSubsubcats) {
+          [...new Set(subItems.map(a => a.subsubcat).filter(Boolean))].forEach(subsub => {
+            const ssl = document.createElement('div'); ssl.className = 'subsubcat-label'; ssl.textContent = subsub; c.appendChild(ssl);
+            const subsubItems = subItems.filter(a => a.subsubcat === subsub);
+              subsubItems.forEach(a => renderArtikelCard(a, c));
+          });
+          subItems.filter(a => !a.subsubcat).forEach(a => renderArtikelCard(a, c));
+        } else {
+          subItems.forEach(a => renderArtikelCard(a, c));
+        }
+      });
+      catItems.filter(a => !a.subcat).forEach(a => renderArtikelCard(a, c));
+    } else {
+      catItems.forEach(a => renderArtikelCard(a, c));
+    }
+  });
+}
+
+function renderArtikelCard(artikel, container) {
+  const qty = cart[artikel.code] || 0;
+  const heeftWarning = artikel.warning && artikel.warning.includes('*');
+  const el = document.createElement('div');
+  el.className = 'artikel-card' + (qty > 0 ? ' selected' : '');
+  el.id = 'card-' + artikel.code;
+  const iconHTML = artikel.afbeelding
+    ? `<img src="${artikel.afbeelding}" alt="${artikel.naam}" loading="lazy" onerror="this.parentElement.innerHTML='${artikel.icon}'" />`
+    : artikel.icon;
+  el.innerHTML = `
+    <div class="artikel-img">${iconHTML}</div>
+    <div class="artikel-body">
+      <div class="artikel-naam">${artikel.naam}</div>
+      <div class="artikel-meta">${artikel.code}${artikel.leverancier ? ' · ' + artikel.leverancier : ''} · per ${artikel.eenheid}</div>
+      ${heeftWarning ? `<div class="artikel-warning"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Let op, bestellen per meter!</div>` : ''}
+    </div>
+    <div class="qty-wrap" onclick="event.stopPropagation()">
+      <button class="qty-btn" onclick="changeQty('${artikel.code}',-1,event)">−</button>
+      <input class="qty-val" type="number" min="0" id="qty-${artikel.code}" value="${qty || 0}"
+        onchange="setQty('${artikel.code}',this)" onclick="this.select()" />
+      <button class="qty-btn" onclick="changeQty('${artikel.code}',1,event)">+</button>
+    </div>`;
+  el.dataset.verpakking = artikel.verpakking || '';
+  el.onclick = artikel.verpakking ? (e) => toonVerpakking(e, el) : null;
+  container.appendChild(el);
+}
+
+function toonVerpakking(e, kaart) {
+  // Klik op qty-control negeren
+  if (e.target.closest('.qty-control')) return;
+
+  // Verwijder eventuele bestaande popup
+  document.querySelectorAll('.verpakking-popup').forEach(p => p.remove());
+
+  const tekst = kaart.dataset.verpakking;
+  if (!tekst) return;
+
+  const popup = document.createElement('div');
+  popup.className = 'verpakking-popup';
+  popup.textContent = '📦 ' + tekst;
+  kaart.appendChild(popup);
+
+  // Sluit bij klik buiten
+  setTimeout(() => {
+    document.addEventListener('click', function sluiter() {
+      popup.remove();
+      document.removeEventListener('click', sluiter);
+    });
+  }, 0);
+}
+
+
+function changeQty(code, delta, e) {
+  if (e) e.stopPropagation();
+  const nieuw = Math.max(0, (cart[code] || 0) + delta);
+  _setCart(code, nieuw);
+  if (delta > 0 && nieuw === 1) {
+    const artikel = ARTIKELEN.find(a => a.code === code);
+    if (artikel && artikel.warning && artikel.warning.includes('*')) {
+      showToast('⚠️ Let op, bestellen per meter!');
+    } else {
+      showToast('✓ Toegevoegd aan bestelling');
+    }
+  }
+}
+
+function setQty(code, input) {
+  const nieuw = Math.max(0, parseInt(input.value) || 0);
+  input.value = nieuw;
+  _setCart(code, nieuw);
+}
+
+function _setCart(code, nieuw) {
+  if (nieuw === 0) delete cart[code]; else cart[code] = nieuw;
+  saveCart();
+  const qEl = document.getElementById('qty-' + code);
+  const cEl = document.getElementById('card-' + code);
+  if (qEl) qEl.value = nieuw;
+  if (cEl) cEl.classList.toggle('selected', nieuw > 0);
+  updateBadge();
+}
+
+function updateBadge() {
+  const total = Object.values(cart).reduce((s, n) => s + n, 0);
+  const label = document.getElementById('cart-label');
+  if (label) label.textContent = total === 1 ? '1 item' : `${total} items`;
+  const countEl = document.getElementById('cart-count');
+  if (countEl) countEl.textContent = total;
+  const badge = document.getElementById('nav-badge');
+  if (badge) {
+    badge.style.display = total > 0 ? 'flex' : 'none';
+    badge.textContent = total;
+  }
+}
+
+// ── WINKELWAGEN ───────────────────────────────────────────────
+function renderCart() {
+  const el = document.getElementById('cart-content');
+  const items = Object.entries(cart);
+  if (!items.length) {
+    el.innerHTML = `<div class="empty-cart">
+      <svg width="54" height="54" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+      </svg>
+      <p>Geen artikelen geselecteerd.<br>Ga naar <strong>Artikelen</strong> om te beginnen.</p>
+    </div>`; return;
+  }
+  let html = '', totaal = 0;
+  items.forEach(([code, qty]) => {
+    const a = ARTIKELEN.find(x => x.code === code); if (!a) return;
+    totaal += qty;
+    html += `<div class="cart-item">
+      <div class="artikel-img" style="width:38px;height:38px;font-size:1rem;flex-shrink:0">${a.icon}</div>
+      <div class="cart-info">
+        <div class="cart-naam">${a.naam}</div>
+        <div class="cart-code">${a.code}</div>
+      </div>
+      <div class="cart-badge">${qty}</div>
+      <button class="del-btn" onclick="removeItem('${code}')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>`;
+  });
+  // Leverdatum: morgen als minimum, weekenden uitschakelen
+  const today = new Date();
+  const morgen = new Date(today);
+  morgen.setDate(today.getDate() + 1);
+  // Sla weekenden over voor de minimale datum
+  while (morgen.getDay() === 0 || morgen.getDay() === 6) morgen.setDate(morgen.getDate() + 1);
+  const minDatum = morgen.toISOString().split('T')[0];
+  const opgeslagenDatum = (() => { try { return localStorage.getItem('leverdatum') || ''; } catch(e){ return ''; } })();
+  html += `<div class="datum-row">
+    <label>📅 Gewenste leverdatum <span style="color:var(--green)">*</span></label>
+    <input type="date" id="leverdatum" min="${minDatum}" value="${opgeslagenDatum}" onchange="kiesLeverdatum(this)" />
+  </div>
+  <div id="weekend-waarschuwing" style="display:none;background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:8px 12px;font-size:.78rem;color:#856404;margin-bottom:8px">
+    ⚠️ Dit is een weekend — kies een werkdag.
+  </div>`;
+  const inf = getInfo();
+  html += `<div class="summary-box">
+    <div class="s-row"><span>Monteur</span><span>${inf.naam||'—'}</span></div>
+    <div class="s-row"><span>Project</span><span>${inf.projectnummer ? inf.projectnummer + (inf.projectnaam?' · '+inf.projectnaam:'') : (inf.projectnaam||'—')}</span></div>
+    <div class="s-row"><span>Afleveradres</span><span>${inf.locatie||'—'}</span></div>
+    <div class="s-row total"><span>Totaal</span><span>${totaal} stuks</span></div>
+  </div>
+  <button class="btn btn-primary" onclick="verstuurEmail()">
+    <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 2 11 13M22 2 15 22l-4-9-9-4 20-7z"/></svg>
+    Bestelling versturen
+  </button>
+  <button class="btn btn-danger" onclick="leegMaken()">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+    Bestelling wissen
+  </button>`;
+  el.innerHTML = html;
+  // Restore leverdatum
+  const ld = document.getElementById('leverdatum');
+  if (ld) { try { ld.value = localStorage.getItem('leverdatum') || ''; } catch(e){} }
+}
+
+function toggleOnthoudProject(cb) {
+  try { localStorage.setItem('onthoud_project', cb.checked ? '1' : '0'); } catch(e){}
+  if (!cb.checked) {
+    try { localStorage.removeItem('emondt_project'); } catch(e){}
+  } else {
+    const inf = getInfo();
+    try { localStorage.setItem('emondt_project', JSON.stringify({ projectnummer: inf.projectnummer, projectnaam: inf.projectnaam })); } catch(e){}
+  }
+}
+
+function toggleOnthoudLocatie(cb) {
+  try { localStorage.setItem('onthoud_locatie', cb.checked ? '1' : '0'); } catch(e){}
+  if (!cb.checked) {
+    try { localStorage.removeItem('emondt_locatie'); } catch(e){}
+  } else {
+    const inf = getInfo();
+    try { localStorage.setItem('emondt_locatie', JSON.stringify({ locatie: inf.locatie })); } catch(e){}
+  }
+}
+
+function kiesLocatie(sel) {
+  const input = document.getElementById('locatie');
+  if (!input) return;
+  if (sel.value === 'vrij') {
+    input.style.display = 'block';
+    input.focus();
+  } else {
+    input.style.display = 'none';
+    input.value = sel.value;
+  }
+  saveInfo();
+}
+
+function kiesLeverdatum(input) {
+  const d = new Date(input.value);
+  const dag = d.getDay(); // 0=zo, 6=za
+  const waarschuwing = document.getElementById('weekend-waarschuwing');
+  if (dag === 0 || dag === 6) {
+    if (waarschuwing) waarschuwing.style.display = 'block';
+    input.setCustomValidity('Weekenden zijn niet geldig als leverdatum.');
+    input.value = '';
+    try { localStorage.removeItem('leverdatum'); } catch(e){}
+  } else {
+    if (waarschuwing) waarschuwing.style.display = 'none';
+    input.setCustomValidity('');
+    try { localStorage.setItem('leverdatum', input.value); } catch(e){}
+  }
+}
+
+function removeItem(code) {
+  delete cart[code];
+  const qEl = document.getElementById('qty-' + code);
+  const cEl = document.getElementById('card-' + code);
+  if (qEl) qEl.value = 0;
+  if (cEl) cEl.classList.remove('selected');
+  updateBadge(); renderCart();
+}
+
+function leegMaken() {
+  if (!confirm('Hele bestelling wissen?')) return;
+  cart = {};
+  try { localStorage.removeItem('emondt_cart'); } catch(e){}
+  document.querySelectorAll('.qty-val').forEach(el => el.value = 0);
+  document.querySelectorAll('.artikel-card').forEach(el => el.classList.remove('selected'));
+  updateBadge(); renderCart();
+}
+
+// ── E-MAIL ────────────────────────────────────────────────────
+function verstuurEmail() {
+  const inf = getInfo();
+  const items = Object.entries(cart);
+  if (!items.length) { alert('Voeg eerst artikelen toe.'); return; }
+
+  let leverdatum = '';
+  try { leverdatum = localStorage.getItem('leverdatum') || ''; } catch(e){}
+
+  const verplicht = [
+    {id:'naam',label:'Naam',tab:'info'},{id:'afdeling',label:'Afdeling',tab:'info'},
+    {id:'projectnaam',label:'Projectnaam',tab:'winkelwagen'},{id:'locatie',label:'Afleveradres',tab:'winkelwagen'},
+    {id:'telefoon',label:'Telefoonnummer',tab:'info'},
+  ];
+  for (const v of verplicht) {
+    if (!inf[v.id]||inf[v.id].trim()==='') {
+      alert(`Vul het verplichte veld "${v.label}" in.`); showTab(v.tab);
+      const el = document.getElementById(v.id); if(el) el.focus(); return;
+    }
+  }
+
+  // ── Leverdatum verplicht ──────────────────────────────────
+  if (!leverdatum) {
+    alert('Kies een gewenste leverdatum.');
+    showTab('winkelwagen');
+    return;
+  }
+
+  // ── Waarschuwing na 14:00 ─────────────────────────────────
+  const nu = new Date();
+  const uur = nu.getHours();
+  const minuut = nu.getMinutes();
+  if (uur >= 14) {
+    const tijdStr = `${String(uur).padStart(2,'0')}:${String(minuut).padStart(2,'0')}`;
+    if (!confirm(`⚠️ Let op: het is nu ${tijdStr}
+
+Bestellingen die na 14:00 binnenkomen worden verwerkt op de volgende werkdag.
+
+Wil je toch versturen?`)) return;
+  }
+
+  const datum = new Date().toLocaleDateString('nl-NL',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const projref = inf.projectnummer || inf.projectnaam || '';
+  const subject = `Materiaal bestellen${projref?' '+projref:''}${inf.projectnaam?' – '+inf.projectnaam:''} – ${inf.naam||'monteur'} – ${datum}`;
+  const to = 'rubenbrinks1@gmail.com';
+  const cc = inf.ontvanger2 || '';
+
+  // ── Bouw e-mailbody (platte tekst) ────────────────────────
+  const cats = [...new Set(items.map(([code]) => ARTIKELEN.find(x=>x.code===code)?.cat).filter(Boolean))];
+  let body = `MATERIAAL BESTELLEN – EMONDT GROEP
+${'='.repeat(46)}
+
+`;
+  body += `Datum:           ${datum}
+`;
+  if (leverdatum) body += `Leverdatum:      ${new Date(leverdatum).toLocaleDateString('nl-NL',{day:'2-digit',month:'2-digit',year:'numeric'})}
+`;
+  body += `Monteur:         ${inf.naam||'—'}
+`;
+  if (inf.telefoon) body += `Telefoon:        ${inf.telefoon}
+`;
+  body += `Afdeling:        ${inf.afdeling||'—'}
+`;
+  body += `Projectnummer:   ${inf.projectnummer||'—'}
+`;
+  body += `Projectnaam:     ${inf.projectnaam||'—'}
+`;
+  body += `Afleveradres:    ${inf.locatie||'—'}
+
+`;
+  body += `GEVRAAGDE ARTIKELEN
+${'─'.repeat(46)}
+`;
+  let totaal = 0;
+  const artikelItems = [];
+  cats.forEach(cat => {
+    body += `
+[ ${cat.toUpperCase()} ]
+`;
+    items.forEach(([code, qty]) => {
+      const a = ARTIKELEN.find(x=>x.code===code);
+      if (!a || a.cat !== cat) return;
+      totaal += qty;
+      artikelItems.push({ code: a.code, naam: a.naam, cat: a.cat, eenheid: a.eenheid || 'stuk', leverancier: a.leverancier || '', qty });
+      const eenheid     = a.eenheid     || 'stuk';
+      const leverancier = a.leverancier ? `  Leverancier: ${a.leverancier}\n` : '';
+      body += `  ${a.code.padEnd(12)} ${String(qty).padStart(4)} x  ${a.naam}  [per ${eenheid}]
+${leverancier}`;
+    });
+  });
+  body += `
+${'─'.repeat(46)}
+TOTAAL: ${totaal} artikelen
+`;
+  if (inf.opmerkingen) body += `
+OPMERKINGEN
+${inf.opmerkingen}
+`;
+  body += `
+${'='.repeat(46)}
+Emondt Materiaalapp · www.emondt.nl`;
+
+  // ── Verstuur via mailto ───────────────────────────────────
+  // ── Verstuur via Scripts (automatisch) of mailto (fallback) ──
+  // Script verstuurt de mail automatisch — geen mailto nodig
+  // logBestellingSheets handelt zowel mail als logging af
+
+  // ── Log bestelling in Google Sheets (+ mail via script) ──
+  logBestellingSheets({
+    datum,
+    naam:          inf.naam,
+    telefoon:      inf.telefoon,
+    afdeling:      inf.afdeling,
+    projectnummer: inf.projectnummer,
+    projectnaam:   inf.projectnaam,
+    locatie:       inf.locatie,
+    leverdatum,
+    opmerkingen:   inf.opmerkingen,
+    ontvanger2:    inf.ontvanger2 || '',
+    items:         artikelItems,
+  });
+
+  // ── Winkelmand legen ──────────────────────────────────────
+  setTimeout(() => {
+    cart = {};
+    try { localStorage.removeItem('leverdatum'); localStorage.removeItem('emondt_cart'); } catch(e){}
+    document.querySelectorAll('.qty-val').forEach(el => el.value = 0);
+    document.querySelectorAll('.artikel-card').forEach(el => el.classList.remove('selected'));
+    updateBadge();
+    showTab('welkom');
+  }, 800);
+  showToast('⏳ Bestelling wordt verstuurd...');
+}
+
+// ── OPSLAAN / LADEN ───────────────────────────────────────────
+
+function saveInfo() {
+  const inf = getInfo();
+  try { localStorage.setItem('emondt_persoon', JSON.stringify({ naam: inf.naam, telefoon: inf.telefoon, afdeling: inf.afdeling, ontvanger2: inf.ontvanger2 })); } catch(e){}
+  try { sessionStorage.setItem('emondt_sessie_info', JSON.stringify(inf)); } catch(e){}
+  // Onthoud project/locatie als checkbox aan
+  try {
+    if (localStorage.getItem('onthoud_project') === '1')
+      localStorage.setItem('emondt_project', JSON.stringify({ projectnummer: inf.projectnummer, projectnaam: inf.projectnaam }));
+    if (localStorage.getItem('onthoud_locatie') === '1')
+      localStorage.setItem('emondt_locatie', JSON.stringify({ locatie: inf.locatie }));
+  } catch(e){}
+}
+function loadInfo() {
+  try { localStorage.removeItem('emondt_info'); } catch(e){} // opruimen oude sleutel
+  try {
+    // Vaste gegevens uit localStorage
+    const persoon = JSON.parse(localStorage.getItem('emondt_persoon') || '{}');
+    if (persoon.naam)       { const el = document.getElementById('naam');       if (el) el.value = persoon.naam; }
+    if (persoon.telefoon)   { const el = document.getElementById('telefoon');   if (el) el.value = persoon.telefoon; }
+    if (persoon.afdeling)   { const el = document.getElementById('afdeling');   if (el) el.value = persoon.afdeling; }
+    if (persoon.ontvanger2) { const el = document.getElementById('ontvanger2'); if (el) el.value = persoon.ontvanger2; }
+
+    // Projectgegevens onthouden
+    const onthoudProject = localStorage.getItem('onthoud_project') === '1';
+    const cbProject = document.getElementById('onthoud-project');
+    if (cbProject) cbProject.checked = onthoudProject;
+    if (onthoudProject) {
+      const proj = JSON.parse(localStorage.getItem('emondt_project') || '{}');
+      if (proj.projectnummer) { const el = document.getElementById('projectnummer'); if (el) el.value = proj.projectnummer; }
+      if (proj.projectnaam)   { const el = document.getElementById('projectnaam');   if (el) el.value = proj.projectnaam; }
+    }
+
+    // Locatie onthouden
+    const onthoudLocatie = localStorage.getItem('onthoud_locatie') === '1';
+    const cbLocatie = document.getElementById('onthoud-locatie');
+    if (cbLocatie) cbLocatie.checked = onthoudLocatie;
+    if (onthoudLocatie) {
+      const loc = JSON.parse(localStorage.getItem('emondt_locatie') || '{}');
+      if (loc.locatie) {
+        const sel = document.getElementById('locatie-keuze');
+        const input = document.getElementById('locatie');
+        const vaste = ['op de klus', 'op de zaak'];
+        if (sel && input) {
+          if (vaste.includes(loc.locatie)) {
+            sel.value = loc.locatie; input.value = loc.locatie; input.style.display = 'none';
+          } else {
+            sel.value = 'vrij'; input.value = loc.locatie; input.style.display = 'block';
+          }
+        }
+      }
+    }
+
+    // Sessiegegevens uit sessionStorage (verdwijnen bij sluiten tabblad)
+    const s = JSON.parse(sessionStorage.getItem('emondt_sessie_info') || '{}');
+    ['projectnummer','projectnaam','opmerkingen'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && s[id]) el.value = s[id];
+    });
+
+    // Herstel afleveradres dropdown
+    if (s.locatie) {
+      const sel   = document.getElementById('locatie-keuze');
+      const input = document.getElementById('locatie');
+      if (sel && input) {
+        const vaste = ['op de klus', 'op de zaak'];
+        if (vaste.includes(s.locatie)) {
+          sel.value = s.locatie;
+          input.value = s.locatie;
+          input.style.display = 'none';
+        } else {
+          sel.value = 'vrij';
+          input.value = s.locatie;
+          input.style.display = 'block';
+        }
+      }
+    }
+  } catch(e){}
+}
+function getInfo() {
+  return ['naam','telefoon','afdeling','projectnummer','projectnaam','locatie','ontvanger2','opmerkingen']
+    .reduce((o,id) => { const el = document.getElementById(id); if(el) o[id]=el.value; return o; }, {});
+}
+let _toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('show');
+  void t.offsetWidth; // force reflow voor animatie-reset
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+
+function customArtikelToevoegen() {
+  const naam = document.getElementById('custom-naam').value.trim();
+  const code = document.getElementById('custom-code').value.trim();
+  const qty  = parseInt(document.getElementById('custom-qty').value)||1;
+  if (!naam) { alert('Vul een omschrijving in.'); return; }
+  customTeller++;
+  const customCode = code || ('CUSTOM-'+customTeller);
+  if (!ARTIKELEN.find(a=>a.code===customCode)) {
+    ARTIKELEN.push({code:customCode,naam,cat:'Diversen',eenheid:'stuk',icon:'📦',custom:true});
+  }
+  cart[customCode] = qty;
+  updateBadge();
+  document.getElementById('custom-naam').value = '';
+  document.getElementById('custom-code').value = '';
+  document.getElementById('custom-qty').value = '1';
+  showToast('✓ Toegevoegd aan bestelling');
+  sluitVrijArtikel();
+  applyFilters();
+}
+
+function testVerbinding() {
+  const status = document.getElementById('sheets-status');
+  status.innerHTML = '<span style="color:var(--muted)">⏳ Verbinding testen...</span>';
+  fetch(SHEETS_API_URL + '?actie=lezen&t=' + Date.now())
+    .then(r => r.json())
+    .then(data => {
+      status.innerHTML = data.status === 'ok'
+        ? `<span style="color:green">✅ Verbinding OK — ${data.count} artikelen in Sheets.</span>`
+        : `<span style="color:var(--danger)">❌ Script fout: ${data.message || JSON.stringify(data)}</span>`;
+    })
+    .catch(err => {
+      status.innerHTML = `<span style="color:var(--danger)">❌ Geen verbinding: ${err.message}</span>`;
+    });
+}
+
+function herlaadArtikelen() {
+  try { localStorage.removeItem('emondt_artikelen_ts'); sessionStorage.removeItem('emondt_artikelen_sessie'); } catch(e) {}
+  laadArtikelenUitSheets();
+  showToast('🔄 Artikelen worden herladen...');
+  showTab('artikelen');
+}
+
+function testBestellingLog() {
+  const statusEl = document.getElementById('sheets-status');
+  if (statusEl) statusEl.innerHTML = '<span style="color:var(--muted)">⏳ Test bestelling loggen...</span>';
+  const testData = {
+    datum: new Date().toLocaleString('nl-NL'),
+    naam: 'TEST Monteur', telefoon: '0600000000', afdeling: 'Test',
+    projectnummer: 'TEST-001', projectnaam: 'Testproject',
+    locatie: 'Testlocatie', opmerkingen: 'Dit is een testbestelling',
+    items: [{ code: 'TEST-001', naam: 'Testartikel', cat: 'Diversen', eenheid: 'stuk', leverancier: '', qty: 1 }],
+  };
+  const artikelStr = testData.items.map(i => [i.code, i.qty, i.naam, i.eenheid, i.leverancier].join('×')).join('|');
+  const url = getSheetsUrl();
+  if (!url) { if (statusEl) statusEl.innerHTML = '<span style="color:var(--danger)">❌ Geen URL ingesteld</span>'; return; }
+  const params = new URLSearchParams({
+    actie: 'bestelling', datum: testData.datum, naam: testData.naam,
+    telefoon: testData.telefoon, afdeling: testData.afdeling,
+    projectnummer: testData.projectnummer, projectnaam: testData.projectnaam,
+    locatie: testData.locatie, leverdatum: '', opmerkingen: testData.opmerkingen,
+    artikelen: artikelStr, totaal: 1, t: Date.now(),
+  });
+  fetch(`${url}?${params.toString()}`)
+    .then(r => r.json())
+    .then(r => {
+      if (statusEl) statusEl.innerHTML = r.status === 'ok'
+        ? '<span style="color:green">✅ Test bestelling gelogd in Sheets!</span>'
+        : `<span style="color:var(--danger)">❌ Script fout: ${r.message || JSON.stringify(r)}</span>`;
+    })
+    .catch(err => {
+      if (statusEl) statusEl.innerHTML = `<span style="color:var(--danger)">❌ Fetch fout: ${err.message}</span>`;
+    });
+}
+
+// ── DEV BEHEER ────────────────────────────────────────────────
+const DEV_PW = 'Eg@2026!#';
+
+function getSheetsUrl() {
+  return SHEETS_API_URL;
+}
+
+// Alle schrijfacties via GET (geen POST — werkt altijd cross-origin)
+function sheetsRequest(params) {
+  const url = getSheetsUrl();
+  if (!url) return Promise.resolve({ status: 'geen_url' });
+  const qs = Object.entries(params)
+    .map(([k, v]) => `${k}=${encodeURIComponent(typeof v === 'object' ? JSON.stringify(v) : v)}`)
+    .join('&');
+  return fetch(`${url}?${qs}&t=${Date.now()}`).then(r => r.json());
+}
+
+function testVerbinding() {
+  const status = document.getElementById('sheets-status');
+  status.innerHTML = '<span style="color:var(--muted)">⏳ Verbinding testen...</span>';
+  fetch(SHEETS_API_URL + '?actie=lezen&t=' + Date.now())
+    .then(r => r.json())
+    .then(data => {
+      status.innerHTML = data.status === 'ok'
+        ? `<span style="color:green">✅ Verbinding OK — ${data.count} artikelen in Sheets.</span>`
+        : `<span style="color:var(--danger)">❌ Script fout: ${data.message || JSON.stringify(data)}</span>`;
+    })
+    .catch(err => {
+      status.innerHTML = `<span style="color:var(--danger)">❌ Geen verbinding: ${err.message}</span>`;
+    });
+}
+
+function herlaadArtikelen() {
+  try { localStorage.removeItem('emondt_artikelen_ts'); sessionStorage.removeItem('emondt_artikelen_sessie'); } catch(e) {}
+  laadArtikelenUitSheets();
+  showToast('🔄 Artikelen worden herladen...');
+  showTab('artikelen');
+}
+
+function testBestellingLog() {
+  const statusEl = document.getElementById('sheets-status');
+  if (statusEl) statusEl.innerHTML = '<span style="color:var(--muted)">⏳ Test bestelling loggen...</span>';
+
+  const testData = {
+    datum:         new Date().toLocaleString('nl-NL'),
+    naam:          'TEST Monteur',
+    telefoon:      '0600000000',
+    afdeling:      'Test',
+    projectnummer: 'TEST-001',
+    projectnaam:   'Testproject',
+    locatie:       'Testlocatie',
+    leverdatum:    '',
+    opmerkingen:   'Dit is een testbestelling',
+    items:         [{ code: 'TEST-001', naam: 'Testartikel', cat: 'Diversen', qty: 1 }],
+  };
+
+  const artikelStr = testData.items.map(i => `${i.code}×${i.qty}`).join('|');
+  const url = getSheetsUrl();
+  if (!url) {
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--danger)">❌ Geen URL ingesteld</span>';
+    return;
+  }
+
+  const params = new URLSearchParams({
+    actie: 'bestelling',
+    datum: testData.datum, naam: testData.naam, telefoon: testData.telefoon,
+    afdeling: testData.afdeling, projectnummer: testData.projectnummer,
+    projectnaam: testData.projectnaam, locatie: testData.locatie,
+    leverdatum: '', opmerkingen: testData.opmerkingen,
+    artikelen: artikelStr, totaal: 1, t: Date.now(),
+  });
+
+  const fullUrl = `${url}?${params.toString()}`;
+  if (statusEl) statusEl.innerHTML = `<span style="color:var(--muted)">📡 URL lengte: ${fullUrl.length} tekens</span>`;
+
+  fetch(fullUrl)
+    .then(r => r.json())
+    .then(r => {
+      if (statusEl) statusEl.innerHTML = r.status === 'ok'
+        ? '<span style="color:green">✅ Test bestelling gelogd in Sheets!</span>'
+        : `<span style="color:var(--danger)">❌ Script fout: ${r.message || JSON.stringify(r)}</span>`;
+    })
+    .catch(err => {
+      if (statusEl) statusEl.innerHTML = `<span style="color:var(--danger)">❌ Fetch fout: ${err.message}<br><small>Controleer of de URL van de <strong>nieuwste implementatie</strong> is.</small></span>`;
+    });
+}
+
+// Bestelling loggen — compact GET request
+function logBestellingSheets(data) {
+  const url = getSheetsUrl();
+  if (!url) return;
+
+  // Formaat: code×qty×naam×eenheid×leverancier
+  const artikelStr = (data.items || [])
+    .map(i => [
+      i.code,
+      i.qty,
+      (i.naam        || '').replace(/[×|]/g, ''),
+      (i.eenheid     || 'stuk').replace(/[×|]/g, ''),
+      (i.leverancier || '').replace(/[×|]/g, ''),
+    ].join('×'))
+    .join('|');
+
+  // Bouw compact payload — geen JSON nesting, directe parameters
+  const params = new URLSearchParams({
+    actie:          'bestelling',
+    datum:          data.datum          || '',
+    naam:           data.naam           || '',
+    telefoon:       data.telefoon       || '',
+    afdeling:       data.afdeling       || '',
+    projectnummer:  data.projectnummer  || '',
+    projectnaam:    data.projectnaam    || '',
+    locatie:        data.locatie        || '',
+    leverdatum:     data.leverdatum     || '',
+    opmerkingen:    data.opmerkingen    || '',
+    ontvanger2:     data.ontvanger2     || '',
+    artikelen:      artikelStr,
+    totaal:         (data.items || []).reduce((s, i) => s + (parseInt(i.qty)||0), 0),
+    t:              Date.now(),
+  });
+
+  fetch(`${url}?${params.toString()}`)
+    .then(r => r.json())
+    .then(r => {
+      if (r.status === 'ok') {
+        showToast('✅ Bestelling verstuurd!');
+      } else {
+        showToast('⚠️ Fout: ' + (r.message || r.status));
+        console.warn('[Sheets] Fout:', r);
+      }
+    })
+    .catch(err => {
+      showToast('⚠️ Verbinding mislukt');
+      console.warn('[Sheets] Mislukt:', err.message);
+    });
+}
+
+
+
+function openDev() {
+  // Al ingelogd in deze sessie?
+  if (sessionStorage.getItem('dev_auth') === '1') {
+    closeDrawer();
+    showTab('dev');
+      initDevPage();
+    return;
+  }
+  closeDrawer();
+  document.getElementById('dev-overlay').classList.add('open');
+  document.getElementById('dev-pw').value = '';
+  document.getElementById('dev-pw-err').style.display = 'none';
+  setTimeout(() => document.getElementById('dev-pw').focus(), 100);
+}
+
+function initDevPage() {
+  bouwIconKiezer();
+}
+
+function bouwIconKiezer() {
+  const container = document.getElementById('cat-icon-lijst');
+  if (!container) return;
+  const cats = [...new Set(ARTIKELEN.map(a => a.cat))].filter(Boolean).sort();
+  if (!cats.length) {
+    container.innerHTML = '<div style="color:var(--muted);font-size:.8rem">Laad eerst artikelen om iconen in te stellen.</div>';
+    return;
+  }
+  container.innerHTML = cats.map(cat => {
+    const huidig = ICONS[cat] || ICON_DEFAULTS[cat] || '📦';
+    const opties = ICOON_OPTIES.map(ic =>
+      `<option value="${ic}"${ic===huidig?' selected':''}>${ic}</option>`
+    ).join('');
+    return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:1.1rem;width:28px;text-align:center">${huidig}</span>
+      <span style="flex:1;font-size:.84rem">${cat}</span>
+      <select data-cat="${cat}" style="background:var(--bg);border:1.5px solid var(--border);border-radius:6px;font-size:1rem;padding:4px 6px;color:var(--text);outline:none" onchange="previewIcon(this)">
+        ${opties}
+      </select>
+    </div>`;
+  }).join('');
+}
+
+function previewIcon(sel) {
+  const icoon = sel.value;
+  const preview = sel.parentElement.querySelector('span:first-child');
+  if (preview) preview.textContent = icoon;
+}
+
+function slaIconenOp() {
+  const selects = document.querySelectorAll('#cat-icon-lijst select[data-cat]');
+  selects.forEach(sel => {
+    const cat = sel.dataset.cat;
+    ICONS[cat] = sel.value;
+  });
+  // Opslaan in localStorage
+  try { localStorage.setItem('emondt_icons', JSON.stringify(ICONS)); } catch(e) {}
+  // Drawer vernieuwen
+  bouwDrawerCats(); bouwCatPills();
+  // Artikellijst vernieuwen (iconen in kaartjes updaten)
+  renderArtikelen(activeCat ? ARTIKELEN.filter(a=>a.cat===activeCat) : ARTIKELEN);
+  showToast('✅ Iconen opgeslagen');
+}
+
+function laadOpgeslagenIconen() {
+  try {
+    const opgeslagen = localStorage.getItem('emondt_icons');
+    if (opgeslagen) {
+      const parsed = JSON.parse(opgeslagen);
+      Object.assign(ICONS, parsed);
+    }
+  } catch(e) {}
+}
+
+function checkPw() {
+  if (document.getElementById('dev-pw').value === DEV_PW) {
+    sessionStorage.setItem('dev_auth', '1');
+    document.getElementById('dev-overlay').classList.remove('open');
+    showTab('dev');
+      initDevPage();
+  } else {
+    document.getElementById('dev-pw-err').style.display = 'block';
+    document.getElementById('dev-pw').value = '';
+  }
+}
+
+
+
+function devZoek() {
+  const q = document.getElementById('dev-zoek').value.toLowerCase().trim();
+  const res = document.getElementById('dev-zoek-resultaten');
+  if (!q) { res.innerHTML = ''; return; }
+  const gevonden = ARTIKELEN.filter(a =>
+    a.naam.toLowerCase().includes(q) || a.code.toLowerCase().includes(q)
+  ).slice(0, 15);
+  if (!gevonden.length) {
+    res.innerHTML = '<div style="color:var(--muted);font-size:.84rem;padding:8px 0">Geen resultaten gevonden.</div>';
+    return;
+  }
+  res.innerHTML = gevonden.map(a => `
+    <div class="dev-artikel-row" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+      <div class="info" style="flex:1;min-width:0">
+        <strong style="font-size:.86rem;display:block;word-break:break-word">${a.naam}</strong>
+        <span style="font-size:.7rem;color:var(--muted)">${a.code} · ${a.cat}${a.subcat ? ' › ' + a.subcat : ''}</span>
+      </div>
+      <button data-code="${a.code}" class="btn-del-artikel" style="background:#fdecea;border:1px solid #f5c6c2;color:var(--danger);padding:6px 10px;border-radius:6px;cursor:pointer;font-size:.82rem;flex-shrink:0">🗑 Verwijderen</button>
+    </div>`).join('');
+
+  // Bind events via delegation-safe approach
+  res.querySelectorAll('.btn-del-artikel').forEach(btn => {
+    btn.addEventListener('click', () => devVerwijderArtikel(btn.dataset.code));
+  });
+}
+
+function devVerwijderArtikel(code) {
+  const a = ARTIKELEN.find(x => x.code === code);
+  if (!a || !confirm(`Artikel "${a.naam}" (${code}) verwijderen uit de database?`)) return;
+  ARTIKELEN.splice(ARTIKELEN.findIndex(x => x.code === code), 1);
+  if (cart[code]) { delete cart[code]; saveCart(); updateBadge(); }
+  bouwDrawerCats(); bouwCatPills();
+  devZoek();
+
+  // Verwijder uit Sheets
+  sheetsRequest({ actie: 'verwijderen', code })
+    .then(data => showToast(data.status === 'ok' ? '🗑 Verwijderd uit Sheets' : '⚠️ ' + (data.message||data.status)))
+    .catch(() => showToast('🗑 Lokaal verwijderd (Sheets niet bereikbaar)'));
+}
+
+
+function updateOnlineStatus() {
+  const bar = document.getElementById('pwa-banner');
+  // Offline-status beïnvloedt de PWA-banner niet; log alleen voor debugging
+  console.log('[Online]', navigator.onLine ? 'online' : 'offline');
+}
+window.addEventListener('online',  updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+// ── PWA INSTALL PROMPT ────────────────────────────────────────
+let deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  // Toon banner
+  if (!localStorage.getItem('pwa-banner-dismissed') && !window.matchMedia('(display-mode: standalone)').matches) {
+    setTimeout(() => { document.getElementById('pwa-banner').style.display = 'block'; }, 3000);
+  }
+  // Toon ook de knop op de landingspagina
+  const btn = document.getElementById('landing-install-btn');
+  if (btn) btn.style.display = 'inline-block';
+});
+
+async function triggerPwaInstall() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  const { outcome } = await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  document.getElementById('pwa-banner').style.display = 'none';
+  const btn = document.getElementById('landing-install-btn');
+  if (btn) btn.style.display = 'none';
+  if (outcome === 'accepted') showToast('✅ App geïnstalleerd!');
+}
+
+document.getElementById('pwa-install-btn').addEventListener('click', async () => {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  const { outcome } = await deferredInstallPrompt.userChoice;
+  console.log('[PWA] Installatie uitkomst:', outcome);
+  deferredInstallPrompt = null;
+  document.getElementById('pwa-banner').style.display = 'none';
+  if (outcome === 'accepted') showToast('✅ App geïnstalleerd!');
+});
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('pwa-banner').style.display = 'none';
+  deferredInstallPrompt = null;
+  console.log('[PWA] App geïnstalleerd');
+});
+</script>
+<!-- ── FOOTER ── -->
+<footer style="text-align:center;padding:20px 16px;margin-top:8px;font-size:.72rem;color:var(--muted);letter-spacing:.06em;border-top:1px solid var(--border)">
+  Ontwerp en concept door Ruben Brinks
+</footer>
+
+</body>
+</html>
