@@ -816,18 +816,14 @@
   </div>
   <div class="drawer-scroll">
     <div class="d-item" onclick="wisFilter();showTab('artikelen');closeDrawer();toonCategorieTegels()"><span class="ico">🔧</span> Installatiemateriaal</div>
+    <div class="d-item" onclick="openVrijArtikel()"><span class="ico">✏️</span> Vrij artikel toevoegen</div>
     <div class="d-item" onclick="showTab('favorieten');closeDrawer()"><span class="ico">⭐</span> Favorieten</div>
     <div class="d-item" onclick="showTab('historie');closeDrawer()"><span class="ico">📋</span> Bestelhistorie</div>
-    <div class="d-divider"></div>
-    <div class="d-item" onclick="showTab('telefoonlijst');closeDrawer()"><span class="ico">📞</span> Telefoonlijst</div>
-    <div class="d-divider"></div>
     <div class="d-coming"><span class="ico">🕐</span> Meer komt binnenkort</div>
   </div>
   <div class="d-foot">
-    <div class="d-item" onclick="openVrijArtikel()"><span class="ico">✏️</span> Vrij artikel toevoegen</div>
-    <div class="d-divider"></div>
+    <div class="d-item" onclick="showTab('telefoonlijst');closeDrawer()"><span class="ico">📞</span> Telefoonlijst</div>
     <div class="d-item" onclick="showTab('beheer-panel');closeDrawer()"><span class="ico">⚙️</span> Beheer</div>
-    <div class="d-divider"></div>
     <div id="drawer-account" style="padding:6px 12px 2px;font-size:.7rem;color:rgba(255,255,255,.3);letter-spacing:.04em"></div>
     <div class="d-item" onclick="uitloggen()" style="color:rgba(255,255,255,.5)"><span class="ico">🚪</span> Uitloggen</div>
   </div>
@@ -891,7 +887,9 @@
     <button class="btn btn-secondary" onclick="toonInloggen()" style="margin-bottom:0">← Terug naar inloggen</button>
   </div>
 
-  <p style="color:rgba(255,255,255,.3);font-size:.68rem;margin-top:20px;text-align:center">Emondt Groep · Intern gebruik</p>
+  <p style="color:rgba(255,255,255,.3);font-size:.68rem;margin-top:20px;text-align:center">
+    <span id="app-versie-login"></span> · Ontwerp en concept door Ruben Brinks
+  </p>
 </div>
 
 <header>
@@ -1067,10 +1065,10 @@
       <input type="email" id="ontvanger2" placeholder="jouw@email.nl" oninput="saveInfo()" />
     </div>
   </div>
+  </div>
 </div>
 
 <div class="screen" id="tab-winkelwagen">
-  <div id="cart-content"></div>
 
   <div class="form-card" style="margin-top:14px">
     <div class="form-card-title" style="display:flex;align-items:center;justify-content:space-between">
@@ -1567,6 +1565,7 @@ function sluitVrijArtikel() {
   document.getElementById('custom-code').value = '';
   document.getElementById('custom-qty').value = '1';
 }
+
 
 function toonRegistreren() {
   document.getElementById('login-box-inloggen').style.display = 'none';
@@ -2074,6 +2073,18 @@ function slaURLOp() {
 
 // ── INIT ──────────────────────────────────────────────────────
 window.onload = () => {
+  // Versienummer alvast tonen (ook op loginpagina)
+  if ('serviceWorker' in navigator) {
+    caches.keys().then(keys => {
+      const swCache = keys.find(k => k.startsWith('emondt-materiaalapp-'));
+      if (swCache) {
+        ['app-versie-footer', 'app-versie-login'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = swCache;
+        });
+      }
+    });
+  }
   // Controleer of al ingelogd (sessie nog actief)
   if (isIngelogd()) {
     document.getElementById('login-scherm').classList.add('verborgen');
@@ -2091,8 +2102,6 @@ function initialiseerApp() {
     if (card) card.style.display = 'none';
   }
 
-  loadInfo();
-  loadCart();
   laadOpgeslagenIconen();
   // Toon ingelogde gebruiker in drawer
   const sessie = getAuthSessie();
@@ -2146,7 +2155,8 @@ function initialiseerApp() {
     // Toon melding als er een update op de achtergrond is geladen
     navigator.serviceWorker.addEventListener('message', event => {
       if (event.data?.type === 'SW_UPDATE_KLAAR') {
-        showToast('🔄 Nieuwe versie beschikbaar — herstart de app om te updaten');
+        const banner = document.getElementById('update-banner');
+        if (banner) banner.style.display = 'flex';
       }
     });
   }
@@ -3758,7 +3768,7 @@ window.addEventListener('appinstalled', () => {
 </script>
 <!-- ── FOOTER ── -->
 <footer style="text-align:center;padding:20px 16px 24px;margin-top:8px;font-size:.72rem;color:var(--muted);letter-spacing:.06em;border-top:1px solid var(--border)">
-  Ontwerp en concept door Ruben Brinks
+  <span id="app-versie-footer"></span> · Ontwerp en concept door Ruben Brinks
   <div style="display:flex;justify-content:center;gap:20px;margin-top:12px">
     <a href="https://www.instagram.com/werkenbij_emondt/" target="_blank"
       style="color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:5px;font-size:.75rem;transition:color .15s"
@@ -3780,6 +3790,13 @@ window.addEventListener('appinstalled', () => {
     </a>
   </div>
 </footer>
+
+<!-- Update banner -->
+<div id="update-banner" style="display:none;position:fixed;bottom:calc(var(--nav-h) + 10px);left:50%;transform:translateX(-50%);z-index:600;background:var(--navy);color:var(--white);border-radius:12px;padding:12px 18px;font-size:.84rem;box-shadow:0 8px 32px rgba(4,28,66,.35);display:none;align-items:center;gap:12px;max-width:calc(100vw - 32px)">
+  <span>🔄 Nieuwe versie beschikbaar</span>
+  <button onclick="location.reload()" style="background:var(--green);color:var(--navy);border:none;border-radius:8px;padding:6px 14px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Updaten</button>
+  <button onclick="document.getElementById('update-banner').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:1.1rem;cursor:pointer;padding:0 2px">×</button>
+</div>
 
 </body>
 </html>
