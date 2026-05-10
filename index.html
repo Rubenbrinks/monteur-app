@@ -91,74 +91,75 @@
     }
     .drawer>*{position:relative;z-index:1}
     .drawer{
-      position:fixed;top:0;left:0;bottom:0;width:300px;
+      position:fixed;top:0;left:0;bottom:0;width:260px;
       background:var(--navy);z-index:400;
-      transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+      transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
       display:flex;flex-direction:column;
-      box-shadow:6px 0 32px rgba(4,28,66,.4);
+      box-shadow:8px 0 40px rgba(4,28,66,.5);
       overflow:hidden;
     }
     .drawer.open{transform:translateX(0)}
 
     .drawer-head{
-      padding:24px 20px 18px;
+      padding:24px 18px 20px;
       border-bottom:1px solid rgba(255,255,255,.1);
       flex-shrink:0;
       display:flex;align-items:center;gap:12px;
     }
-    .drawer-head img{width:32px;height:32px;object-fit:contain;opacity:.9}
-    .drawer-head-text .t1{font-size:1.1rem;font-weight:700;color:var(--white)}
+    .drawer-head img{width:34px;height:34px;object-fit:contain;opacity:.9}
+    .drawer-head-text .t1{font-size:1.05rem;font-weight:700;color:var(--white);line-height:1.2}
     .drawer-head-text .t2{font-size:.62rem;color:var(--green);text-transform:uppercase;letter-spacing:.14em}
 
-    .drawer-scroll{flex:1;overflow-y:auto;padding:12px 0}
-    .drawer-scroll::-webkit-scrollbar{width:3px}
+    .drawer-scroll{flex:1;overflow-y:auto;padding:8px 10px}
+    .drawer-scroll::-webkit-scrollbar{width:2px}
     .drawer-scroll::-webkit-scrollbar-track{background:transparent}
-    .drawer-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+    .drawer-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:2px}
 
     .d-item{
-      display:flex;align-items:center;gap:14px;
-      padding:15px 20px;
-      color:rgba(255,255,255,.7);font-size:1rem;font-weight:500;
-      cursor:pointer;transition:all .15s;
-      border-left:3px solid transparent;
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;
+      color:rgba(255,255,255,.7);font-size:.88rem;font-weight:500;
+      cursor:pointer;transition:all .12s;
+      border-radius:8px;margin-bottom:2px;
+      border-left:2px solid transparent;
     }
     .d-item:active,.d-item.active{
-      background:rgba(174,195,54,.12);color:var(--white);
+      background:rgba(174,195,54,.15);color:var(--white);
       border-left-color:var(--green);
     }
-    .d-item .ico{font-size:1.3rem;width:26px;text-align:center;flex-shrink:0}
+    .d-item:hover{background:rgba(255,255,255,.06);color:var(--white)}
+    .d-item .ico{font-size:1.05rem;width:22px;text-align:center;flex-shrink:0}
 
-    .d-divider{height:1px;background:rgba(255,255,255,.08);margin:10px 20px}
+    .d-divider{display:none}
 
     .d-group-btn{
-      display:flex;align-items:center;gap:14px;
-      padding:15px 20px;
-      color:rgba(255,255,255,.8);font-size:1rem;font-weight:500;
-      cursor:pointer;transition:background .15s;user-select:none;
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;
+      color:rgba(255,255,255,.75);font-size:.88rem;font-weight:500;
+      cursor:pointer;transition:background .12s;user-select:none;
+      border-radius:8px;margin-bottom:2px;
     }
-    .d-group-btn:active{background:rgba(255,255,255,.07)}
-    .d-group-btn .ico{font-size:1.3rem;width:26px;text-align:center;flex-shrink:0}
-    .d-group-btn .arrow{margin-left:auto;font-size:.7rem;color:rgba(255,255,255,.35);transition:transform .25s}
+    .d-group-btn:active{background:rgba(255,255,255,.06)}
+    .d-group-btn .ico{font-size:1.05rem;width:22px;text-align:center;flex-shrink:0}
+    .d-group-btn .arrow{margin-left:auto;font-size:.65rem;color:rgba(255,255,255,.3);transition:transform .22s}
     .d-group-btn.open .arrow{transform:rotate(90deg)}
 
-    .d-submenu{overflow:hidden;max-height:0;transition:max-height .4s cubic-bezier(.4,0,.2,1)}
+    .d-submenu{overflow:hidden;max-height:0;transition:max-height .35s cubic-bezier(.4,0,.2,1)}
     .d-submenu.open{max-height:70vh;overflow-y:auto}
-    .d-submenu .d-item{padding-left:38px;font-size:.96rem}
+    .d-submenu .d-item{padding-left:36px;font-size:.84rem}
 
-    .d-subgroup-btn .arrow{margin-left:auto;font-size:.65rem;color:rgba(255,255,255,.3);transition:transform .2s}
-
-    .d-subsubmenu .d-item{padding-left:54px;font-size:.88rem;color:rgba(255,255,255,.5)}
+    .d-subsubmenu .d-item{padding-left:50px;font-size:.82rem;color:rgba(255,255,255,.45)}
     .d-subsubmenu .d-item:active,.d-subsubmenu .d-item.active{color:var(--white)}
 
-    .d-foot{border-top:1px solid rgba(255,255,255,.08);padding:12px 0;flex-shrink:0}
+    .d-foot{border-top:1px solid rgba(255,255,255,.08);padding:8px 10px 6px;flex-shrink:0}
 
     .d-coming{
-      display:flex;align-items:center;gap:14px;
-      padding:15px 20px;
-      color:rgba(255,255,255,.3);font-size:1rem;
-      pointer-events:none;
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;
+      color:rgba(255,255,255,.2);font-size:.84rem;
+      pointer-events:none;border-radius:8px;margin-bottom:2px;
     }
-    .d-coming .ico{font-size:1.3rem;width:26px;text-align:center}
+    .d-coming .ico{font-size:1.05rem;width:22px;text-align:center}
 
     /* ═══ BOTTOM NAVIGATION ═════════════════════════════════════ */
     .bottom-nav{
@@ -814,25 +815,25 @@
     </div>
   </div>
   <div class="drawer-scroll">
-    <div class="d-item" onclick="wisFilter();showTab('artikelen');closeDrawer()"><span class="ico">🔧</span> Installatiemateriaal</div>
+    <div class="d-item" onclick="wisFilter();showTab('artikelen');closeDrawer();toonCategorieTegels()"><span class="ico">🔧</span> Installatiemateriaal</div>
+    <div class="d-item" onclick="openVrijArtikel()"><span class="ico">✏️</span> Vrij artikel toevoegen</div>
     <div class="d-item" onclick="showTab('favorieten');closeDrawer()"><span class="ico">⭐</span> Favorieten</div>
     <div class="d-item" onclick="showTab('historie');closeDrawer()"><span class="ico">📋</span> Bestelhistorie</div>
-    <div class="d-item" onclick="showTab('telefoonlijst');closeDrawer()"><span class="ico">📞</span> Telefoonlijst</div>
     <div class="d-coming"><span class="ico">🕐</span> Meer komt binnenkort</div>
   </div>
   <div class="d-foot">
-    <div class="d-item" onclick="openVrijArtikel()"><span class="ico">✏️</span> Vrij artikel toevoegen</div>
-    <div class="d-divider"></div>
+    <div class="d-item" onclick="showTab('telefoonlijst');closeDrawer()"><span class="ico">📞</span> Telefoonlijst</div>
     <div class="d-item" onclick="showTab('beheer-panel');closeDrawer()"><span class="ico">⚙️</span> Beheer</div>
-    <div class="d-divider"></div>
+    <div id="drawer-account" style="padding:6px 12px 2px;font-size:.7rem;color:rgba(255,255,255,.3);letter-spacing:.04em"></div>
     <div class="d-item" onclick="uitloggen()" style="color:rgba(255,255,255,.5)"><span class="ico">🚪</span> Uitloggen</div>
   </div>
 </div>
 
+
 <!-- HEADER -->
 <!-- ── PAGINA LOGIN ──────────────────────────────────────────── -->
 <div id="login-scherm">
-  <div class="login-box">
+  <div class="login-box" id="login-box-inloggen">
     <div class="login-logo">
       <div style="width:64px;height:64px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;margin:0 auto 14px">
         <svg width="30" height="30" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -851,8 +852,41 @@
       <input type="password" id="login-pw" placeholder="wachtwoord" autocomplete="current-password"
         onkeydown="if(event.key==='Enter')checkLogin()" />
     </div>
-    <button class="btn btn-primary" onclick="checkLogin()" style="margin-bottom:0">Inloggen</button>
+    <button class="btn btn-primary" onclick="checkLogin()">Inloggen</button>
+    <button class="btn btn-secondary" onclick="toonRegistreren()" style="margin-bottom:0">Account aanmaken</button>
   </div>
+
+  <div class="login-box" id="login-box-registreren" style="display:none">
+    <div class="login-logo">
+      <h2 style="margin-top:0">Account aanmaken</h2>
+      <p>Vul je gegevens in</p>
+    </div>
+    <div class="login-fout" id="registreer-fout"></div>
+    <div class="field">
+      <label>Gebruikersnaam <span class="req">*</span></label>
+      <input type="text" id="reg-user" placeholder="gebruikersnaam" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label>E-mailadres <span class="req">*</span></label>
+      <input type="email" id="reg-email" placeholder="naam@emondt.nl" autocomplete="email" />
+    </div>
+    <div class="field">
+      <label>Telefoonnummer <span class="req">*</span></label>
+      <input type="tel" id="reg-tel" placeholder="06-12345678" />
+    </div>
+    <div class="field">
+      <label>Wachtwoord <span class="req">*</span></label>
+      <input type="password" id="reg-pw" placeholder="minimaal 6 tekens" />
+    </div>
+    <div class="field">
+      <label>Wachtwoord bevestigen <span class="req">*</span></label>
+      <input type="password" id="reg-pw2" placeholder="herhaal wachtwoord"
+        onkeydown="if(event.key==='Enter')registreerAccount()" />
+    </div>
+    <button class="btn btn-primary" onclick="registreerAccount()">Account aanmaken</button>
+    <button class="btn btn-secondary" onclick="toonInloggen()" style="margin-bottom:0">← Terug naar inloggen</button>
+  </div>
+
   <p style="color:rgba(255,255,255,.3);font-size:.68rem;margin-top:20px;text-align:center">Emondt Groep · Intern gebruik</p>
 </div>
 
@@ -1032,7 +1066,6 @@
 </div>
 
 <div class="screen" id="tab-winkelwagen">
-  <div id="cart-content"></div>
 
   <div class="form-card" style="margin-top:14px">
     <div class="form-card-title" style="display:flex;align-items:center;justify-content:space-between">
@@ -1530,6 +1563,144 @@ function sluitVrijArtikel() {
   document.getElementById('custom-qty').value = '1';
 }
 
+function wijzigWachtwoord() {
+  const huidig   = document.getElementById('ww-huidig').value;
+  const nieuw    = document.getElementById('ww-nieuw').value;
+  const bevestig = document.getElementById('ww-bevestig').value;
+  const status   = document.getElementById('ww-status');
+
+  const setStatus = (tekst, ok = false) => {
+    status.style.color = ok ? 'green' : 'var(--danger)';
+    status.textContent = tekst;
+  };
+
+  if (!huidig || !nieuw || !bevestig) { setStatus('❌ Vul alle velden in'); return; }
+  if (nieuw.length < 6)               { setStatus('❌ Nieuw wachtwoord minimaal 6 tekens'); return; }
+  if (nieuw !== bevestig)             { setStatus('❌ Wachtwoorden komen niet overeen'); return; }
+
+  const url = getSheetsUrl();
+  if (!url) { setStatus('❌ Geen verbinding met de database'); return; }
+
+  const sessie = getAuthSessie();
+  if (!sessie) { setStatus('❌ Niet ingelogd'); return; }
+
+  setStatus('⏳ Wachtwoord wijzigen...');
+
+  // Verifieer huidig wachtwoord via login-endpoint
+  fetch(`${url}?actie=login&gebruiker=${encodeURIComponent(sessie.gebruiker)}&wachtwoord=${encodeURIComponent(huidig)}&t=${Date.now()}`)
+    .then(r => r.json())
+    .then(r => {
+      if (r.status !== 'ok') {
+        setStatus('❌ Huidig wachtwoord is onjuist');
+        return;
+      }
+      // Huidig wachtwoord klopt — sla nieuw op via bijwerken-endpoint
+      const params = new URLSearchParams({
+        actie:     'wachtwoord_wijzigen',
+        gebruiker: sessie.gebruiker,
+        huidig:    huidig,
+        nieuw:     nieuw,
+        t:         Date.now(),
+      });
+      return fetch(`${url}?${params.toString()}`)
+        .then(r2 => r2.json())
+        .then(r2 => {
+          if (r2.status === 'ok') {
+            setStatus('✅ Wachtwoord gewijzigd!', true);
+            document.getElementById('ww-huidig').value = '';
+            document.getElementById('ww-nieuw').value = '';
+            document.getElementById('ww-bevestig').value = '';
+          } else {
+            setStatus('❌ ' + (r2.message || 'Fout bij opslaan'));
+          }
+        });
+    })
+    .catch(err => setStatus('❌ Verbindingsfout: ' + err.message));
+}
+
+function toonRegistreren() {
+  document.getElementById('login-box-inloggen').style.display = 'none';
+  document.getElementById('login-box-registreren').style.display = 'block';
+  setTimeout(() => document.getElementById('reg-user').focus(), 100);
+}
+
+function toonInloggen() {
+  document.getElementById('login-box-registreren').style.display = 'none';
+  document.getElementById('login-box-inloggen').style.display = 'block';
+}
+
+function registreerAccount() {
+  const user  = document.getElementById('reg-user').value.trim().toLowerCase();
+  const email = document.getElementById('reg-email').value.trim().toLowerCase();
+  const tel   = document.getElementById('reg-tel').value.trim();
+  const pw    = document.getElementById('reg-pw').value;
+  const pw2   = document.getElementById('reg-pw2').value;
+  const fout  = document.getElementById('registreer-fout');
+
+  const setFout = (tekst, ok=false) => {
+    fout.style.cssText = `display:block;border-radius:8px;padding:10px;margin-bottom:8px;${ok ? 'background:#f0f7e6;color:green' : 'background:#fee2e2;color:var(--danger)'}`;
+    fout.textContent = tekst;
+  };
+
+  fout.style.display = 'none';
+  if (!user || !email || !tel || !pw || !pw2) { setFout('❌ Vul alle velden in'); return; }
+  if (!email.includes('@'))                   { setFout('❌ Ongeldig e-mailadres'); return; }
+  if (pw.length < 6)                          { setFout('❌ Wachtwoord minimaal 6 tekens'); return; }
+  if (pw !== pw2)                             { setFout('❌ Wachtwoorden komen niet overeen'); return; }
+
+  const url = getSheetsUrl();
+  if (!url) { setFout('❌ Geen databasekoppeling. Vraag een beheerder.'); return; }
+
+  setFout('⏳ Account aanmaken...', true);
+
+  // Gebruik URLSearchParams voor correcte encoding
+  const params = new URLSearchParams({
+    actie:      'registreer',
+    gebruiker:  user,
+    wachtwoord: pw,
+    email:      email,
+    telefoon:   tel,
+    rol:        'monteur',
+    t:          Date.now(),
+  });
+
+  fetch(`${url}?${params.toString()}`)
+    .then(r => r.json())
+    .then(r => {
+      if (r.status === 'ok') {
+        slaAuthOp(user, 'monteur');
+        try {
+          const bestaand = JSON.parse(localStorage.getItem('emondt_persoon') || '{}');
+          localStorage.setItem('emondt_persoon', JSON.stringify({
+            ...bestaand, naam: user, telefoon: tel, ontvanger2: email
+          }));
+        } catch(e) {}
+        document.getElementById('login-scherm').classList.add('verborgen');
+        initialiseerApp();
+        setTimeout(() => {
+          const nEl = document.getElementById('monteur-naam');
+          const tEl = document.getElementById('monteur-telefoon');
+          const eEl = document.getElementById('monteur-email');
+          if (nEl) nEl.value = user;
+          if (tEl) tEl.value = tel;
+          if (eEl) eEl.value = email;
+          saveInfo();
+        }, 500);
+      } else if (r.status === 'bestaat_al') {
+        setFout('❌ Gebruikersnaam al in gebruik, kies een andere.');
+      } else {
+        setFout('❌ ' + (r.message || 'Onbekende fout. Controleer de databasekoppeling.'));
+      }
+    })
+    .catch(err => {
+      if (err.message?.includes('NetworkError') || err.message?.includes('fetch')) {
+        setFout('❌ CORS-fout: werkt alleen op de gedeployde omgeving (niet lokaal).');
+      } else {
+        setFout('❌ Verbindingsfout: ' + err.message);
+      }
+    });
+}
+
 // ── AUTHENTICATIE ─────────────────────────────────────────────
 // Sessie opgeslagen in localStorage zodat inloggen onthouden wordt
 const AUTH_KEY = 'emondt_auth';
@@ -1625,6 +1796,37 @@ function checkBeheerLogin() {}
 
 // ── FAVORIETEN ────────────────────────────────────────────────
 let FAVORIETEN = new Set(JSON.parse(localStorage.getItem('emondt_favorieten') || '[]'));
+
+function toonCategorieTegels() {
+  if (!ARTIKELEN.length) { setTimeout(toonCategorieTegels, 300); return; }
+  const lijst = document.getElementById('artikel-lijst');
+  if (!lijst) return;
+
+  const cats = [...new Set(ARTIKELEN.map(a => a.cat).filter(Boolean))].sort();
+  lijst.className = 'artikel-grid';
+  lijst.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:4px 0">
+      ${cats.map(cat => {
+        const n = ARTIKELEN.filter(a => a.cat === cat).length;
+        const iconen = ['🔧','⚡','🌡️','🔩','🧊','💧','🔌','🛠️','📦','🔄'];
+        const ico = iconen[cats.indexOf(cat) % iconen.length];
+        return `<button onclick="filterCategorie('${cat.replace(/'/g,"\\'")}');applyFilters()"
+          style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);
+                 padding:16px 12px;text-align:left;cursor:pointer;box-shadow:var(--shadow);
+                 display:flex;flex-direction:column;gap:4px;transition:border-color .15s;font-family:'DM Sans',sans-serif">
+          <span style="font-size:.85rem;font-weight:700;color:var(--navy);line-height:1.3">${cat}</span>
+          <span style="font-size:.72rem;color:var(--muted)">${n} artikel${n !== 1 ? 'en' : ''}</span>
+        </button>`;
+      }).join('')}
+    </div>`;
+}
+
+// Artikelen-bug fix: render na laden als artikelenpagina actief is
+function _naArtikelenGeladen() {
+  if (document.getElementById('tab-artikelen')?.classList.contains('active')) {
+    renderArtikelen(ARTIKELEN);
+  }
+}
 
 function toggleFavoriet(code) {
   if (FAVORIETEN.has(code)) {
@@ -1942,6 +2144,10 @@ function initialiseerApp() {
   loadInfo();
   loadCart();
   laadOpgeslagenIconen();
+  // Toon ingelogde gebruiker in drawer
+  const sessie = getAuthSessie();
+  const accountEl = document.getElementById('drawer-account');
+  if (accountEl && sessie) accountEl.textContent = 'Ingelogd als ' + sessie.gebruiker;
   document.getElementById('di-all')?.classList.add('active');
   showTab('welkom');
   laadArtikelenUitSheets();
@@ -2007,6 +2213,7 @@ function laadArtikelenUitSheets() {
       ARTIKELEN = JSON.parse(sesCache);
       bouwDrawerCats();
       renderArtikelen(ARTIKELEN);
+      _naArtikelenGeladen();
       // Ververs op achtergrond zonder laad-indicator
       fetchSheets(false);
       return;
@@ -2025,6 +2232,7 @@ function laadArtikelenUitSheets() {
       try { sessionStorage.setItem('emondt_artikelen_sessie', cached); } catch(e) {}
       bouwDrawerCats();
       renderArtikelen(ARTIKELEN);
+      _naArtikelenGeladen();
       // Ververs op achtergrond
       fetchSheets(false);
       return;
@@ -2043,6 +2251,7 @@ function fetchSheets(toonLaadindicator) {
       ARTIKELEN = JSON.parse(cached);
       bouwDrawerCats();
       renderArtikelen(ARTIKELEN);
+      _naArtikelenGeladen();
       showToast('📦 Gecachte database geladen');
     } else {
       const lijst = document.getElementById('artikel-lijst');
@@ -2102,6 +2311,7 @@ function laadUitCache(reden) {
       try { sessionStorage.setItem('emondt_artikelen_sessie', cached); } catch(e) {}
       bouwDrawerCats();
       renderArtikelen(ARTIKELEN);
+      _naArtikelenGeladen();
       const ts = localStorage.getItem('emondt_artikelen_ts');
       const leeftijd = ts ? Math.round((Date.now() - parseInt(ts)) / 60000) : '?';
       showToast(`📦 Cache geladen (${leeftijd} min oud)`);
@@ -3104,16 +3314,6 @@ Emondt Materiaalapp · www.emondt.nl`;
     ontvanger2:    inf.ontvanger2 || '',
     items:         artikelItems,
   });
-
-  // ── Winkelmand legen ──────────────────────────────────────
-  setTimeout(() => {
-    cart = {};
-    try { localStorage.removeItem('leverdatum'); localStorage.removeItem('emondt_cart'); } catch(e){}
-    document.querySelectorAll('.qty-val').forEach(el => el.value = 0);
-    document.querySelectorAll('.artikel-card').forEach(el => el.classList.remove('selected'));
-    updateBadge();
-    showTab('welkom');
-  }, 800);
   showToast('⏳ Bestelling wordt verstuurd...');
 }
 
@@ -3318,46 +3518,53 @@ function logBestellingSheets(data) {
   const url = getSheetsUrl();
   if (!url) return;
 
-  // Formaat: code×qty×naam×eenheid×leverancier
-  const artikelStr = (data.items || [])
+  // Log formaat: aantal-artikelnr-beschrijving
+  const logArtikelStr = (data.items || [])
+    .map(i => `${i.qty}-${i.code}-${(i.naam || '').replace(/[×|]/g, '')}`)
+    .join('|');
+
+  // Mail formaat: artikelnr×aantal×beschrijving×eenheid×leverancier
+  const mailArtikelStr = (data.items || [])
     .map(i => [
       i.code,
       i.qty,
-      (i.naam        || '').replace(/[×|]/g, ''),
-      (i.eenheid     || 'stuk').replace(/[×|]/g, ''),
-      (i.leverancier || '').replace(/[×|]/g, ''),
+      (i.naam       || '').replace(/[×|]/g, ''),
+      (i.eenheid    || 'stuk').replace(/[×|]/g, ''),
+      (i.leverancier|| '').replace(/[×|]/g, ''),
     ].join('×'))
     .join('|');
 
-  // Bouw compact payload — geen JSON nesting, directe parameters
   const params = new URLSearchParams({
-    actie:          'bestelling',
-    datum:          data.datum          || '',
-    naam:           data.naam           || '',
-    telefoon:       data.telefoon       || '',
-    afdeling:       data.afdeling       || '',
-    projectnummer:  data.projectnummer  || '',
-    projectnaam:    data.projectnaam    || '',
-    locatie:        data.locatie        || '',
-    leverdatum:     data.leverdatum     || '',
-    opmerkingen:    data.opmerkingen    || '',
-    ontvanger2:     data.ontvanger2     || '',
-    artikelen:      artikelStr,
-    totaal:         (data.items || []).reduce((s, i) => s + (parseInt(i.qty)||0), 0),
-    t:              Date.now(),
+    actie:         'bestelling',
+    datum:         data.datum          || '',
+    naam:          data.naam           || '',
+    telefoon:      data.telefoon       || '',
+    afdeling:      data.afdeling       || '',
+    projectnummer: data.projectnummer  || '',
+    projectnaam:   data.projectnaam    || '',
+    locatie:       data.locatie        || '',
+    leverdatum:    data.leverdatum     || '',
+    opmerkingen:   data.opmerkingen   || '',
+    ontvanger2:    data.ontvanger2     || '',
+    artikelen:     mailArtikelStr,
+    log_artikelen: logArtikelStr,
+    totaal:        (data.items || []).reduce((s, i) => s + (parseInt(i.qty)||0), 0),
+    t:             Date.now(),
   });
 
   fetch(`${url}?${params.toString()}`)
     .then(r => r.json())
     .then(r => {
       if (r.status === 'ok') {
-        // Sla op in bestelhistorie
-        const inf2 = getInfo();
-        const histItems = Object.entries(cart).map(([code, qty]) => {
-          const a = ARTIKELEN.find(x => x.code === code) || { naam: code, code };
-          return { code, qty, naam: a.naam };
-        });
-        const leverdatum = localStorage.getItem('leverdatum') || '';
+        // Gebruik data.items — niet cart (die wordt daarna pas geleegd)
+        const histItems = (data.items || []).map(i => ({
+          code:        i.code,
+          qty:         i.qty,
+          naam:        i.naam,
+          eenheid:     i.eenheid,
+          leverancier: i.leverancier || '',
+        }));
+        const leverdatum    = data.leverdatum || localStorage.getItem('leverdatum') || '';
         const leverdatumTxt = leverdatum
           ? new Date(leverdatum + 'T12:00:00').toLocaleDateString('nl-NL', { day:'2-digit', month:'long', year:'numeric' })
           : '—';
@@ -3365,41 +3572,49 @@ function logBestellingSheets(data) {
         slaHistorieOp({
           datum:         new Date().toLocaleString('nl-NL'),
           leverdatum,
-          naam:          inf2.naam,
-          telefoon:      inf2.telefoon,
-          afdeling:      inf2.afdeling,
-          projectnummer: inf2.projectnummer,
-          projectnaam:   inf2.projectnaam,
-          locatie:       inf2.locatie,
-          opmerkingen:   inf2.opmerkingen,
+          naam:          data.naam          || '',
+          telefoon:      data.telefoon      || '',
+          afdeling:      data.afdeling      || '',
+          projectnummer: data.projectnummer || '',
+          projectnaam:   data.projectnaam   || '',
+          locatie:       data.locatie       || '',
+          opmerkingen:   data.opmerkingen  || '',
           artikelen:     histItems,
         });
 
-        // Toon bevestigingsscherm
-        const totaalArtikelen = histItems.reduce((s, a) => s + a.qty, 0);
+        // Bevestigingsscherm
+        const totaalStuks = histItems.reduce((s, a) => s + a.qty, 0);
         document.getElementById('bevestiging-samenvatting').innerHTML = `
-          <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 14px">
-            <span style="color:var(--muted)">Monteur</span><span style="font-weight:600">${inf2.naam || '—'}</span>
-            <span style="color:var(--muted)">Project</span><span style="font-weight:600">${inf2.projectnaam || '—'}</span>
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin-bottom:12px">
+            <span style="color:var(--muted)">Monteur</span><span style="font-weight:600">${data.naam || '—'}</span>
+            <span style="color:var(--muted)">Project</span><span style="font-weight:600">${data.projectnaam || '—'}</span>
             <span style="color:var(--muted)">Leverdatum</span><span style="font-weight:600;color:var(--navy)">${leverdatumTxt}</span>
-            <span style="color:var(--muted)">Afleveradres</span><span style="font-weight:600">${inf2.locatie || '—'}</span>
-            <span style="color:var(--muted)">Artikelen</span><span style="font-weight:600">${histItems.length} soort${histItems.length !== 1 ? 'en' : ''} · ${totaalArtikelen} stuks totaal</span>
+            <span style="color:var(--muted)">Afleveradres</span><span style="font-weight:600">${data.locatie || '—'}</span>
+          </div>
+          <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:6px">Bestelde artikelen</div>
+          <div style="background:var(--white);border-radius:8px;overflow:hidden;border:1px solid var(--border)">
+            ${histItems.map((a, i) => `
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:${i%2===0?'var(--white)':'var(--bg)'};font-size:.82rem">
+                <span style="font-weight:700;color:var(--navy);min-width:28px">${a.qty}×</span>
+                <span style="flex:1">${a.naam}</span>
+                <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.74rem">${a.code}</span>
+              </div>`).join('')}
+            <div style="background:var(--navy);color:var(--green);padding:7px 10px;font-size:.8rem;font-weight:700;display:flex;justify-content:space-between">
+              <span>Totaal</span><span>${totaalStuks} stuks · ${histItems.length} artikel${histItems.length !== 1 ? 'en' : ''}</span>
+            </div>
           </div>`;
-        const overlay = document.getElementById('bevestiging-overlay');
-        overlay.style.display = 'flex';
-        // Wis winkelwagen
+
+        document.getElementById('bevestiging-overlay').style.display = 'flex';
         cart = {};
         saveCart();
         updateBadge();
         renderCart();
       } else {
         showToast('⚠️ Fout: ' + (r.message || r.status));
-        console.warn('[Sheets] Fout:', r);
       }
     })
     .catch(err => {
-      showToast('⚠️ Verbinding mislukt');
-      console.warn('[Sheets] Mislukt:', err.message);
+      showToast('⚠️ Verbinding mislukt: ' + err.message);
     });
 }
 
