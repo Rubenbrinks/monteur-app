@@ -816,14 +816,18 @@
   </div>
   <div class="drawer-scroll">
     <div class="d-item" onclick="wisFilter();showTab('artikelen');closeDrawer();toonCategorieTegels()"><span class="ico">🔧</span> Installatiemateriaal</div>
-    <div class="d-item" onclick="openVrijArtikel()"><span class="ico">✏️</span> Vrij artikel toevoegen</div>
     <div class="d-item" onclick="showTab('favorieten');closeDrawer()"><span class="ico">⭐</span> Favorieten</div>
     <div class="d-item" onclick="showTab('historie');closeDrawer()"><span class="ico">📋</span> Bestelhistorie</div>
+    <div class="d-divider"></div>
+    <div class="d-item" onclick="showTab('telefoonlijst');closeDrawer()"><span class="ico">📞</span> Telefoonlijst</div>
+    <div class="d-divider"></div>
     <div class="d-coming"><span class="ico">🕐</span> Meer komt binnenkort</div>
   </div>
   <div class="d-foot">
-    <div class="d-item" onclick="showTab('telefoonlijst');closeDrawer()"><span class="ico">📞</span> Telefoonlijst</div>
+    <div class="d-item" onclick="openVrijArtikel()"><span class="ico">✏️</span> Vrij artikel toevoegen</div>
+    <div class="d-divider"></div>
     <div class="d-item" onclick="showTab('beheer-panel');closeDrawer()"><span class="ico">⚙️</span> Beheer</div>
+    <div class="d-divider"></div>
     <div id="drawer-account" style="padding:6px 12px 2px;font-size:.7rem;color:rgba(255,255,255,.3);letter-spacing:.04em"></div>
     <div class="d-item" onclick="uitloggen()" style="color:rgba(255,255,255,.5)"><span class="ico">🚪</span> Uitloggen</div>
   </div>
@@ -1066,6 +1070,7 @@
 </div>
 
 <div class="screen" id="tab-winkelwagen">
+  <div id="cart-content"></div>
 
   <div class="form-card" style="margin-top:14px">
     <div class="form-card-title" style="display:flex;align-items:center;justify-content:space-between">
@@ -1561,61 +1566,6 @@ function sluitVrijArtikel() {
   document.getElementById('custom-naam').value = '';
   document.getElementById('custom-code').value = '';
   document.getElementById('custom-qty').value = '1';
-}
-
-function wijzigWachtwoord() {
-  const huidig   = document.getElementById('ww-huidig').value;
-  const nieuw    = document.getElementById('ww-nieuw').value;
-  const bevestig = document.getElementById('ww-bevestig').value;
-  const status   = document.getElementById('ww-status');
-
-  const setStatus = (tekst, ok = false) => {
-    status.style.color = ok ? 'green' : 'var(--danger)';
-    status.textContent = tekst;
-  };
-
-  if (!huidig || !nieuw || !bevestig) { setStatus('❌ Vul alle velden in'); return; }
-  if (nieuw.length < 6)               { setStatus('❌ Nieuw wachtwoord minimaal 6 tekens'); return; }
-  if (nieuw !== bevestig)             { setStatus('❌ Wachtwoorden komen niet overeen'); return; }
-
-  const url = getSheetsUrl();
-  if (!url) { setStatus('❌ Geen verbinding met de database'); return; }
-
-  const sessie = getAuthSessie();
-  if (!sessie) { setStatus('❌ Niet ingelogd'); return; }
-
-  setStatus('⏳ Wachtwoord wijzigen...');
-
-  // Verifieer huidig wachtwoord via login-endpoint
-  fetch(`${url}?actie=login&gebruiker=${encodeURIComponent(sessie.gebruiker)}&wachtwoord=${encodeURIComponent(huidig)}&t=${Date.now()}`)
-    .then(r => r.json())
-    .then(r => {
-      if (r.status !== 'ok') {
-        setStatus('❌ Huidig wachtwoord is onjuist');
-        return;
-      }
-      // Huidig wachtwoord klopt — sla nieuw op via bijwerken-endpoint
-      const params = new URLSearchParams({
-        actie:     'wachtwoord_wijzigen',
-        gebruiker: sessie.gebruiker,
-        huidig:    huidig,
-        nieuw:     nieuw,
-        t:         Date.now(),
-      });
-      return fetch(`${url}?${params.toString()}`)
-        .then(r2 => r2.json())
-        .then(r2 => {
-          if (r2.status === 'ok') {
-            setStatus('✅ Wachtwoord gewijzigd!', true);
-            document.getElementById('ww-huidig').value = '';
-            document.getElementById('ww-nieuw').value = '';
-            document.getElementById('ww-bevestig').value = '';
-          } else {
-            setStatus('❌ ' + (r2.message || 'Fout bij opslaan'));
-          }
-        });
-    })
-    .catch(err => setStatus('❌ Verbindingsfout: ' + err.message));
 }
 
 function toonRegistreren() {
