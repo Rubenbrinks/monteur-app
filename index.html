@@ -2304,6 +2304,30 @@ function initialiseerApp() {
   const sessie = getAuthSessie();
   const accountEl = document.getElementById('drawer-account');
   if (accountEl && sessie) accountEl.textContent = 'Ingelogd als ' + sessie.gebruiker;
+
+  // Haal profielgegevens op als naam nog niet is opgeslagen
+  const persoon = (() => { try { return JSON.parse(localStorage.getItem('emondt_persoon') || '{}'); } catch(e) { return {}; } })();
+  if (!persoon.naam && sessie?.gebruiker) {
+    const url = getSheetsUrl();
+    if (url) {
+      fetch(`${url}?actie=profiel&gebruiker=${encodeURIComponent(sessie.gebruiker)}&t=${Date.now()}`)
+        .then(r => r.json())
+        .then(r => {
+          if (r.status === 'ok') {
+            try {
+              localStorage.setItem('emondt_persoon', JSON.stringify({
+                naam:       r.gebruiker  || '',
+                telefoon:   r.telefoon   || '',
+                ontvanger2: r.email      || '',
+                afdeling:   persoon.afdeling || '',
+              }));
+            } catch(e) {}
+            loadInfo();
+          }
+        })
+        .catch(() => {});
+    }
+  }
   document.getElementById('di-all')?.classList.add('active');
   showTab('welkom');
   laadArtikelenUitSheets();
