@@ -578,9 +578,6 @@
       color:var(--green);margin-bottom:16px;padding-bottom:10px;
       border-bottom:1.5px solid var(--border);
     }
-    .onthoud-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.72rem;font-weight:700;text-transform:none;letter-spacing:0;white-space:nowrap;padding:4px 10px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);transition:all .2s}
-    .onthoud-toggle.actief{background:var(--green-light);border-color:var(--green);color:var(--navy)}
-    .onthoud-toggle input[type=checkbox]{width:15px;height:15px;accent-color:var(--navy);cursor:pointer;flex-shrink:0}
     .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
     .field:last-child{margin-bottom:0}
     .field-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -1069,15 +1066,9 @@
 </div>
 
 <div class="screen" id="tab-winkelwagen">
-
+  <div id="cart-content"></div>
   <div class="form-card" style="margin-top:14px">
-    <div class="form-card-title" style="display:flex;align-items:center;justify-content:space-between">
-      📋 Project
-      <label class="onthoud-toggle">
-        <input type="checkbox" id="onthoud-project" onchange="toggleOnthoudProject(this)" />
-        <span>Onthoud</span>
-      </label>
-    </div>
+    <div class="form-card-title">📋 Project</div>
     <div class="field-2">
       <div class="field">
         <label>Projectnummer</label>
@@ -1091,13 +1082,7 @@
   </div>
 
   <div class="form-card">
-    <div class="form-card-title" style="display:flex;align-items:center;justify-content:space-between">
-      📦 Levering
-      <label class="onthoud-toggle">
-        <input type="checkbox" id="onthoud-locatie" onchange="toggleOnthoudLocatie(this)" />
-        <span>Onthoud</span>
-      </label>
-    </div>
+    <div class="form-card-title">📦 Levering</div>
     <div class="field">
       <label>Afleveradres <span class="req">*</span></label>
       <select id="locatie-keuze" onchange="kiesLocatie(this)">
@@ -1642,9 +1627,9 @@ function registreerAccount() {
         document.getElementById('login-scherm').classList.add('verborgen');
         initialiseerApp();
         setTimeout(() => {
-          const nEl = document.getElementById('monteur-naam');
-          const tEl = document.getElementById('monteur-telefoon');
-          const eEl = document.getElementById('monteur-email');
+          const nEl = document.getElementById('naam');
+          const tEl = document.getElementById('telefoon');
+          const eEl = document.getElementById('ontvanger2');
           if (nEl) nEl.value = user;
           if (tEl) tEl.value = tel;
           if (eEl) eEl.value = email;
@@ -1727,6 +1712,17 @@ function checkLogin() {
       btn.disabled = false;
       if (r.status === 'ok') {
         slaAuthOp(r.gebruiker, r.rol);
+        // Sla accountgegevens op — vul naam in als nog niet ingevuld
+        try {
+          const bestaand = JSON.parse(localStorage.getItem('emondt_persoon') || '{}');
+          const updated = {
+            naam:      bestaand.naam      || r.gebruiker || '',
+            telefoon:  bestaand.telefoon  || r.telefoon  || '',
+            ontvanger2:bestaand.ontvanger2|| r.email     || '',
+            afdeling:  bestaand.afdeling  || '',
+          };
+          localStorage.setItem('emondt_persoon', JSON.stringify(updated));
+        } catch(e) {}
         document.getElementById('login-scherm').classList.add('verborgen');
         initialiseerApp();
       } else {
@@ -3233,42 +3229,29 @@ function updateCartSamenvatting() {
     <div class="s-row total"><span>Totaal</span><span>${totaal} stuks</span></div>`;
 }
 
-function updateOnthoudUI() {
-  const cbP = document.getElementById('onthoud-project');
-  const cbL = document.getElementById('onthoud-locatie');
-  const lblP = cbP?.closest('.onthoud-toggle');
-  const lblL = cbL?.closest('.onthoud-toggle');
-  if (lblP) lblP.classList.toggle('actief', !!cbP?.checked);
-  if (lblL) lblL.classList.toggle('actief', !!cbL?.checked);
+function saveInfo() {
+  const inf = getInfo();
+  // Alleen persoonsgegevens bewaren (niet project/locatie)
+  try { localStorage.setItem('emondt_persoon', JSON.stringify({ naam: inf.naam, telefoon: inf.telefoon, afdeling: inf.afdeling, ontvanger2: inf.ontvanger2 })); } catch(e){}
+  updateCartSamenvatting();
 }
 
-function toggleOnthoudProject(cb) {
-  try { localStorage.setItem('onthoud_project', cb.checked ? '1' : '0'); } catch(e){}
-  updateOnthoudUI();
-  if (!cb.checked) {
-    try { localStorage.removeItem('emondt_project'); } catch(e){}
-    showToast('📌 Projectgegevens worden niet meer onthouden');
-  } else {
-    const pnr = document.getElementById('projectnummer')?.value || '';
-    const pnm = document.getElementById('projectnaam')?.value   || '';
-    try { localStorage.setItem('emondt_project', JSON.stringify({ projectnummer: pnr, projectnaam: pnm })); } catch(e){}
-    showToast('✓ Projectgegevens worden onthouden');
-  }
-}
+function loadInfo() {
+  try { localStorage.removeItem('emondt_info'); } catch(e){}
+  try {
+    // Persoonsgegevens laden — eerst uit account-sessie, daarna localStorage
+    const sessie  = getAuthSessie();
+    const persoon = JSON.parse(localStorage.getItem('emondt_persoon') || '{}');
 
-function toggleOnthoudLocatie(cb) {
-  try { localStorage.setItem('onthoud_locatie', cb.checked ? '1' : '0'); } catch(e){}
-  updateOnthoudUI();
-  if (!cb.checked) {
-    try { localStorage.removeItem('emondt_locatie'); } catch(e){}
-    showToast('📌 Afleveradres wordt niet meer onthouden');
-  } else {
-    const locInput = document.getElementById('locatie');
-    const locKeuze = document.getElementById('locatie-keuze');
-    const locWaarde = (locKeuze?.value === 'vrij' ? locInput?.value : locKeuze?.value) || '';
-    try { localStorage.setItem('emondt_locatie', JSON.stringify({ locatie: locWaarde })); } catch(e){}
-    showToast('✓ Afleveradres wordt onthouden');
-  }
+    // Naam: voorrang aan opgeslagen naam, anders accountnaam
+    const naam = persoon.naam || sessie?.gebruiker || '';
+    if (naam) { const el = document.getElementById('naam'); if (el) el.value = naam; }
+    if (persoon.telefoon)   { const el = document.getElementById('telefoon');   if (el) el.value = persoon.telefoon; }
+    if (persoon.afdeling)   { const el = document.getElementById('afdeling');   if (el) el.value = persoon.afdeling; }
+    if (persoon.ontvanger2) { const el = document.getElementById('ontvanger2'); if (el) el.value = persoon.ontvanger2; }
+
+    // Project/locatie/leverdatum NIET laden — worden gewist na elke bestelling
+  } catch(e){}
 }
 
 function kiesLocatie(sel) {
@@ -3398,8 +3381,6 @@ Wil je toch versturen?`)) return;
   const datum = new Date().toLocaleDateString('nl-NL',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
   const projref = inf.projectnummer || inf.projectnaam || '';
   const subject = `Materiaal bestellen${projref?' '+projref:''}${inf.projectnaam?' – '+inf.projectnaam:''} – ${inf.naam||'monteur'} – ${datum}`;
-  const to = 'bestellen@emondt.nl';
-  const cc = inf.ontvanger2 || '';
 
   // ── Bouw e-mailbody (platte tekst) ────────────────────────
   const cats = [...new Set(items.map(([code]) => ARTIKELEN.find(x=>x.code===code)?.cat).filter(Boolean))];
@@ -3480,92 +3461,6 @@ Emondt Materiaalapp · www.emondt.nl`;
 
 // ── OPSLAAN / LADEN ───────────────────────────────────────────
 
-function saveInfo() {
-  const inf = getInfo();
-  try { localStorage.setItem('emondt_persoon', JSON.stringify({ naam: inf.naam, telefoon: inf.telefoon, afdeling: inf.afdeling, ontvanger2: inf.ontvanger2 })); } catch(e){}
-  try { sessionStorage.setItem('emondt_sessie_info', JSON.stringify(inf)); } catch(e){}
-  // Onthoud project/locatie als checkbox aan
-  try {
-    if (localStorage.getItem('onthoud_project') === '1') {
-      localStorage.setItem('emondt_project', JSON.stringify({ projectnummer: inf.projectnummer, projectnaam: inf.projectnaam }));
-    }
-    if (localStorage.getItem('onthoud_locatie') === '1') {
-      const locKeuze = document.getElementById('locatie-keuze');
-      const locInput = document.getElementById('locatie');
-      const locWaarde = (locKeuze?.value === 'vrij' ? locInput?.value : locKeuze?.value) || inf.locatie || '';
-      localStorage.setItem('emondt_locatie', JSON.stringify({ locatie: locWaarde }));
-    }
-  } catch(e){}
-  updateCartSamenvatting();
-}
-function loadInfo() {
-  try { localStorage.removeItem('emondt_info'); } catch(e){} // opruimen oude sleutel
-  try {
-    // Vaste gegevens uit localStorage
-    const persoon = JSON.parse(localStorage.getItem('emondt_persoon') || '{}');
-    if (persoon.naam)       { const el = document.getElementById('naam');       if (el) el.value = persoon.naam; }
-    if (persoon.telefoon)   { const el = document.getElementById('telefoon');   if (el) el.value = persoon.telefoon; }
-    if (persoon.afdeling)   { const el = document.getElementById('afdeling');   if (el) el.value = persoon.afdeling; }
-    if (persoon.ontvanger2) { const el = document.getElementById('ontvanger2'); if (el) el.value = persoon.ontvanger2; }
-
-    // Projectgegevens onthouden
-    const onthoudProject = localStorage.getItem('onthoud_project') === '1';
-    const cbProject = document.getElementById('onthoud-project');
-    if (cbProject) cbProject.checked = onthoudProject;
-    if (onthoudProject) {
-      const proj = JSON.parse(localStorage.getItem('emondt_project') || '{}');
-      if (proj.projectnummer) { const el = document.getElementById('projectnummer'); if (el) el.value = proj.projectnummer; }
-      if (proj.projectnaam)   { const el = document.getElementById('projectnaam');   if (el) el.value = proj.projectnaam; }
-    }
-
-    // Locatie onthouden
-    const onthoudLocatie = localStorage.getItem('onthoud_locatie') === '1';
-    const cbLocatie = document.getElementById('onthoud-locatie');
-    if (cbLocatie) cbLocatie.checked = onthoudLocatie;
-    if (onthoudLocatie) {
-      const loc = JSON.parse(localStorage.getItem('emondt_locatie') || '{}');
-      if (loc.locatie) {
-        const sel = document.getElementById('locatie-keuze');
-        const input = document.getElementById('locatie');
-        const vaste = ['op de klus', 'op de zaak'];
-        if (sel && input) {
-          if (vaste.includes(loc.locatie)) {
-            sel.value = loc.locatie; input.value = loc.locatie; input.style.display = 'none';
-          } else {
-            sel.value = 'vrij'; input.value = loc.locatie; input.style.display = 'block';
-          }
-        }
-      }
-    }
-
-    updateOnthoudUI();
-
-    // Sessiegegevens uit sessionStorage (verdwijnen bij sluiten tabblad)
-    const s = JSON.parse(sessionStorage.getItem('emondt_sessie_info') || '{}');
-    ['projectnummer','projectnaam','opmerkingen'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el && s[id]) el.value = s[id];
-    });
-
-    // Herstel afleveradres dropdown
-    if (s.locatie) {
-      const sel   = document.getElementById('locatie-keuze');
-      const input = document.getElementById('locatie');
-      if (sel && input) {
-        const vaste = ['op de klus', 'op de zaak'];
-        if (vaste.includes(s.locatie)) {
-          sel.value = s.locatie;
-          input.value = s.locatie;
-          input.style.display = 'none';
-        } else {
-          sel.value = 'vrij';
-          input.value = s.locatie;
-          input.style.display = 'block';
-        }
-      }
-    }
-  } catch(e){}
-}
 function getInfo() {
   return ['naam','telefoon','afdeling','projectnummer','projectnaam','locatie','ontvanger2','opmerkingen']
     .reduce((o,id) => { const el = document.getElementById(id); if(el) o[id]=el.value; return o; }, {});
@@ -3770,6 +3665,19 @@ function logBestellingSheets(data) {
         saveCart();
         updateBadge();
         renderCart();
+
+        // Project, levering en leverdatum wissen
+        ['projectnummer','projectnaam','opmerkingen'].forEach(id => {
+          const el = document.getElementById(id); if (el) el.value = '';
+        });
+        const locKeuze = document.getElementById('locatie-keuze');
+        const locInput = document.getElementById('locatie');
+        if (locKeuze) { locKeuze.value = ''; }
+        if (locInput) { locInput.value = ''; locInput.style.display = 'none'; }
+        const levEl = document.getElementById('leverdatum-static');
+        if (levEl) levEl.value = '';
+        try { localStorage.removeItem('leverdatum'); } catch(e){}
+        updateCartSamenvatting();
       } else {
         showToast('⚠️ Fout: ' + (r.message || r.status));
       }
