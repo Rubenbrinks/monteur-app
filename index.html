@@ -3398,7 +3398,7 @@ Wil je toch versturen?`)) return;
   const datum = new Date().toLocaleDateString('nl-NL',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
   const projref = inf.projectnummer || inf.projectnaam || '';
   const subject = `Materiaal bestellen${projref?' '+projref:''}${inf.projectnaam?' – '+inf.projectnaam:''} – ${inf.naam||'monteur'} – ${datum}`;
-  const to = 'rubenbrinks1@gmail.com';
+  const to = 'bestellen@emondt.nl';
   const cc = inf.ontvanger2 || '';
 
   // ── Bouw e-mailbody (platte tekst) ────────────────────────
