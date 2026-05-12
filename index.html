@@ -2300,6 +2300,8 @@ function initialiseerApp() {
   }
 
   laadOpgeslagenIconen();
+  loadInfo();
+  loadCart();
   // Toon ingelogde gebruiker in drawer
   const sessie = getAuthSessie();
   const accountEl = document.getElementById('drawer-account');
