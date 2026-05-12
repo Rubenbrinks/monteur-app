@@ -1,6 +1,6 @@
 // ── Emondt Materiaalapp – Service Worker ──────────────────────
 // Versie: bump dit getal na elke app-update om cache te vernieuwen
-const CACHE_NAAM = 'emondt-materiaalapp-v2.4.2';
+const CACHE_NAAM = 'emondt-materiaalapp-v2.4.3';
 
 // Bestanden die offline beschikbaar moeten zijn
 const TE_CACHEN = [
