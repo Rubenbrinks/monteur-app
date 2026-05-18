@@ -276,35 +276,40 @@
 
     /* ═══ CATEGORIE / SUBCAT LABELS ═════════════════════════════ */
     /* Hoofdcategorie — volle navy balk */
+    /* ═══ CATEGORIE LABELS — kaart-stijl ═══════════════════════ */
     .cat-label{
-      font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;
-      color:var(--white);background:var(--navy);
-      display:flex;align-items:center;gap:10px;
-      margin:24px -16px 14px;
-      padding:11px 20px;
-      border-left:4px solid var(--green);
+      display:flex;align-items:center;justify-content:space-between;
+      cursor:pointer;user-select:none;
+      background:var(--white);border:1.5px solid var(--border);
+      border-radius:var(--radius);border-left:3px solid var(--navy);
+      padding:12px 14px;margin:0 0 6px;
+      font-size:.88rem;font-weight:700;color:var(--navy);
+      box-shadow:var(--shadow);
     }
-    .cat-label:first-child{margin-top:4px}
+    .cat-label:active{background:var(--bg)}
 
-    /* Subcategorie — lichtgrijze balk, volle breedte */
+    /* Subcategorie — iets lichter, inspring via padding */
     .subcat-label{
-      font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;
-      color:var(--navy);background:var(--bg);
-      display:flex;align-items:center;gap:8px;
-      margin:16px -16px 10px;
-      padding:8px 20px;
-      border-left:3px solid var(--navy);
+      display:flex;align-items:center;justify-content:space-between;
+      cursor:pointer;user-select:none;
+      background:var(--bg);border:1.5px solid var(--border);
+      border-radius:var(--radius);border-left:3px solid var(--green);
+      padding:10px 14px 10px 20px;margin:0 0 4px;
+      font-size:.82rem;font-weight:600;color:var(--text);
     }
+    .subcat-label:active{background:#eaecef}
 
-    /* Subsubcategorie — witte balk met groene accentlijn, ingesprongen */
+    /* Subsubcategorie — nog subtieler */
     .subsubcat-label{
-      font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;
-      color:var(--muted);background:var(--white);
-      display:flex;align-items:center;gap:6px;
-      margin:12px -16px 8px;
-      padding:6px 20px 6px 28px;
-      border-left:2px solid var(--green);
+      display:flex;align-items:center;justify-content:space-between;
+      cursor:pointer;user-select:none;
+      background:transparent;
+      border-left:2px solid var(--border);
+      padding:7px 14px 7px 26px;margin:0 0 2px;
+      font-size:.78rem;font-weight:600;color:var(--muted);
+      letter-spacing:.04em;
     }
+    .subsubcat-label:active{color:var(--text)}
 
     /* ═══ WEERGAVE TOGGLE ══════════════════════════════════════ */
     .weergave-rij{display:flex;align-items:center;justify-content:space-between;padding:8px 0 10px}
@@ -771,7 +776,13 @@
     .hist-artikel-qty{font-weight:700;color:var(--navy);min-width:40px}
 
     /* ═══ BEHEERDERSPANEEL ══════════════════════════════════════ */
-    .admin-card{background:var(--white);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:var(--shadow);border:1.5px solid var(--border)}
+    .admin-card{background:var(--white);border-radius:var(--radius);margin-bottom:8px;box-shadow:var(--shadow);border:1.5px solid var(--border);overflow:hidden}
+    .admin-kaart-header{width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:none;border:none;cursor:pointer;font-size:.88rem;font-weight:700;color:var(--text);text-align:left;font-family:'DM Sans',sans-serif;transition:background .12s}
+    .admin-kaart-header:active{background:var(--bg)}
+    .admin-kaart-header.open{color:var(--navy);border-bottom:1.5px solid var(--border)}
+    .admin-arrow{font-size:.65rem;color:var(--muted);transition:transform .22s;flex-shrink:0}
+    .admin-kaart-header.open .admin-arrow{transform:rotate(90deg)}
+    .admin-kaart-body{padding:14px 16px}
     .admin-titel{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--green);margin-bottom:14px;padding-bottom:10px;border-bottom:1.5px solid var(--border)}
     .admin-artikel-rij{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
     .admin-artikel-rij:last-child{border-bottom:none}
@@ -812,7 +823,6 @@
     </div>
   </div>
   <div class="drawer-scroll">
-    <div class="d-item" onclick="wisFilter();showTab('artikelen');closeDrawer();toonCategorieTegels()"><span class="ico">🔧</span> Installatiemateriaal</div>
     <div class="d-item" onclick="openVrijArtikel()"><span class="ico">✏️</span> Vrij artikel toevoegen</div>
     <div class="d-item" onclick="showTab('favorieten');closeDrawer()"><span class="ico">⭐</span> Favorieten</div>
     <div class="d-item" onclick="showTab('historie');closeDrawer()"><span class="ico">📋</span> Bestelhistorie</div>
@@ -1253,79 +1263,118 @@
 
 <!-- BEHEERDERSPANEEL -->
 <div class="screen" id="tab-beheer-panel">
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
     <button onclick="showTab('welkom')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:4px">←</button>
     <h2 style="font-size:1.1rem;font-weight:700;color:var(--text);margin:0">⚙️ Beheer</h2>
   </div>
 
-  <div class="admin-card">
-    <div class="admin-titel">🔗 Google Sheets koppeling</div>
-    <div id="beheer-omgeving-waarschuwing" style="display:none;background:#fff3cd;border:1.5px solid #f0c040;border-radius:8px;padding:10px 12px;font-size:.8rem;color:#856404;margin-bottom:12px;line-height:1.6">
-      ⚠️ <strong>Lokale testomgeving</strong> — schrijfacties (toevoegen, bewerken, verwijderen) werken niet vanuit <code>localhost</code> of <code>file://</code> door CORS-beperkingen van Google. Deploy de app op GitHub Pages om dit te testen.
-    </div>
-    <div style="display:flex;gap:8px;margin-bottom:8px">
-      <button class="btn btn-primary" onclick="testVerbinding()" style="margin-bottom:0;flex:1">🔍 Verbinding testen</button>
-      <button class="btn btn-primary" onclick="herlaadArtikelen()" style="margin-bottom:0;flex:1">🔄 Herladen</button>
-    </div>
-    <button class="btn btn-secondary" onclick="testBestellingLog()" style="margin-bottom:8px">📋 Test bestelling loggen</button>
-    <div id="beheer-status" style="font-size:.84rem;line-height:1.6;min-height:24px"></div>
+  <div id="beheer-omgeving-waarschuwing" style="display:none;background:#fff3cd;border:1.5px solid #f0c040;border-radius:8px;padding:10px 12px;font-size:.8rem;color:#856404;margin-bottom:10px;line-height:1.6">
+    ⚠️ <strong>Lokale testomgeving</strong> — schrijfacties werken niet vanuit <code>localhost</code> of <code>file://</code>. Deploy op GitHub Pages.
   </div>
 
+  <!-- 1. Koppeling -->
   <div class="admin-card">
-    <div class="admin-titel">📊 Artikeldatabase</div>
-    <p style="font-size:.84rem;color:var(--muted);margin-bottom:14px;line-height:1.6">Kolomtitels: <code style="background:var(--bg);padding:1px 5px;border-radius:4px;font-size:.8rem">code · naam · cat · subcat · subsubcat · eenheid · leverancier · warning · verpakking · afbeelding · link · linktoitems</code></p>
-    <a href="https://docs.google.com/spreadsheets/d/1nVAoYUlm_MGBsFLvH2QsZmuZooqkxbsibreMykhPGws/edit" target="_blank" style="text-decoration:none">
-      <button class="btn btn-primary" style="margin-bottom:0">📊 Open Google Spreadsheet</button>
-    </a>
+    <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-koppeling',this)">
+      <span>🔗 Google Sheets koppeling</span><span class="admin-arrow">▶</span>
+    </button>
+    <div id="kaart-koppeling" class="admin-kaart-body" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="btn btn-primary" onclick="testVerbinding()" style="margin-bottom:0;flex:1">🔍 Verbinding testen</button>
+        <button class="btn btn-primary" onclick="herlaadArtikelen()" style="margin-bottom:0;flex:1">🔄 Herladen</button>
+      </div>
+      <button class="btn btn-secondary" onclick="testBestellingLog()" style="margin-bottom:8px">📋 Test bestelling loggen</button>
+      <div id="beheer-status" style="font-size:.84rem;line-height:1.6;min-height:20px"></div>
+    </div>
   </div>
 
+  <!-- 2. Artikeldatabase -->
   <div class="admin-card">
-    <div class="admin-titel">➕ Artikel toevoegen</div>
-    <div class="field"><label>Artikelnummer <span class="req">*</span></label><input type="text" id="admin-code" placeholder="bijv. KT-0099" /></div>
-    <div class="field"><label>Naam <span class="req">*</span></label><input type="text" id="admin-naam" placeholder="Artikelnaam" /></div>
-    <div class="field-2">
-      <div class="field"><label>Categorie</label><input type="text" id="admin-cat" placeholder="bijv. Koeltechniek" /></div>
-      <div class="field"><label>Subcategorie</label><input type="text" id="admin-subcat" placeholder="bijv. Koperfittingen" /></div>
+    <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-database',this)">
+      <span>📊 Artikeldatabase</span><span class="admin-arrow">▶</span>
+    </button>
+    <div id="kaart-database" class="admin-kaart-body" style="display:none">
+      <p style="font-size:.84rem;color:var(--muted);margin-bottom:12px;line-height:1.6">Kolomtitels: <code style="background:var(--bg);padding:1px 5px;border-radius:4px;font-size:.78rem">code · naam · cat · subcat · subsubcat · eenheid · leverancier · warning · verpakking · afbeelding · link · linktoitems</code></p>
+      <a href="https://docs.google.com/spreadsheets/d/1nVAoYUlm_MGBsFLvH2QsZmuZooqkxbsibreMykhPGws/edit" target="_blank" style="text-decoration:none">
+        <button class="btn btn-primary" style="margin-bottom:0">📊 Open Google Spreadsheet</button>
+      </a>
     </div>
-    <div class="field-2">
-      <div class="field"><label>Eenheid</label><input type="text" id="admin-eenheid" placeholder="stuk / meter / 100 stuks" /></div>
-      <div class="field"><label>Leverancier</label><input type="text" id="admin-leverancier" placeholder="bijv. Reftec BV" /></div>
-    </div>
-    <div class="field-2">
-      <div class="field"><label>Link (URL)</label><input type="url" id="admin-link" placeholder="https://..." /></div>
-      <div class="field"><label>Verpakking</label><input type="text" id="admin-verpakking" placeholder="bijv. doos à 100 stuks" /></div>
-    </div>
-    <button class="btn btn-primary" onclick="adminArtikelOpslaan()" style="margin-bottom:0">➕ Artikel opslaan</button>
-    <div id="admin-status" style="font-size:.84rem;margin-top:8px;line-height:1.6"></div>
   </div>
 
+  <!-- 3. Artikel toevoegen -->
   <div class="admin-card">
-    <div class="admin-titel">📥 CSV importeren — Technische Unie</div>
-    <p style="font-size:.84rem;color:var(--muted);line-height:1.6;margin-bottom:14px">
-      Exporteer artikelen vanuit <strong>mijn.tu.nl</strong> als CSV. De kolommen <code style="background:var(--bg);padding:1px 5px;border-radius:4px;font-size:.8rem">Artikelnummer</code>, <code style="background:var(--bg);padding:1px 5px;border-radius:4px;font-size:.8rem">Artikelomschrijving</code> en <code style="background:var(--bg);padding:1px 5px;border-radius:4px;font-size:.8rem">Verpakkingseenheid</code> worden overgenomen. Artikelen worden direct opgeslagen in de database.
-    </p>
-    <div id="tu-dropzone" onclick="document.getElementById('tu-csv-input').click()"
-      style="border:2px dashed var(--border);border-radius:var(--radius);padding:28px 20px;text-align:center;cursor:pointer;transition:border-color .15s;background:var(--bg);margin-bottom:10px">
-      <div style="font-size:1.8rem;margin-bottom:6px">📄</div>
-      <div style="font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:2px">Tik om CSV te kiezen</div>
-      <div style="font-size:.74rem;color:var(--muted)">of sleep een bestand hierheen</div>
+    <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-toevoegen',this)">
+      <span>➕ Artikel toevoegen</span><span class="admin-arrow">▶</span>
+    </button>
+    <div id="kaart-toevoegen" class="admin-kaart-body" style="display:none">
+      <div class="field"><label>Artikelnummer <span class="req">*</span></label><input type="text" id="admin-code" placeholder="bijv. KT-0099" /></div>
+      <div class="field"><label>Naam <span class="req">*</span></label><input type="text" id="admin-naam" placeholder="Artikelnaam" /></div>
+      <div class="field-2">
+        <div class="field"><label>Categorie</label><input type="text" id="admin-cat" placeholder="bijv. Koeltechniek" /></div>
+        <div class="field"><label>Subcategorie</label><input type="text" id="admin-subcat" placeholder="bijv. Koperfittingen" /></div>
+      </div>
+      <div class="field-2">
+        <div class="field"><label>Eenheid</label><input type="text" id="admin-eenheid" placeholder="stuk / meter / 100 stuks" /></div>
+        <div class="field"><label>Leverancier</label><input type="text" id="admin-leverancier" placeholder="bijv. Reftec BV" /></div>
+      </div>
+      <div class="field-2">
+        <div class="field"><label>Link (URL)</label><input type="url" id="admin-link" placeholder="https://..." /></div>
+        <div class="field"><label>Verpakking</label><input type="text" id="admin-verpakking" placeholder="bijv. doos à 100 stuks" /></div>
+      </div>
+      <button class="btn btn-primary" onclick="adminArtikelOpslaan()" style="margin-bottom:0">➕ Artikel opslaan</button>
+      <div id="admin-status" style="font-size:.84rem;margin-top:8px;line-height:1.6"></div>
     </div>
-    <input type="file" id="tu-csv-input" accept=".csv,.txt" style="display:none" onchange="verwerkTuCsv(this.files[0])" />
-    <div id="tu-import-status" style="font-size:.84rem;min-height:18px"></div>
-    <div id="tu-preview" style="display:none;margin-top:12px">
-      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:8px">Gevonden artikelen</div>
-      <div id="tu-preview-lijst" style="background:var(--bg);border-radius:8px;padding:8px;max-height:200px;overflow-y:auto;font-size:.82rem;margin-bottom:10px"></div>
-      <div style="display:flex;gap:8px">
-        <button id="tu-schrijf-btn" class="btn btn-primary" onclick="schrijfTuNaarDatabase()" style="margin-bottom:0;flex:1">💾 Opslaan in database</button>
-        <button class="btn btn-secondary" onclick="resetTuImport()" style="margin-bottom:0">Annuleren</button>
+  </div>
+
+  <!-- 4. Artikel bewerken / verwijderen -->
+  <div class="admin-card">
+    <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-bewerken',this)">
+      <span>✏️ Artikel bewerken / verwijderen</span><span class="admin-arrow">▶</span>
+    </button>
+    <div id="kaart-bewerken" class="admin-kaart-body" style="display:none">
+      <div class="field">
+        <label>Zoek op naam of code</label>
+        <input type="text" id="admin-zoek" placeholder="bijv. PVC bocht of KT-0042..." oninput="adminZoek()" />
+      </div>
+      <div id="admin-zoek-resultaten" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <!-- 5. CSV importeren -->
+  <div class="admin-card">
+    <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-csv',this)">
+      <span>📥 CSV importeren — Technische Unie</span><span class="admin-arrow">▶</span>
+    </button>
+    <div id="kaart-csv" class="admin-kaart-body" style="display:none">
+      <p style="font-size:.84rem;color:var(--muted);line-height:1.6;margin-bottom:12px">Exporteer artikelen vanuit <strong>mijn.tu.nl</strong> als CSV. Kolommen <code style="background:var(--bg);padding:1px 5px;border-radius:4px;font-size:.78rem">Artikelnummer</code>, <code style="background:var(--bg);padding:1px 5px;border-radius:4px;font-size:.78rem">Artikelomschrijving</code> en <code style="background:var(--bg);padding:1px 5px;border-radius:4px;font-size:.78rem">Verpakkingseenheid</code> worden overgenomen.</p>
+      <div id="tu-dropzone" onclick="document.getElementById('tu-csv-input').click()"
+        style="border:2px dashed var(--border);border-radius:var(--radius);padding:24px 20px;text-align:center;cursor:pointer;transition:border-color .15s;background:var(--bg);margin-bottom:10px">
+        <div style="font-size:1.6rem;margin-bottom:6px">📄</div>
+        <div style="font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:2px">Tik om CSV te kiezen</div>
+        <div style="font-size:.74rem;color:var(--muted)">of sleep een bestand hierheen</div>
+      </div>
+      <input type="file" id="tu-csv-input" accept=".csv,.txt" style="display:none" onchange="verwerkTuCsv(this.files[0])" />
+      <div id="tu-import-status" style="font-size:.84rem;min-height:18px"></div>
+      <div id="tu-preview" style="display:none;margin-top:12px">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:8px">Gevonden artikelen</div>
+        <div id="tu-preview-lijst" style="background:var(--bg);border-radius:8px;padding:8px;max-height:200px;overflow-y:auto;font-size:.82rem;margin-bottom:10px"></div>
+        <div style="display:flex;gap:8px">
+          <button id="tu-schrijf-btn" class="btn btn-primary" onclick="schrijfTuNaarDatabase()" style="margin-bottom:0;flex:1">💾 Opslaan in database</button>
+          <button class="btn btn-secondary" onclick="resetTuImport()" style="margin-bottom:0">Annuleren</button>
+        </div>
       </div>
     </div>
   </div>
-    <div class="field">
-      <label>Zoek op naam of code</label>
-      <input type="text" id="admin-zoek" placeholder="bijv. PVC bocht of KT-0042..." oninput="adminZoek()" />
+
+  <!-- 6. Bestellingenoverzicht -->
+  <div class="admin-card">
+    <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-bestellingen',this);if(!this.classList.contains('was-opened')){this.classList.add('was-opened');laadBestellingenOverzicht()}">
+      <span>📋 Bestellingenoverzicht</span><span class="admin-arrow">▶</span>
+    </button>
+    <div id="kaart-bestellingen" class="admin-kaart-body" style="display:none">
+      <div id="bestellingen-status" style="font-size:.84rem;min-height:18px;margin-bottom:8px"></div>
+      <div id="bestellingen-lijst"></div>
+      <button class="btn btn-secondary" onclick="laadBestellingenOverzicht()" style="margin-top:8px;margin-bottom:0">🔄 Herladen</button>
     </div>
-    <div id="admin-zoek-resultaten" style="margin-top:8px"></div>
   </div>
 
 </div>
@@ -1935,6 +1984,107 @@ document.addEventListener('DOMContentLoaded', () => {
     if (bestand) verwerkTuCsv(bestand);
   });
 });
+// ── BEHEER UITVOUWBARE KAARTEN ────────────────────────────────
+function toggleAdminKaart(id, btn) {
+  const body = document.getElementById(id);
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  btn.classList.toggle('open', !open);
+}
+
+// ── BESTELLINGENOVERZICHT (ADMIN) ─────────────────────────────
+function laadBestellingenOverzicht() {
+  const url = getSheetsUrl();
+  const statusEl = document.getElementById('bestellingen-status');
+  const lijstEl  = document.getElementById('bestellingen-lijst');
+  if (!url) { statusEl.innerHTML = '<span style="color:var(--danger)">❌ Geen Web App URL ingesteld.</span>'; return; }
+
+  statusEl.innerHTML = '<span style="color:var(--muted)">⏳ Bestellingen ophalen...</span>';
+  lijstEl.innerHTML = '';
+
+  fetch(`${url}?actie=lezen&blad=Bestellingen&t=${Date.now()}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.status !== 'ok' || !data.artikelen?.length) {
+        statusEl.innerHTML = '<span style="color:var(--muted)">Geen bestellingen gevonden.</span>';
+        return;
+      }
+
+      const bestellingen = [...data.artikelen].reverse();
+      statusEl.innerHTML = `<span style="color:green">✅ ${bestellingen.length} bestelling${bestellingen.length !== 1 ? 'en' : ''} gevonden.</span>`;
+
+      const fmtDatum = (raw) => {
+        if (!raw) return '—';
+        const d = new Date(raw);
+        if (isNaN(d)) {
+          const m = String(raw).match(/(\d{1,2})[\-\/](\d{1,2})[\-\/](\d{2,4})/);
+          if (m) return `${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}-${m[3].slice(-2)}`;
+          return String(raw).substring(0, 10);
+        }
+        return `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getFullYear()).slice(-2)}`;
+      };
+
+      lijstEl.innerHTML = bestellingen.map((b, i) => {
+        const naam        = b.monteur      || b.naam        || '—';
+        const afdeling    = b.afdeling     || '';
+        const projectnaam = b.projectnaam  || '';
+        const locatie     = b.afleveradres || b.locatie     || '—';
+        const opmerkingen = b.opmerkingen  || '';
+        const artikelen   = b.artikelen    || '';
+
+        const besteldatum = fmtDatum(b.datum);
+        const leverdatum  = fmtDatum(b.leverdatum);
+
+        const titel = [naam, projectnaam].filter(Boolean).join(' – ');
+
+        const artikelRegels = artikelen.split('\n').filter(Boolean).map(r => {
+          const delen = r.split('-');
+          if (delen.length >= 3) {
+            const qty   = delen[0];
+            const code  = delen[1];
+            const naam2 = delen.slice(2).join('-');
+            return `<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);font-size:.8rem">
+              <span style="font-weight:700;color:var(--navy);min-width:28px">${qty}×</span>
+              <span style="flex:1">${naam2}</span>
+              <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.72rem">${code}</span>
+            </div>`;
+          }
+          return `<div style="font-size:.8rem;padding:3px 0;color:var(--muted)">${r}</div>`;
+        }).join('');
+
+        return `
+        <div class="hist-item" style="cursor:default">
+          <div onclick="toggleBestOverzicht(${i})" style="cursor:pointer">
+            <div class="hist-datum">${besteldatum}${leverdatum !== '—' ? ' · Levering: ' + leverdatum : ''}</div>
+            <div class="hist-project" style="font-size:.9rem">${titel || naam}</div>
+            <div class="hist-meta">${afdeling ? afdeling + ' · ' : ''}${locatie}</div>
+          </div>
+          <div class="hist-detail" id="best-overzicht-${i}" onclick="event.stopPropagation()">
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:.82rem;margin-bottom:10px">
+              <span style="color:var(--muted)">Locatie</span><span style="font-weight:600">${locatie}</span>
+              <span style="color:var(--muted)">Leverdatum</span><span style="font-weight:600;color:var(--navy)">${leverdatum}</span>
+              ${opmerkingen ? `<span style="color:var(--muted)">Opmerking</span><span style="font-style:italic">${opmerkingen}</span>` : ''}
+            </div>
+            <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:6px">Artikelen</div>
+            <div style="background:var(--bg);border-radius:8px;padding:6px 10px">${artikelRegels || '<span style="color:var(--muted);font-size:.8rem">Geen artikeldetails beschikbaar</span>'}</div>
+          </div>
+        </div>`;
+      }).join('');
+    })
+    .catch(err => {
+      statusEl.innerHTML = `<span style="color:var(--danger)">❌ ${corsErrorMsg(err)}</span>`;
+    });
+}
+
+function toggleBestOverzicht(i) {
+  const el    = document.getElementById('best-overzicht-' + i);
+  const kaart = el?.closest('.hist-item');
+  if (!el) return;
+  el.classList.toggle('open');
+  kaart?.classList.toggle('open', el.classList.contains('open'));
+}
+
 function beheerUnlocked() {
   return isAdmin();
 }
@@ -2848,32 +2998,109 @@ function renderArtikelen(lijst) {
   c.className = 'artikel-grid modus-' + weergaveModus;
   c.innerHTML = '';
   if (!lijst.length) { c.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.86rem">Geen artikelen gevonden.</div>'; return; }
-  [...new Set(lijst.map(a => a.cat))].forEach(cat => {
+
+  [...new Set(lijst.map(a => a.cat))].forEach((cat, ci) => {
     const icon = ICONS[cat] || ICON_DEFAULTS[cat] || '📦';
-    const lbl = document.createElement('div'); lbl.className = 'cat-label'; lbl.innerHTML = `<span>${icon}</span> ${cat}`; c.appendChild(lbl);
+    const catId = 'cat-body-' + ci;
     const catItems = lijst.filter(a => a.cat === cat);
     const hasSubcats = catItems.some(a => a.subcat);
+
+    // Categorie header — klikbaar
+    const hdr = document.createElement('div');
+    hdr.className = 'cat-label';
+    hdr.style.cursor = 'pointer';
+    hdr.style.userSelect = 'none';
+    hdr.style.justifyContent = 'space-between';
+    hdr.innerHTML = `<span style="display:flex;align-items:center;gap:10px"><span>${icon}</span>${cat}<span style="font-size:.72rem;font-weight:400;color:var(--muted)">${catItems.length}</span></span><span style="font-size:.65rem;color:var(--muted);transition:transform .2s" id="cat-arrow-${ci}">▶</span>`;
+    hdr.onclick = () => toggleCatBlok(catId, ci);
+    c.appendChild(hdr);
+
+    // Categorie body
+    const body = document.createElement('div');
+    body.id = catId;
+    body.style.display = 'none';
+    body.style.overflow = 'hidden';
+
     if (hasSubcats) {
-      [...new Set(catItems.map(a => a.subcat).filter(Boolean))].forEach(sub => {
-        const sl = document.createElement('div'); sl.className = 'subcat-label'; sl.textContent = sub; c.appendChild(sl);
+      [...new Set(catItems.map(a => a.subcat).filter(Boolean))].forEach((sub, si) => {
+        const subId = `sub-body-${ci}-${si}`;
         const subItems = catItems.filter(a => a.subcat === sub);
-        const hasSubsubcats = subItems.some(a => a.subsubcat);
-        if (hasSubsubcats) {
-          [...new Set(subItems.map(a => a.subsubcat).filter(Boolean))].forEach(subsub => {
-            const ssl = document.createElement('div'); ssl.className = 'subsubcat-label'; ssl.textContent = subsub; c.appendChild(ssl);
+        const hasSubsubs = subItems.some(a => a.subsubcat);
+
+        // Subcat header
+        const shdr = document.createElement('div');
+        shdr.className = 'subcat-label';
+        shdr.style.cursor = 'pointer';
+        shdr.style.userSelect = 'none';
+        shdr.style.justifyContent = 'space-between';
+        shdr.innerHTML = `<span>${sub}<span style="font-size:.7rem;font-weight:400;color:var(--muted);margin-left:6px">${subItems.length}</span></span><span style="font-size:.6rem;color:var(--muted);transition:transform .2s" id="sub-arrow-${ci}-${si}">▶</span>`;
+        shdr.onclick = () => toggleSubBlok(subId, ci, si);
+        body.appendChild(shdr);
+
+        const subBody = document.createElement('div');
+        subBody.id = subId;
+        subBody.style.display = 'none';
+
+        if (hasSubsubs) {
+          [...new Set(subItems.map(a => a.subsubcat).filter(Boolean))].forEach((subsub, ssi) => {
+            const subsubId = `subsub-body-${ci}-${si}-${ssi}`;
             const subsubItems = subItems.filter(a => a.subsubcat === subsub);
-              subsubItems.forEach(a => renderArtikelCard(a, c));
+
+            const sshdr = document.createElement('div');
+            sshdr.className = 'subsubcat-label';
+            sshdr.style.cursor = 'pointer';
+            sshdr.style.userSelect = 'none';
+            sshdr.style.justifyContent = 'space-between';
+            sshdr.innerHTML = `<span>${subsub}<span style="font-size:.7rem;font-weight:400;color:var(--muted);margin-left:6px">${subsubItems.length}</span></span><span style="font-size:.6rem;color:var(--muted);transition:transform .2s" id="subsub-arrow-${ci}-${si}-${ssi}">▶</span>`;
+            sshdr.onclick = () => toggleSubsubBlok(subsubId, ci, si, ssi);
+            subBody.appendChild(sshdr);
+
+            const subsubBody = document.createElement('div');
+            subsubBody.id = subsubId;
+            subsubBody.style.display = 'none';
+            subsubItems.forEach(a => renderArtikelCard(a, subsubBody));
+            subBody.appendChild(subsubBody);
           });
-          subItems.filter(a => !a.subsubcat).forEach(a => renderArtikelCard(a, c));
+          subItems.filter(a => !a.subsubcat).forEach(a => renderArtikelCard(a, subBody));
         } else {
-          subItems.forEach(a => renderArtikelCard(a, c));
+          subItems.forEach(a => renderArtikelCard(a, subBody));
         }
+        body.appendChild(subBody);
       });
-      catItems.filter(a => !a.subcat).forEach(a => renderArtikelCard(a, c));
+      catItems.filter(a => !a.subcat).forEach(a => renderArtikelCard(a, body));
     } else {
-      catItems.forEach(a => renderArtikelCard(a, c));
+      catItems.forEach(a => renderArtikelCard(a, body));
     }
+
+    c.appendChild(body);
   });
+}
+
+function toggleCatBlok(id, ci) {
+  const body  = document.getElementById(id);
+  const arrow = document.getElementById('cat-arrow-' + ci);
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  if (arrow) arrow.style.transform = open ? '' : 'rotate(90deg)';
+}
+
+function toggleSubBlok(id, ci, si) {
+  const body  = document.getElementById(id);
+  const arrow = document.getElementById(`sub-arrow-${ci}-${si}`);
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  if (arrow) arrow.style.transform = open ? '' : 'rotate(90deg)';
+}
+
+function toggleSubsubBlok(id, ci, si, ssi) {
+  const body  = document.getElementById(id);
+  const arrow = document.getElementById(`subsub-arrow-${ci}-${si}-${ssi}`);
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  if (arrow) arrow.style.transform = open ? '' : 'rotate(90deg)';
 }
 function renderArtikelCard(artikel, container) {
   const isFavContainer = container.id === 'fav-lijst';
