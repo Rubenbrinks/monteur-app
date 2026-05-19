@@ -2393,44 +2393,31 @@ function initialiseerApp() {
 function laadArtikelenUitSheets() {
   const lijst = document.getElementById('artikel-lijst');
 
-  // ── Laag 1: sessionStorage (snelst, huidige browsersessie) ──
-  try {
-    const sesCache = sessionStorage.getItem('emondt_artikelen_sessie');
-    if (sesCache) {
-      ARTIKELEN = JSON.parse(sesCache);
-      bouwDrawerCats();
-      renderArtikelen(ARTIKELEN);
-      _naArtikelenGeladen();
-      // Ververs op achtergrond zonder laad-indicator
-      fetchSheets(false);
-      return;
-    }
-  } catch(e) {}
-
-  // ── Laag 2: localStorage (tot 24 uur geldig) ─────────────
-  if (lijst) lijst.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.86rem">📡 Artikelen laden...</div>';
+  // Controleer localStorage cache — geldig als < 24 uur oud
   try {
     const cached = localStorage.getItem('emondt_artikelen_cache');
     const ts     = localStorage.getItem('emondt_artikelen_ts');
-    const oud    = !ts || (Date.now() - parseInt(ts)) > 86400000; // 24 uur
-    if (cached && !oud) {
+    const cacheGeldig = cached && ts && (Date.now() - parseInt(ts)) < 86400000;
+
+    if (cacheGeldig) {
       ARTIKELEN = JSON.parse(cached);
-      // Zet ook in sessiecache
-      try { sessionStorage.setItem('emondt_artikelen_sessie', cached); } catch(e) {}
       bouwDrawerCats();
       renderArtikelen(ARTIKELEN);
       _naArtikelenGeladen();
-      // Ververs op achtergrond
-      fetchSheets(false);
-      return;
+      return; // Klaar — geen fetch nodig
     }
   } catch(e) {}
 
-  // ── Laag 3: Sheets ophalen ────────────────────────────────
-  fetchSheets(true);
+  // Cache leeg of verlopen → ophalen uit Sheets
+  if (lijst) lijst.innerHTML = `
+    <div class="laad-indicator" style="padding:60px 20px">
+      <div class="laad-spinner"></div>
+      <span>Artikelen laden...</span>
+    </div>`;
+  fetchSheets();
 }
 
-function fetchSheets(toonLaadindicator) {
+function fetchSheets() {
   if (!SHEETS_API_URL || SHEETS_API_URL === 'JOUW_WEBAPP_URL_HIER') {
     // Geen URL — toon cache als die er is, anders melding
     const cached = (() => { try { return localStorage.getItem('emondt_artikelen_cache'); } catch(e){ return null; } })();
@@ -2478,7 +2465,7 @@ function fetchSheets(toonLaadindicator) {
         bouwDrawerCats();
         renderArtikelen(ARTIKELEN);
         _naArtikelenGeladen();
-        if (toonLaadindicator) showToast('✓ ' + ARTIKELEN.length + ' artikelen geladen');
+        showToast('✓ ' + ARTIKELEN.length + ' artikelen geladen');
       } else {
         console.error('[Sheets] Fout:', data);
         laadUitCache('Sheets fout: ' + (data.message || 'onbekend'));
@@ -3690,9 +3677,12 @@ function testVerbinding() {
 
 function herlaadArtikelen() {
   setBeheerStatus('<span style="color:var(--muted)">⏳ Artikelen herladen...</span>');
-  try { localStorage.removeItem('emondt_artikelen_ts'); sessionStorage.removeItem('emondt_artikelen_sessie'); } catch(e) {}
-  laadArtikelenUitSheets();
-  setTimeout(() => setBeheerStatus('<span style="color:green">✅ Artikelen herladen.</span>'), 1500);
+  try {
+    localStorage.removeItem('emondt_artikelen_ts');
+    localStorage.removeItem('emondt_artikelen_cache');
+    sessionStorage.removeItem('emondt_artikelen_sessie');
+  } catch(e) {}
+  fetchSheets();
 }
 
 function testBestellingLog() {
