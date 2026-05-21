@@ -1,0 +1,26 @@
+/* ── Emondt Materiaalapp — variables.css ────────────────── */
+
+:root {
+      --bg:#f0f2f5;
+      --surface:#ffffff;
+      --border:#e2e6ec;
+      --navy:#041c42;
+      --navy2:#0d2d5e;
+      --green:#AEC336;
+      --green-dark:#8fa028;
+      --green-light:#f2f6d8;
+      --muted:#7a8aa0;
+      --text:#1a2332;
+      --white:#fff;
+      --danger:#e53e3e;
+      --danger-light:#fff5f5;
+      --radius:14px;
+      --radius-sm:10px;
+      --shadow:0 2px 12px rgba(4,28,66,.08);
+      --shadow-lg:0 8px 32px rgba(4,28,66,.14);
+      --nav-h:72px;
+      --header-h:64px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;padding-bottom:var(--nav-h)}

@@ -1,0 +1,52 @@
+/* ── Emondt Materiaalapp — components.css ────────────────── */
+
+/* ═══ BUTTONS ═══════════════════════════════════════════════ */
+    .btn{
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      width:100%;padding:17px;border-radius:var(--radius);border:none;
+      font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;
+      letter-spacing:.04em;text-transform:uppercase;
+      cursor:pointer;transition:opacity .15s,transform .1s;margin-bottom:10px;
+    }
+    .btn:active{transform:scale(.98);opacity:.88}
+    .btn-primary{background:var(--green);color:var(--navy);box-shadow:0 4px 16px rgba(174,195,54,.3)}
+    .btn-danger{background:var(--danger-light);color:var(--danger);border:2px solid #fca5a5}
+    .btn-secondary{background:var(--bg);color:var(--muted);border:2px solid var(--border)}
+
+    /* ═══ TOAST ═════════════════════════════════════════════════ */
+    #toast{
+      position:fixed;bottom:calc(var(--nav-h) + 20px);left:50%;
+      transform:translateX(-50%) translateY(120px);
+      opacity:0;
+      background:var(--navy);color:var(--white);
+      font-size:.9rem;font-weight:500;
+      padding:12px 22px;border-radius:30px;
+      border-left:4px solid var(--green);
+      z-index:9999;
+      transition:transform .3s ease, opacity .3s ease;
+      white-space:nowrap;pointer-events:none;
+      box-shadow:var(--shadow-lg);
+    }
+    #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+    /* ═══ DEV MODAL ═════════════════════════════════════════════ */
+    #dev-overlay{position:fixed;inset:0;background:rgba(4,28,66,.7);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+    #dev-overlay.open{display:flex}
+    .dev-modal{background:var(--white);border-radius:var(--radius);padding:28px 24px;width:100%;max-width:360px;box-shadow:var(--shadow-lg)}
+    .dev-titel{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--green);margin-bottom:14px}
+    .dev-artikel-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1.5px solid var(--border);font-size:.9rem}
+    .dev-artikel-row:last-child{border-bottom:none}
+    .dev-artikel-row .info{flex:1;min-width:0}
+    .dev-artikel-row .info span{display:block;font-size:.74rem;color:var(--muted)}
+    .csv-info{background:var(--green-light);border:1.5px solid var(--green);border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:.82rem;color:var(--text);line-height:1.7}
+    .csv-info code{background:rgba(0,0,0,.08);padding:1px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:.85rem}
+
+    /* ═══ PWA BANNER ════════════════════════════════════════════ */
+    #pwa-banner{
+      display:none;position:fixed;bottom:var(--nav-h);left:0;right:0;
+      background:var(--navy);border-top:3px solid var(--green);
+      padding:14px 18px;z-index:9000;align-items:center;gap:12px;
+      box-shadow:0 -4px 20px rgba(4,28,66,.25);
+    }
+    #pwa-banner .txt{flex:1;font-size:.86rem;color:var(--white);line-height:1.5}
+    #pwa-banner strong{color:var(--green)}
