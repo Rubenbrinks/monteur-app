@@ -269,6 +269,54 @@ function adminBewerk(code) {
 
 
 
+// ── TREFWOORDEN GENEREREN ─────────────────────────────────────
+const _STOPWOORDEN = new Set([
+  'de','het','een','en','in','op','voor','van','met','uit','bij','aan','per','te','of',
+  'mm','cm','dm','m','stuks','stuk','set','paar','rol','bus','doos','zak',
+]);
+
+function startTrefwoordenGenereren() {
+  const url      = getSheetsUrl();
+  const statusEl = document.getElementById('trefwoorden-status');
+  if (!url) { statusEl.innerHTML = '<span style="color:var(--danger)">❌ Geen Web App URL ingesteld.</span>'; return; }
+  if (!ARTIKELEN.length) { statusEl.innerHTML = '<span style="color:var(--muted)">⚠️ Artikelen nog niet geladen — open eerst de artikelenpagina.</span>'; return; }
+
+  const teVerwerken = ARTIKELEN.filter(a => !a.trefwoorden);
+  if (!teVerwerken.length) { statusEl.innerHTML = '<span style="color:var(--green-dark)">✅ Alle artikelen hebben al trefwoorden.</span>'; return; }
+
+  statusEl.innerHTML = `<span style="color:var(--muted)">⏳ 0/${teVerwerken.length} verwerkt...</span>`;
+  let gedaan = 0, fouten = 0;
+
+  const volgende = (index) => {
+    if (index >= teVerwerken.length) {
+      statusEl.innerHTML = `<span style="color:var(--green-dark)">✅ ${gedaan} trefwoorden opgeslagen${fouten ? `, ${fouten} mislukt` : ''}.</span>`;
+      return;
+    }
+    const a = teVerwerken[index];
+    const bronTekst = [a.naam, a.cat, a.subcat, a.subsubcat].join(' ');
+    const woorden = bronTekst
+      .toLowerCase()
+      .replace(/[\/\-–]/g, ' ')
+      .split(/[\s,.()\[\]]+/)
+      .map(w => w.replace(/[^a-z0-9]/g, ''))
+      .filter(w => w.length > 2 && !_STOPWOORDEN.has(w) && !/^\d+$/.test(w));
+    const trefwoorden = [...new Set(woorden)].join(', ');
+
+    if (!trefwoorden) { volgende(index + 1); return; }
+
+    const params = new URLSearchParams({ actie: 'bijwerken', code: a.code, trefwoorden, t: Date.now() + index });
+    fetch(`${url}?${params.toString()}`)
+      .then(r => r.json())
+      .then(r => {
+        if (r.status === 'ok') { gedaan++; a.trefwoorden = trefwoorden; } else fouten++;
+        statusEl.innerHTML = `<span style="color:var(--muted)">⏳ ${index + 1}/${teVerwerken.length} verwerkt...</span>`;
+        volgende(index + 1);
+      })
+      .catch(() => { fouten++; volgende(index + 1); });
+  };
+  volgende(0);
+}
+
 // ── BEHEER UITVOUWBARE KAARTEN ────────────────────────────────
 function toggleAdminKaart(id, btn) {
   const body = document.getElementById(id);

@@ -662,6 +662,18 @@
     </div>
   </div>
 
+  <!-- 8. Trefwoorden genereren -->
+  <div class="admin-card">
+    <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-trefwoorden',this)">
+      <span>🏷️ Trefwoorden genereren</span><span class="admin-arrow">▶</span>
+    </button>
+    <div id="kaart-trefwoorden" class="admin-kaart-body" style="display:none">
+      <p style="font-size:.84rem;color:var(--muted);margin-bottom:12px;line-height:1.5">Vult de kolom "trefwoorden" in de Artikelen sheet op basis van de artikelnaam en categorie. Vereist: kolom "trefwoorden" in de sheet (mag leeg zijn). Artikelen met bestaande trefwoorden worden overgeslagen.</p>
+      <div id="trefwoorden-status" style="font-size:.84rem;min-height:18px;margin-bottom:12px"></div>
+      <button class="btn btn-primary" onclick="startTrefwoordenGenereren()" style="margin-bottom:0;width:100%">🔄 Genereer trefwoorden</button>
+    </div>
+  </div>
+
 </div>
 <!-- BESTELBEVESTIGING MODAL -->
 <div id="bevestiging-overlay" style="display:none;position:fixed;inset:0;background:rgba(4,28,66,.6);z-index:800;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)">
@@ -745,7 +757,7 @@
 <!-- Update banner -->
 <div id="update-banner" style="display:none;position:fixed;bottom:calc(var(--nav-h) + 10px);left:50%;transform:translateX(-50%);z-index:600;background:var(--navy);color:var(--white);border-radius:12px;padding:12px 18px;font-size:.84rem;box-shadow:0 8px 32px rgba(4,28,66,.35);display:none;align-items:center;gap:12px;max-width:calc(100vw - 32px)">
   <span>🔄 Nieuwe versie beschikbaar</span>
-  <button onclick="location.reload()" style="background:var(--green);color:var(--navy);border:none;border-radius:8px;padding:6px 14px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Updaten</button>
+  <button onclick="bevestigUpdate()" style="background:var(--green);color:var(--navy);border:none;border-radius:8px;padding:6px 14px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Updaten</button>
   <button onclick="document.getElementById('update-banner').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:1.1rem;cursor:pointer;padding:0 2px">×</button>
 </div>
 

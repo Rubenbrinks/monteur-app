@@ -121,12 +121,26 @@ function initialiseerApp() {
     // Toon melding als er een update op de achtergrond is geladen
     navigator.serviceWorker.addEventListener('message', event => {
       if (event.data?.type === 'SW_UPDATE_KLAAR') {
+        // Niet tonen als we net zelf herladen hebben (bevestigUpdate-flow)
+        if (sessionStorage.getItem('emondt_net_bijgewerkt')) return;
         const banner = document.getElementById('update-banner');
         if (banner) banner.style.display = 'flex';
       }
     });
   }
+
+  // Toon bevestiging als we net hebben bijgewerkt
+  if (sessionStorage.getItem('emondt_net_bijgewerkt')) {
+    sessionStorage.removeItem('emondt_net_bijgewerkt');
+    setTimeout(() => showToast('✅ App bijgewerkt naar nieuwe versie'), 600);
+  }
 };
+
+function bevestigUpdate() {
+  document.getElementById('update-banner').style.display = 'none';
+  sessionStorage.setItem('emondt_net_bijgewerkt', '1');
+  location.reload();
+}
 
 
 // ── OPSLAAN / LADEN ───────────────────────────────────────────

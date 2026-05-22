@@ -63,6 +63,7 @@ function fetchSheets() {
           subsubcat:   a.subsubcat   || '',
           link:        a.link        || '',
           linktoitems: a.linktoitems || '',
+          trefwoorden: a.trefwoorden || '',
           icon:        ICONS[a.cat] || ICON_DEFAULTS[a.cat] || '📦',
         })).filter(a => a.code && a.naam);
 

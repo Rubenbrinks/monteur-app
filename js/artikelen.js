@@ -301,11 +301,11 @@ function applyFilters() {
   if (activeSubsubcat)    lijst = lijst.filter(a => a.subsubcat === activeSubsubcat);
   if (trefwoorden.length) {
     lijst = lijst.filter(a => {
-      const t = [a.naam, a.code, a.leverancier, a.cat, a.subcat, a.subsubcat].join(' ').toLowerCase();
+      const t = [a.naam, a.code, a.leverancier, a.cat, a.subcat, a.subsubcat, a.trefwoorden].join(' ').toLowerCase();
       return trefwoorden.every(w => t.includes(w));
     });
   }
-  renderArtikelen(lijst);
+  renderArtikelen(lijst, trefwoorden.length > 0);
 }
 
 
@@ -351,12 +351,21 @@ window.addEventListener('scroll', () => {
 
 
 // ── ARTIKELEN ─────────────────────────────────────────────────
-function renderArtikelen(lijst) {
+function renderArtikelen(lijst, isZoek) {
   const c = document.getElementById('artikel-lijst');
   c.className = 'artikel-grid modus-' + (weergaveModus || 'a');
   c.innerHTML = '';
   if (!lijst.length) {
     c.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.86rem">Geen artikelen gevonden.</div>';
+    return;
+  }
+
+  // ── Platte lijst bij zoekresultaten ──────────────────────
+  if (isZoek) {
+    const blok = document.createElement('div');
+    blok.className = 'artikel-blok';
+    lijst.forEach(a => renderArtikelCard(a, blok));
+    c.appendChild(blok);
     return;
   }
 
