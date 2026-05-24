@@ -639,6 +639,7 @@ function renderArtikelCard(artikel, container) {
   el.dataset.link        = artikel.link        || '';
   el.dataset.naam        = artikel.naam        || '';
   el.dataset.linktoitems = artikel.linktoitems || '';
+  el.dataset.details     = artikel.details     || '';
   el.onclick = null;
   container.appendChild(el);
   autoSizeQty(document.getElementById(qtyId));
@@ -671,7 +672,7 @@ function toonIsolatieSuggestie(bronCode, linktoitems) {
         <div style="font-size:.92rem;font-weight:600;color:var(--text)">${art.naam}</div>
         <div style="font-size:.74rem;color:var(--muted);margin-top:2px">${art.code} · per ${art.eenheid}</div>
       </div>
-      <button onclick="event.stopPropagation();changeQty('${art.code}',1,event);document.getElementById('suggestie-overlay').style.display='none';showToast('✓ Toegevoegd')"
+      <button onclick="event.stopPropagation();voegGekoppeldToe('${bronCode}','${art.code}');document.getElementById('suggestie-overlay').style.display='none'"
         style="background:var(--green);color:var(--navy);border:none;border-radius:8px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap">
         + Toevoegen
       </button>`;
@@ -685,20 +686,30 @@ function sluitSuggestie() {
   document.getElementById('suggestie-overlay').style.display = 'none';
 }
 
+function voegGekoppeldToe(bronCode, secCode) {
+  const primQty = cart[bronCode] || 1;
+  const stap    = getStap(secCode);
+  const qty     = rondeOpStap(primQty, stap);
+  _setCart(secCode, qty);
+  showToast(`✓ Toegevoegd: ${qty} ${ARTIKELEN.find(a => a.code === secCode)?.eenheid || 'st'}`);
+}
+
 function toonVerpakking(e, kaart) {
   if (e.target.closest('.qty-wrap')) return;
   e.stopPropagation();
   document.querySelectorAll('.verpakking-popup').forEach(p => p.remove());
   const code = kaart.id.replace('card-', '').replace('fav-card-', '');
-  const naam = kaart.dataset.naam || '';
-  const verpakking = kaart.dataset.verpakking;
-  const link = kaart.dataset.link;
+  const naam       = kaart.dataset.naam       || '';
+  const verpakking = kaart.dataset.verpakking || '';
+  const link       = kaart.dataset.link       || '';
+  const details    = kaart.dataset.details    || '';
   const isFav = FAVORIETEN.has(code);
 
   const popup = document.createElement('div');
   popup.className = 'verpakking-popup';
   popup.innerHTML = `
     <strong style="display:block;font-size:.88rem;margin-bottom:8px">${naam}</strong>
+    ${details ? `<div style="font-size:.82rem;color:#fff;line-height:1.5;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.12)">${details.replace(/\n/g,'<br>')}</div>` : ''}
     ${verpakking ? `<div style="font-size:.8rem;opacity:.85;margin-bottom:8px">📦 Verpakking: ${verpakking}</div>` : ''}
     ${link ? `<a href="${link}" target="_blank" class="verpakking-link" onclick="event.stopPropagation()" style="display:block;margin-bottom:8px">↗ Open productpagina</a>` : ''}
     <button onclick="event.stopPropagation();toggleFavorietVanPopup('${code}',this)" style="

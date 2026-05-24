@@ -345,30 +345,54 @@ Emondt Materiaalapp · www.emondt.nl`;
 
 
 // ── BESTELHISTORIE ────────────────────────────────────────────
+let _historieData = [];
+
 function slaHistorieOp(bestelling) {
   try {
     const hist = JSON.parse(localStorage.getItem('emondt_historie') || '[]');
     hist.unshift({ ...bestelling, id: Date.now() });
-    // Bewaar max 50 bestellingen
     localStorage.setItem('emondt_historie', JSON.stringify(hist.slice(0, 50)));
   } catch(e){}
 }
 
-function renderHistorie() {
+function _parseArtikelenData(artikelenData) {
+  if (!artikelenData) return [];
+  return artikelenData.split('|').filter(Boolean).map(r => {
+    const [code, qty, naam, eenheid, leverancier] = r.split('×');
+    return { code: code||'', qty: parseInt(qty)||1, naam: naam||'', eenheid: eenheid||'stuk', leverancier: leverancier||'' };
+  });
+}
+
+// Fallback parser voor leesbare tekst uit oude sheet-rijen
+// Formaat: "5× PVC bocht (KT-0042) per stuk – Leverancier"
+function _parseArtikelenTekst(tekst) {
+  if (!tekst) return [];
+  return tekst.split('\n').filter(Boolean).map(r => {
+    const m = r.match(/^(\d+)×\s+(.+?)\s+\(([^)]+)\)(?:\s+per\s+(\S+))?(?:\s+[–-]\s+(.+))?$/);
+    if (!m) return null;
+    return { qty: parseInt(m[1])||1, naam: (m[2]||'').trim(), code: (m[3]||'').trim(), eenheid: (m[4]||'stuk').trim(), leverancier: (m[5]||'').trim() };
+  }).filter(Boolean);
+}
+
+function _getArtikelen(b) {
+  if (b.artikelenData) return _parseArtikelenData(b.artikelenData);
+  return _parseArtikelenTekst(b.artikelenTekst || '');
+}
+
+function _renderHistorieLijst(hist) {
   const el = document.getElementById('historie-lijst');
   if (!el) return;
-  let hist = [];
-  try { hist = JSON.parse(localStorage.getItem('emondt_historie') || '[]'); } catch(e){}
   if (!hist.length) {
-    el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.9rem">Nog geen bestellingen verstuurd.</div>';
+    el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.9rem">Nog geen bestellingen gevonden.</div>';
     return;
   }
-
   el.innerHTML = hist.map((b, i) => {
+    const artikelen = _getArtikelen(b);
     const leverdatumTxt = b.leverdatum
       ? new Date(b.leverdatum + 'T12:00:00').toLocaleDateString('nl-NL', {day:'2-digit', month:'long', year:'numeric'})
       : '—';
-    const totaal = (b.artikelen || []).reduce((s, a) => s + (a.qty || 0), 0);
+    const totaal = artikelen.reduce((s, a) => s + (a.qty || 0), 0);
+    const kanHerbestellen = artikelen.length > 0;
 
     return `
     <div class="hist-item" onclick="toggleHistDetail(${i})">
@@ -387,23 +411,45 @@ function renderHistorie() {
 
         <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:6px">Artikelen</div>
         <div style="background:var(--bg);border-radius:8px;overflow:hidden;margin-bottom:12px">
-          ${(b.artikelen || []).map((a, ai) => `
+          ${artikelen.length ? artikelen.map((a, ai) => `
             <div class="hist-artikel-rij" style="background:${ai % 2 === 0 ? 'var(--white)' : 'var(--bg)'}">
               <span class="hist-artikel-qty">${a.qty}×</span>
               <span style="flex:1">${a.naam}</span>
               <span style="color:var(--muted);font-size:.74rem;font-family:'DM Mono',monospace">${a.code}</span>
-            </div>`).join('')}
-          <div style="background:var(--navy);color:var(--green);padding:7px 12px;font-size:.8rem;font-weight:700;display:flex;justify-content:space-between">
-            <span>Totaal</span><span>${totaal} stuks · ${(b.artikelen||[]).length} artikel${(b.artikelen||[]).length !== 1 ? 'en' : ''}</span>
-          </div>
+            </div>`).join('') : `<div style="padding:10px 12px;font-size:.82rem;color:var(--muted)">Artikeldetails niet beschikbaar</div>`}
+          ${artikelen.length ? `<div style="background:var(--navy);color:var(--green);padding:7px 12px;font-size:.8rem;font-weight:700;display:flex;justify-content:space-between">
+            <span>Totaal</span><span>${totaal} stuks · ${artikelen.length} artikel${artikelen.length !== 1 ? 'en' : ''}</span>
+          </div>` : ''}
         </div>
 
-        <button onclick="event.stopPropagation();herbestelHistorie(${i})" class="btn btn-primary" style="margin-bottom:0">
+        ${kanHerbestellen ? `<button onclick="event.stopPropagation();herbestelHistorie(${i})" class="btn btn-primary" style="margin-bottom:0">
           🔁 Opnieuw bestellen
-        </button>
+        </button>` : ''}
       </div>
     </div>`;
   }).join('');
+}
+
+function renderHistorie() {
+  const el = document.getElementById('historie-lijst');
+  if (!el) return;
+  const url = getSheetsUrl();
+  const sessie = getAuthSessie();
+  if (!url || !sessie) {
+    el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.9rem">Niet beschikbaar — geen verbinding.</div>';
+    return;
+  }
+  el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.9rem">⏳ Bestellingen laden...</div>';
+  fetch(`${url}?actie=bestellingen_lezen&gebruiker=${encodeURIComponent(sessie.gebruiker)}&t=${Date.now()}`)
+    .then(r => r.json())
+    .then(r => {
+      if (r.status !== 'ok') throw new Error(r.message || 'Fout');
+      _historieData = r.bestellingen || [];
+      _renderHistorieLijst(_historieData);
+    })
+    .catch(() => {
+      el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.9rem">⚠️ Kon bestellingen niet laden. Controleer verbinding.</div>';
+    });
 }
 
 function toggleHistDetail(i) {
@@ -415,21 +461,12 @@ function toggleHistDetail(i) {
 }
 
 function herbestelHistorie(i) {
-  let hist = [];
-  try { hist = JSON.parse(localStorage.getItem('emondt_historie') || '[]'); } catch(e){}
-  const b = hist[i];
+  const b = _historieData[i];
   if (!b) return;
-  // Laad artikelen in winkelwagen
-  (b.artikelen || []).forEach(a => { if (a.code && a.qty) cart[a.code] = a.qty; });
+  const artikelen = _getArtikelen(b);
+  artikelen.forEach(a => { if (a.code && a.qty) cart[a.code] = a.qty; });
   saveCart();
   updateBadge();
   showTab('winkelwagen');
   showToast('🔁 Artikelen herladen in bestelling');
-}
-
-function wisHistorie() {
-  if (!confirm('Wil je de volledige bestelhistorie wissen?')) return;
-  try { localStorage.removeItem('emondt_historie'); } catch(e){}
-  renderHistorie();
-  showToast('🗑 Bestelhistorie gewist');
 }

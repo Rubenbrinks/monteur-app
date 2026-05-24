@@ -64,6 +64,7 @@ function fetchSheets() {
           link:        a.link        || '',
           linktoitems: a.linktoitems || '',
           trefwoorden: a.trefwoorden || '',
+          details:     a.details     || '',
           icon:        ICONS[a.cat] || ICON_DEFAULTS[a.cat] || '📦',
         })).filter(a => a.code && a.naam);
 
@@ -348,6 +349,7 @@ function logBestellingSheets(data) {
     leverdatum:    data.leverdatum     || '',
     opmerkingen:   data.opmerkingen   || '',
     ontvanger2:    data.ontvanger2     || '',
+    gebruiker:     getAuthSessie()?.gebruiker || '',
     artikelen:     mailArtikelStr,
     log_artikelen: logArtikelStr,
     totaal:        (data.items || []).reduce((s, i) => s + (parseInt(i.qty)||0), 0),

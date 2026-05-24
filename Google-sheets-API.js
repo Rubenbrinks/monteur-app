@@ -391,19 +391,102 @@ function doGet(e) {
         let logSheet = ss.getSheetByName('Bestellingen');
         if (!logSheet) {
           logSheet = ss.insertSheet('Bestellingen');
-          logSheet.appendRow(['Datum','Naam','Telefoon','Afdeling','Projectnummer','Projectnaam','Locatie','Leverdatum','Artikelen','Opmerkingen']);
+          logSheet.appendRow(['Datum','Naam','Telefoon','Afdeling','Projectnummer','Projectnaam','Locatie','Leverdatum','Artikelen','Opmerkingen','Gebruiker','ArtikelenData']);
+        } else {
+          // Voeg ontbrekende kolommen toe aan bestaande sheet
+          const headerRij = logSheet.getRange(1, 1, 1, logSheet.getLastColumn()).getValues()[0];
+          const headers = headerRij.map(h => String(h).trim().toLowerCase());
+          if (!headers.includes('gebruiker')) {
+            logSheet.getRange(1, logSheet.getLastColumn() + 1).setValue('Gebruiker');
+          }
+          if (!headers.includes('artikelendata')) {
+            logSheet.getRange(1, logSheet.getLastColumn() + 1).setValue('ArtikelenData');
+          }
         }
+        // Lees kolomposities dynamisch zodat volgorde niet uitmaakt
+        const hRow = logSheet.getRange(1, 1, 1, logSheet.getLastColumn()).getValues()[0];
+        const hIdx = {};
+        hRow.forEach((h, i) => { hIdx[String(h).trim().toLowerCase()] = i; });
         const artikelenTekst = regels.map(r =>
           `${r.qty}× ${r.naam} (${r.code})${r.eenheid ? ' per ' + r.eenheid : ''}${r.leverancier ? ' – ' + r.leverancier : ''}`
         ).join('\n');
-        logSheet.appendRow([p.datum, p.naam, p.telefoon, p.afdeling, p.projectnummer, p.projectnaam, p.locatie, p.leverdatum,
-          artikelenTekst, p.opmerkingen || '']);
+        const logRij = new Array(hRow.length).fill('');
+        logRij[hIdx['datum']]          = p.datum          || '';
+        logRij[hIdx['naam']]           = p.naam           || '';
+        logRij[hIdx['telefoon']]       = p.telefoon       || '';
+        logRij[hIdx['afdeling']]       = p.afdeling       || '';
+        logRij[hIdx['projectnummer']]  = p.projectnummer  || '';
+        logRij[hIdx['projectnaam']]    = p.projectnaam    || '';
+        logRij[hIdx['locatie']]        = p.locatie        || '';
+        logRij[hIdx['leverdatum']]     = p.leverdatum     || '';
+        logRij[hIdx['artikelen']]      = artikelenTekst;
+        logRij[hIdx['opmerkingen']]    = p.opmerkingen    || '';
+        logRij[hIdx['gebruiker']]      = p.gebruiker      || '';
+        logRij[hIdx['artikelendata']]  = p.artikelen      || '';
+        logSheet.appendRow(logRij);
       } catch(logErr) { /* logging is optioneel */ }
 
       return jsonOutput({ status: 'ok', provider: MAIL_PROVIDER });
 
     } catch(err) {
       return jsonOutput({ status: 'error', message: err.message });
+    }
+  }
+
+  // ── BESTELLINGEN LEZEN (per monteur) ─────────────────────
+  if (actie === 'bestellingen_lezen') {
+    try {
+      const gebruiker = (e.parameter.gebruiker || '').toLowerCase().trim();
+      const ss = SpreadsheetApp.openById(SHEET_ID);
+      const sheet = ss.getSheetByName('Bestellingen');
+      if (!sheet) return jsonOutput({ status: 'ok', bestellingen: [] });
+
+      const data = sheet.getDataRange().getValues();
+      if (data.length <= 1) return jsonOutput({ status: 'ok', bestellingen: [] });
+
+      // Kolomposities op naam zoeken (robuust bij ontbrekende/extra kolommen)
+      const headers = data[0].map(h => String(h).trim().toLowerCase());
+      const ci = name => headers.indexOf(name);
+
+      const rijen = data.slice(1);
+      const bestellingen = rijen
+        .filter(r => {
+          if (!gebruiker) return true;
+          const opgeslagenGebruiker = String(r[ci('gebruiker')] || '').toLowerCase().trim();
+          const opgeslagenNaam      = String(r[ci('naam')]      || '').toLowerCase().trim();
+          return opgeslagenGebruiker
+            ? opgeslagenGebruiker === gebruiker
+            : opgeslagenNaam === gebruiker;
+        })
+        .map(r => {
+          const datumRaw      = ci('datum')      >= 0 ? r[ci('datum')]      : '';
+          const leverdatumRaw = ci('leverdatum') >= 0 ? r[ci('leverdatum')] : '';
+          const fmtDatum = v => v instanceof Date
+            ? Utilities.formatDate(v, Session.getScriptTimeZone(), 'dd-MM-yyyy HH:mm')
+            : String(v || '');
+          const fmtLever = v => v instanceof Date
+            ? Utilities.formatDate(v, Session.getScriptTimeZone(), 'yyyy-MM-dd')
+            : String(v || '');
+          const cel = name => ci(name) >= 0 ? String(r[ci(name)] || '') : '';
+          return {
+            datum:          fmtDatum(datumRaw),
+            naam:           cel('naam'),
+            telefoon:       cel('telefoon'),
+            afdeling:       cel('afdeling'),
+            projectnummer:  cel('projectnummer'),
+            projectnaam:    cel('projectnaam'),
+            locatie:        cel('locatie'),
+            leverdatum:     fmtLever(leverdatumRaw),
+            opmerkingen:    cel('opmerkingen'),
+            artikelenData:  cel('artikelendata'),
+            artikelenTekst: cel('artikelen'),
+          };
+        })
+        .reverse();
+
+      return jsonOutput({ status: 'ok', bestellingen });
+    } catch(err) {
+      return jsonOutput({ status: 'fout', message: String(err) });
     }
   }
 
