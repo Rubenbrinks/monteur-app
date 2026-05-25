@@ -356,7 +356,16 @@ function renderArtikelen(lijst, isZoek) {
   c.className = 'artikel-grid modus-' + (weergaveModus || 'a');
   c.innerHTML = '';
   if (!lijst.length) {
-    c.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.86rem">Geen artikelen gevonden.</div>';
+    c.innerHTML = isZoek
+      ? `<div style="text-align:center;padding:40px 20px;color:var(--muted)">
+          <div style="font-size:1.6rem;margin-bottom:10px">🔍</div>
+          <div style="font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:6px">Geen artikelen gevonden</div>
+          <div style="font-size:.82rem;margin-bottom:18px">Probeer andere zoekwoorden, of voeg een vrij artikel toe.</div>
+          <button onclick="openVrijArtikel()" class="btn btn-primary" style="display:inline-flex;padding:9px 18px;font-size:.84rem">
+            ✏️ Vrij artikel toevoegen
+          </button>
+        </div>`
+      : '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.86rem">Geen artikelen gevonden.</div>';
     return;
   }
 

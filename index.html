@@ -15,6 +15,7 @@
   <meta name="description" content="Emondt Materiaalapp – Artikelen selecteren en bestellen voor monteurs." />
   <title>Emondt – Materiaal bestellen</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
@@ -39,11 +40,10 @@
     <div class="d-item" onclick="openVrijArtikel()"><span class="ico">✏️</span> Vrij artikel toevoegen</div>
     <div class="d-item" onclick="showTab('favorieten');closeDrawer()"><span class="ico">⭐</span> Favorieten</div>
     <div class="d-item" onclick="showTab('historie');closeDrawer()"><span class="ico">📋</span> Bestelhistorie</div>
-    <div class="d-coming"><span class="ico">🕐</span> Meer komt binnenkort</div>
   </div>
   <div class="d-foot">
     <div class="d-item" onclick="showTab('telefoonlijst');closeDrawer()"><span class="ico">📞</span> Telefoonlijst</div>
-    <div class="d-item" onclick="showTab('beheer-panel');closeDrawer()"><span class="ico">⚙️</span> Beheer</div>
+    <div id="drawer-beheer" class="d-item" onclick="showTab('beheer-panel');closeDrawer()"><span class="ico">⚙️</span> Beheer</div>
     <div id="drawer-account" style="padding:6px 12px 2px;font-size:.7rem;color:rgba(255,255,255,.3);letter-spacing:.04em"></div>
     <div class="d-item" onclick="uitloggen()" style="color:rgba(255,255,255,.5)"><span class="ico">🚪</span> Uitloggen</div>
   </div>
@@ -381,7 +381,17 @@
     <div class="form-card-title">📅 Leverdatum</div>
     <div class="field">
       <label>Gewenste leverdatum <span class="req">*</span></label>
-      <input type="date" id="leverdatum-static" onchange="kiesLeverdatum(this)" />
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button id="lev-zsm-btn" type="button" onclick="kiesZsmLeverdatum()"
+          style="flex:1;padding:9px 12px;border-radius:8px;border:1.5px solid var(--navy);font-family:'DM Sans',sans-serif;font-size:.84rem;font-weight:600;cursor:pointer;background:var(--navy);color:#fff">
+          ⚡ Zo snel mogelijk
+        </button>
+        <button id="lev-datum-btn" type="button" onclick="kiesKalenderLeverdatum()"
+          style="flex:1;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:'DM Sans',sans-serif;font-size:.84rem;font-weight:600;cursor:pointer;background:transparent;color:var(--text)">
+          📅 Kies datum
+        </button>
+      </div>
+      <input type="date" id="leverdatum-static" onchange="kiesLeverdatum(this)" style="display:none" />
       <div id="leverdatum-waarschuwing" style="display:none;background:#fff3cd;border:1.5px solid #f0c040;border-radius:8px;padding:8px 12px;font-size:.82rem;color:#856404;margin-top:6px;line-height:1.5">
         ⚠️ <span id="leverdatum-waarschuwing-tekst"></span>
       </div>
@@ -492,16 +502,16 @@
     <div class="vrij-title">✏️ Vrij artikel toevoegen</div>
     <div class="vrij-sub">Staat het artikel niet in de lijst?</div>
     <div class="field">
-      <label>Artikelnummer (optioneel)</label>
-      <input type="text" id="custom-code" placeholder="bijv. 99XX0001" />
-    </div>
-    <div class="field">
       <label>Omschrijving <span class="req">*</span></label>
       <input type="text" id="custom-naam" placeholder="Omschrijf het artikel..." />
     </div>
-    <div class="field" style="margin-bottom:20px">
+    <div class="field">
       <label>Aantal <span class="req">*</span></label>
       <input type="number" id="custom-qty" min="1" value="1" />
+    </div>
+    <div class="field" style="margin-bottom:20px">
+      <label>Artikelnummer (optioneel)</label>
+      <input type="text" id="custom-code" placeholder="bijv. 99XX0001" />
     </div>
     <button id="vrij-toevoegen-btn" class="btn btn-primary" style="margin-bottom:0">➕ Toevoegen aan bestelling</button>
     <button id="vrij-sluit-btn" class="btn btn-secondary" style="margin-bottom:0;margin-top:8px">Annuleren</button>

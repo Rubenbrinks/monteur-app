@@ -40,6 +40,28 @@ function initialiseerApp() {
   const sessie = getAuthSessie();
   const accountEl = document.getElementById('drawer-account');
   if (accountEl && sessie) accountEl.textContent = 'Ingelogd als ' + sessie.gebruiker;
+  const beheerItem = document.getElementById('drawer-beheer');
+  if (beheerItem) beheerItem.style.display = isAdmin() ? '' : 'none';
+
+  // ── ONESIGNAL: push notificaties ─────────────────────────
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  window.OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: ONESIGNAL_APP_ID,
+      serviceWorkerPath: 'sw.js',
+      notifyButton: { enable: false },
+      allowLocalhostAsSecureOrigin: true,
+    });
+    if (sessie?.gebruiker) {
+      await OneSignal.login(sessie.gebruiker);
+    }
+    // Vraag toestemming eenmalig als nog niet besloten
+    if (OneSignal.Notifications.permissionNative === 'default'
+        && !sessionStorage.getItem('push_gevraagd')) {
+      sessionStorage.setItem('push_gevraagd', '1');
+      setTimeout(() => OneSignal.Notifications.requestPermission(), 3000);
+    }
+  });
 
   // Haal profielgegevens op uit database op basis van ingelogde gebruiker
   if (sessie?.gebruiker) {

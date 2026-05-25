@@ -5,6 +5,7 @@
 // ── GOOGLE SHEETS API ────────────────────────────────────────
 // Vervang de URL hieronder met jouw Web App URL na deployment
 const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzD7_qnECE3nc54PgncGmlE3bckWKHxg6NPMIl4BroWZQdzIjRVEFfE9B0_LHxFOfXy9A/exec';
+const ONESIGNAL_APP_ID = 'd7e0a843-4152-4f58-8250-bd7f3da10ba9'; // ← invullen na aanmaken OneSignal account
 
 let ARTIKELEN = [];  // wordt geladen vanuit Google Sheets (of fallback)
 

@@ -284,9 +284,11 @@ function doGet(e) {
         return `  ${r.code.padEnd(12)} ${String(r.qty).padStart(4)} x  ${r.naam}  [per ${r.eenheid}]${lev}`;
       }).join('\n');
 
-      const leverdatumTekst = p.leverdatum
-        ? new Date(p.leverdatum).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' })
-        : '—';
+      const leverdatumTekst = !p.leverdatum || p.leverdatum === 'zsm'
+        ? 'Zo snel mogelijk'
+        : isNaN(new Date(p.leverdatum))
+          ? p.leverdatum
+          : new Date(p.leverdatum).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
       const body = [
         'MATERIAAL BESTELLEN – EMONDT GROEP',
@@ -362,6 +364,21 @@ function doGet(e) {
       Totaal: ${p.totaal || regels.length} artikel${(p.totaal || regels.length) !== 1 ? 'en' : ''}
     </div>
   </div>
+  <div style="background:#ffffff;padding:20px 24px;border:1px solid #dde1e6;border-top:none">
+    <div style="font-size:12px;color:#7a8aa0;margin-bottom:14px;text-align:center">
+      Bevestig of wijs deze bestelling af — de monteur ontvangt direct een pushmelding.
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center">
+      <a href="${ScriptApp.getService().getUrl()}?actie=bevestig_bestelling&gebruiker=${encodeURIComponent(p.gebruiker||p.naam||'')}&status=bevestigd&project=${encodeURIComponent(p.projectnaam||'')}&naam=${encodeURIComponent(p.naam||'')}"
+        style="display:inline-block;padding:12px 24px;background:#2e7d32;color:#fff;text-decoration:none;border-radius:8px;font-family:Arial,sans-serif;font-size:14px;font-weight:bold">
+        ✅ Bevestig bestelling
+      </a>
+      <a href="${ScriptApp.getService().getUrl()}?actie=bevestig_bestelling&gebruiker=${encodeURIComponent(p.gebruiker||p.naam||'')}&status=afgewezen&project=${encodeURIComponent(p.projectnaam||'')}&naam=${encodeURIComponent(p.naam||'')}"
+        style="display:inline-block;padding:12px 24px;background:#c62828;color:#fff;text-decoration:none;border-radius:8px;font-family:Arial,sans-serif;font-size:14px;font-weight:bold">
+        ❌ Wijs af
+      </a>
+    </div>
+  </div>
   <div style="background:#f0f2f5;padding:12px 24px;border-radius:0 0 8px 8px;border:1px solid #dde1e6;border-top:none;font-size:11px;color:#7a8aa0;text-align:center">
     Emondt Materiaalapp · Automatisch gegenereerd
   </div>
@@ -431,6 +448,63 @@ function doGet(e) {
     } catch(err) {
       return jsonOutput({ status: 'error', message: err.message });
     }
+  }
+
+  // ── BESTELLING BEVESTIGEN / AFWIJZEN ─────────────────────
+  if (actie === 'bevestig_bestelling') {
+    const gebruiker = e.parameter.gebruiker || '';
+    const status    = e.parameter.status    || 'bevestigd';
+    const project   = e.parameter.project   || '';
+    const naam      = e.parameter.naam      || '';
+
+    const isBevestigd = status === 'bevestigd';
+    const emoji   = isBevestigd ? '✅' : '❌';
+    const labelNL = isBevestigd ? 'bevestigd' : 'afgewezen';
+
+    try {
+      const props        = PropertiesService.getScriptProperties();
+      const osAppId      = props.getProperty('ONESIGNAL_APP_ID');
+      const osRestKey    = props.getProperty('ONESIGNAL_REST_API_KEY');
+
+      if (osAppId && osRestKey && gebruiker) {
+        const pushBody = {
+          app_id: osAppId,
+          include_aliases: { external_id: [gebruiker] },
+          target_channel: 'push',
+          headings: { nl: `${emoji} Bestelling ${labelNL}`, en: `${emoji} Order ${labelNL}` },
+          contents: {
+            nl: project
+              ? `Je bestelling voor "${project}" is ${labelNL} door de werkvoorbereiding.`
+              : `Je bestelling is ${labelNL} door de werkvoorbereiding.`,
+            en: `Your order has been ${isBevestigd ? 'confirmed' : 'rejected'}.`,
+          },
+        };
+        UrlFetchApp.fetch('https://api.onesignal.com/notifications', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Key ${osRestKey}`,
+            'Content-Type': 'application/json',
+          },
+          payload: JSON.stringify(pushBody),
+          muteHttpExceptions: true,
+        });
+      }
+    } catch(pushErr) { /* push is optioneel */ }
+
+    const htmlPagina = `<!DOCTYPE html>
+<html lang="nl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Emondt Materiaalapp</title>
+<style>body{font-family:Arial,sans-serif;text-align:center;padding:60px 20px;background:#f8f8f8}
+.card{background:#fff;border-radius:12px;padding:40px;max-width:420px;margin:0 auto;box-shadow:0 2px 16px rgba(0,0,0,.08)}
+h2{margin:0 0 12px;font-size:1.4rem;color:#22262A}p{color:#7a8aa0;font-size:.95rem;margin:0}</style></head>
+<body><div class="card">
+  <div style="font-size:3rem;margin-bottom:16px">${emoji}</div>
+  <h2>Bestelling ${labelNL}</h2>
+  <p>${naam ? `Bestelling van <strong>${naam}</strong>` : 'De bestelling'}${project ? ` voor <strong>${project}</strong>` : ''} is als <strong>${labelNL}</strong> gemarkeerd.<br><br>De monteur ontvangt een pushmelding.</p>
+</div></body></html>`;
+
+    return ContentService.createTextOutput(htmlPagina).setMimeType(ContentService.MimeType.HTML);
   }
 
   // ── BESTELLINGEN LEZEN (per monteur) ─────────────────────

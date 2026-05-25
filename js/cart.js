@@ -43,32 +43,37 @@ function renderCart() {
   html += '</div>';
   // Leverdatum: morgen als minimum, weekenden uitschakelen
   const today = new Date();
-  const opgeslagenDatum = (() => { try { return localStorage.getItem('leverdatum') || ''; } catch(e){ return ''; } })();
-  // Initialiseer statisch leverdatum-veld
+  const opgeslagenDatum = (() => { try { return localStorage.getItem('leverdatum') || 'zsm'; } catch(e){ return 'zsm'; } })();
   const ldStatic = document.getElementById('leverdatum-static');
   if (ldStatic) {
     const morgen = new Date(today);
     morgen.setDate(today.getDate() + 1);
     while (morgen.getDay() === 0 || morgen.getDay() === 6) morgen.setDate(morgen.getDate() + 1);
-    const minStr = morgen.toISOString().split('T')[0];
-    ldStatic.min = minStr;
-    // Valideer opgeslagen datum — wis als in het verleden of weekend
+    ldStatic.min = morgen.toISOString().split('T')[0];
+  }
+  if (opgeslagenDatum === 'zsm') {
+    try { localStorage.setItem('leverdatum', 'zsm'); } catch(e){}
+    _setLeverdatumModus('zsm');
+  } else {
     const vandaag = today.toISOString().split('T')[0];
-    const dag = opgeslagenDatum ? new Date(opgeslagenDatum + 'T12:00:00').getDay() : -1;
-    const ongeldig = !opgeslagenDatum || opgeslagenDatum <= vandaag || dag === 0 || dag === 6;
-    ldStatic.value = ongeldig ? '' : opgeslagenDatum;
-    if (ongeldig && opgeslagenDatum) {
-      try { localStorage.removeItem('leverdatum'); } catch(e){}
+    const dag = new Date(opgeslagenDatum + 'T12:00:00').getDay();
+    const ongeldig = opgeslagenDatum <= vandaag || dag === 0 || dag === 6;
+    if (ongeldig) {
+      try { localStorage.setItem('leverdatum', 'zsm'); } catch(e){}
+      _setLeverdatumModus('zsm');
+    } else {
+      if (ldStatic) ldStatic.value = opgeslagenDatum;
+      _setLeverdatumModus('datum');
     }
   }
 
   el.innerHTML = html;
   // Update samenvatting onderaan
   const inf = getInfo();
-  const opgeslagenDatum2 = (() => { try { return localStorage.getItem('leverdatum') || ''; } catch(e){ return ''; } })();
-  const leverdatumTxt = opgeslagenDatum2
-    ? new Date(opgeslagenDatum2 + 'T12:00:00').toLocaleDateString('nl-NL', {day:'2-digit',month:'2-digit',year:'numeric'})
-    : '—';
+  const _levD1 = (() => { try { return localStorage.getItem('leverdatum') || 'zsm'; } catch(e){ return 'zsm'; } })();
+  const leverdatumTxt = _levD1 === 'zsm'
+    ? 'Zo snel mogelijk'
+    : new Date(_levD1 + 'T12:00:00').toLocaleDateString('nl-NL', {day:'2-digit',month:'2-digit',year:'numeric'});
   const sumEl = document.getElementById('cart-samenvatting');
   if (sumEl) sumEl.innerHTML = `
     <div class="s-row"><span>Monteur</span><span>${inf.naam||'—'}</span></div>
@@ -99,10 +104,10 @@ function updateCartSamenvatting() {
 
   const inf = getInfo();
   const totaal = items.reduce((s, [,q]) => s + q, 0);
-  const leverdatum = localStorage.getItem('leverdatum') || '';
-  const leverdatumTxt = leverdatum
-    ? new Date(leverdatum + 'T12:00:00').toLocaleDateString('nl-NL', {day:'2-digit',month:'2-digit',year:'numeric'})
-    : '—';
+  const _levD2 = (() => { try { return localStorage.getItem('leverdatum') || 'zsm'; } catch(e){ return 'zsm'; } })();
+  const leverdatumTxt = _levD2 === 'zsm'
+    ? 'Zo snel mogelijk'
+    : new Date(_levD2 + 'T12:00:00').toLocaleDateString('nl-NL', {day:'2-digit',month:'2-digit',year:'numeric'});
 
   sumEl.innerHTML = `
     <div class="s-row"><span>Monteur</span><span>${inf.naam||'—'}</span></div>
@@ -148,6 +153,37 @@ function kiesLocatie(sel) {
     input.value = sel.value;
   }
   saveInfo();
+}
+
+function _setLeverdatumModus(modus) {
+  const zsmBtn    = document.getElementById('lev-zsm-btn');
+  const datumBtn  = document.getElementById('lev-datum-btn');
+  const datumInput = document.getElementById('leverdatum-static');
+  if (modus === 'zsm') {
+    if (zsmBtn)    { zsmBtn.style.background = 'var(--navy)'; zsmBtn.style.color = '#fff'; zsmBtn.style.borderColor = 'var(--navy)'; }
+    if (datumBtn)  { datumBtn.style.background = 'transparent'; datumBtn.style.color = 'var(--text)'; datumBtn.style.borderColor = 'var(--border)'; }
+    if (datumInput) datumInput.style.display = 'none';
+  } else {
+    if (zsmBtn)    { zsmBtn.style.background = 'transparent'; zsmBtn.style.color = 'var(--text)'; zsmBtn.style.borderColor = 'var(--border)'; }
+    if (datumBtn)  { datumBtn.style.background = 'var(--navy)'; datumBtn.style.color = '#fff'; datumBtn.style.borderColor = 'var(--navy)'; }
+    if (datumInput) datumInput.style.display = '';
+  }
+}
+
+function kiesZsmLeverdatum() {
+  try { localStorage.setItem('leverdatum', 'zsm'); } catch(e){}
+  _setLeverdatumModus('zsm');
+  const w = document.getElementById('leverdatum-waarschuwing');
+  if (w) w.style.display = 'none';
+  updateCartSamenvatting();
+}
+
+function kiesKalenderLeverdatum() {
+  try { localStorage.removeItem('leverdatum'); } catch(e){}
+  _setLeverdatumModus('datum');
+  const input = document.getElementById('leverdatum-static');
+  if (input) input.value = '';
+  updateCartSamenvatting();
 }
 
 function kiesLeverdatum(input) {
@@ -227,8 +263,8 @@ function verstuurEmail() {
   const items = Object.entries(cart);
   if (!items.length) { alert('Voeg eerst artikelen toe.'); return; }
 
-  let leverdatum = '';
-  try { leverdatum = localStorage.getItem('leverdatum') || ''; } catch(e){}
+  let leverdatum = 'zsm';
+  try { leverdatum = localStorage.getItem('leverdatum') || 'zsm'; } catch(e){}
 
   const verplicht = [
     {id:'naam',label:'Naam',tab:'info'},{id:'afdeling',label:'Afdeling',tab:'info'},
@@ -274,7 +310,9 @@ ${'='.repeat(46)}
 `;
   body += `Datum:           ${datum}
 `;
-  if (leverdatum) body += `Leverdatum:      ${new Date(leverdatum).toLocaleDateString('nl-NL',{day:'2-digit',month:'2-digit',year:'numeric'})}
+  const _levDatumTxt = leverdatum === 'zsm' ? 'Zo snel mogelijk'
+    : new Date(leverdatum).toLocaleDateString('nl-NL', {day:'2-digit',month:'2-digit',year:'numeric'});
+  body += `Leverdatum:      ${_levDatumTxt}
 `;
   body += `Monteur:         ${inf.naam||'—'}
 `;
@@ -388,9 +426,9 @@ function _renderHistorieLijst(hist) {
   }
   el.innerHTML = hist.map((b, i) => {
     const artikelen = _getArtikelen(b);
-    const leverdatumTxt = b.leverdatum
-      ? new Date(b.leverdatum + 'T12:00:00').toLocaleDateString('nl-NL', {day:'2-digit', month:'long', year:'numeric'})
-      : '—';
+    const leverdatumTxt = !b.leverdatum || b.leverdatum === 'zsm'
+      ? 'Zo snel mogelijk'
+      : new Date(b.leverdatum + 'T12:00:00').toLocaleDateString('nl-NL', {day:'2-digit', month:'long', year:'numeric'});
     const totaal = artikelen.reduce((s, a) => s + (a.qty || 0), 0);
     const kanHerbestellen = artikelen.length > 0;
 
