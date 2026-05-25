@@ -49,7 +49,6 @@ function initialiseerApp() {
     try {
       await OneSignal.init({
         appId: ONESIGNAL_APP_ID,
-        serviceWorkerPath: 'sw.js',
         notifyButton: { enable: false },
         allowLocalhostAsSecureOrigin: true,
       });
@@ -126,7 +125,7 @@ function initialiseerApp() {
 
   // ── SERVICE WORKER: registratie + automatisch updaten ────────
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js', {
+    navigator.serviceWorker.register('./OneSignalSDKWorker.js', {
       updateViaCache: 'none'  // Nooit de SW zelf cachen — altijd vers ophalen
     }).then(reg => {
 

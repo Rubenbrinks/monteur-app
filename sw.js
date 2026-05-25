@@ -1,11 +1,12 @@
 // ── Emondt Materiaalapp – Service Worker ──────────────────────
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
-const CACHE_NAAM = 'emondt-materiaalapp-v12';
+const CACHE_NAAM = 'emondt-materiaalapp-v14';
 
 const TE_CACHEN = [
   './',
   './index.html',
+  './OneSignalSDKWorker.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
@@ -94,8 +95,10 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       caches.match(event.request).then(cached => cached ||
         fetch(event.request).then(res => {
-          if (res && res.status === 200)
-            caches.open(CACHE_NAAM).then(c => c.put(event.request, res.clone()));
+          if (res && res.status === 200) {
+            const clone = res.clone();
+            caches.open(CACHE_NAAM).then(c => c.put(event.request, clone));
+          }
           return res;
         }).catch(() => {})
       )
