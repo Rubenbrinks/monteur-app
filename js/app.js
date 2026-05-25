@@ -52,14 +52,17 @@ function initialiseerApp() {
       notifyButton: { enable: false },
       allowLocalhostAsSecureOrigin: true,
     });
-    if (sessie?.gebruiker) {
-      await OneSignal.login(sessie.gebruiker);
-    }
-    // Vraag toestemming eenmalig als nog niet besloten
-    if (OneSignal.Notifications.permissionNative === 'default'
-        && !sessionStorage.getItem('push_gevraagd')) {
+    if (OneSignal.Notifications.permission) {
+      // Al toegestaan — direct koppelen aan account
+      if (sessie?.gebruiker) await OneSignal.login(sessie.gebruiker);
+    } else if (OneSignal.Notifications.permissionNative === 'default'
+               && !sessionStorage.getItem('push_gevraagd')) {
+      // Nog niet gevraagd — vraag toestemming, daarna koppelen
       sessionStorage.setItem('push_gevraagd', '1');
-      setTimeout(() => OneSignal.Notifications.requestPermission(), 3000);
+      setTimeout(async () => {
+        const granted = await OneSignal.Notifications.requestPermission();
+        if (granted && sessie?.gebruiker) await OneSignal.login(sessie.gebruiker);
+      }, 3000);
     }
   });
 
