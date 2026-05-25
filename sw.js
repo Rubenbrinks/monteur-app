@@ -1,6 +1,4 @@
 // ── Emondt Materiaalapp – Service Worker ──────────────────────
-importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
-
 const CACHE_NAAM = 'emondt-materiaalapp-v14';
 
 const TE_CACHEN = [

@@ -43,47 +43,6 @@ function initialiseerApp() {
   const beheerItem = document.getElementById('drawer-beheer');
   if (beheerItem) beheerItem.style.display = isAdmin() ? '' : 'none';
 
-  // ── ONESIGNAL: push notificaties ─────────────────────────
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  window.OneSignalDeferred.push(async function(OneSignal) {
-    try {
-      await OneSignal.init({
-        appId: ONESIGNAL_APP_ID,
-        serviceWorkerPath: 'OneSignalSDKWorker.js',
-        serviceWorkerParam: { scope: '/monteur-app/' },
-        notifyButton: { enable: false },
-        allowLocalhostAsSecureOrigin: true,
-      });
-      const perm    = OneSignal.Notifications.permission;
-      const permNat = OneSignal.Notifications.permissionNative;
-      console.log('[OneSignal] init OK | permission:', perm, '| permissionNative:', permNat);
-      if (perm) {
-        // Al ingeschreven — direct koppelen aan account
-        if (sessie?.gebruiker) await OneSignal.login(sessie.gebruiker);
-        console.log('[OneSignal] login:', sessie?.gebruiker);
-      } else if (permNat === 'granted') {
-        // Browser heeft toestemming maar OneSignal-abonnement is inactief — herstel
-        console.log('[OneSignal] optIn() aanroepen...');
-        await OneSignal.User.PushSubscription.optIn();
-        if (sessie?.gebruiker) await OneSignal.login(sessie.gebruiker);
-        console.log('[OneSignal] optIn + login klaar');
-      } else if (permNat === 'default' && !sessionStorage.getItem('push_gevraagd')) {
-        // Nog niet gevraagd — vraag toestemming, daarna koppelen
-        sessionStorage.setItem('push_gevraagd', '1');
-        setTimeout(async () => {
-          console.log('[OneSignal] requestPermission...');
-          const granted = await OneSignal.Notifications.requestPermission();
-          console.log('[OneSignal] requestPermission resultaat:', granted);
-          if (granted && sessie?.gebruiker) await OneSignal.login(sessie.gebruiker);
-        }, 3000);
-      } else {
-        console.log('[OneSignal] geen actie — permissionNative:', permNat, '| push_gevraagd:', sessionStorage.getItem('push_gevraagd'));
-      }
-    } catch(e) {
-      console.error('[OneSignal] fout:', e);
-    }
-  });
-
   // Haal profielgegevens op uit database op basis van ingelogde gebruiker
   if (sessie?.gebruiker) {
     const url = getSheetsUrl();
@@ -127,7 +86,7 @@ function initialiseerApp() {
 
   // ── SERVICE WORKER: registratie + automatisch updaten ────────
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./OneSignalSDKWorker.js', {
+    navigator.serviceWorker.register('./sw.js', {
       updateViaCache: 'none'  // Nooit de SW zelf cachen — altijd vers ophalen
     }).then(reg => {
 
