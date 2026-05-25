@@ -49,6 +49,8 @@ function initialiseerApp() {
     try {
       await OneSignal.init({
         appId: ONESIGNAL_APP_ID,
+        serviceWorkerPath: 'OneSignalSDKWorker.js',
+        serviceWorkerParam: { scope: '/monteur-app/' },
         notifyButton: { enable: false },
         allowLocalhostAsSecureOrigin: true,
       });
