@@ -53,7 +53,11 @@ function initialiseerApp() {
       allowLocalhostAsSecureOrigin: true,
     });
     if (OneSignal.Notifications.permission) {
-      // Al toegestaan — direct koppelen aan account
+      // Al ingeschreven — direct koppelen aan account
+      if (sessie?.gebruiker) await OneSignal.login(sessie.gebruiker);
+    } else if (OneSignal.Notifications.permissionNative === 'granted') {
+      // Browser heeft toestemming maar OneSignal-abonnement is inactief — herstel
+      await OneSignal.User.PushSubscription.optIn();
       if (sessie?.gebruiker) await OneSignal.login(sessie.gebruiker);
     } else if (OneSignal.Notifications.permissionNative === 'default'
                && !sessionStorage.getItem('push_gevraagd')) {
