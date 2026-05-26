@@ -64,9 +64,9 @@ function initialiseerApp() {
             try {
               localStorage.setItem('emondt_persoon', JSON.stringify({
                 naam:       r.naam       || huidig.naam      || r.gebruiker || '',
-                telefoon:   r.telefoon                       || huidig.telefoon   || '',
-                ontvanger2: r.email                          || huidig.ontvanger2 || '',
-                afdeling:   huidig.afdeling                 || '',
+                telefoon:   r.telefoon   || huidig.telefoon  || '',
+                ontvanger2: r.email      || huidig.ontvanger2 || '',
+                afdeling:   r.afdeling   || huidig.afdeling  || '',
               }));
             } catch(e) {}
             loadInfo();

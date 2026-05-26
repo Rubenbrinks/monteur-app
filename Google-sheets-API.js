@@ -177,19 +177,23 @@ function doGet(e) {
 
       const data    = sheet.getDataRange().getValues();
       const headers = data[0].map(h => String(h).trim().toLowerCase());
-      const userIdx = headers.indexOf('gebruikersnaam');
-      const telIdx  = headers.indexOf('telefoon');
-      const emailIdx= headers.indexOf('email');
-      const rolIdx  = headers.indexOf('rol');
+      const userIdx     = headers.indexOf('gebruikersnaam');
+      const telIdx      = headers.indexOf('telefoon');
+      const emailIdx    = headers.indexOf('email');
+      const rolIdx      = headers.indexOf('rol');
+      const naamIdx     = headers.indexOf('naam');
+      const afdelingIdx = headers.indexOf('afdeling');
 
       for (let i = 1; i < data.length; i++) {
         if (String(data[i][userIdx]).trim().toLowerCase() === gebruiker) {
           return jsonOutput({
             status:    'ok',
             gebruiker,
-            telefoon:  telIdx   >= 0 ? String(data[i][telIdx]).trim()   : '',
-            email:     emailIdx >= 0 ? String(data[i][emailIdx]).trim() : '',
-            rol:       rolIdx   >= 0 ? String(data[i][rolIdx]).trim()   : 'monteur',
+            naam:      naamIdx     >= 0 ? String(data[i][naamIdx]).trim()     : '',
+            telefoon:  telIdx      >= 0 ? String(data[i][telIdx]).trim()      : '',
+            email:     emailIdx    >= 0 ? String(data[i][emailIdx]).trim()    : '',
+            rol:       rolIdx      >= 0 ? String(data[i][rolIdx]).trim()      : 'monteur',
+            afdeling:  afdelingIdx >= 0 ? String(data[i][afdelingIdx]).trim() : '',
           });
         }
       }
@@ -438,7 +442,8 @@ function doGet(e) {
   // ── BESTELLINGEN LEZEN (per monteur) ─────────────────────
   if (actie === 'bestellingen_lezen') {
     try {
-      const gebruiker = (e.parameter.gebruiker || '').toLowerCase().trim();
+      const gebruiker  = (e.parameter.gebruiker || '').toLowerCase().trim();
+      const filterNaam = (e.parameter.naam      || '').toLowerCase().trim();
       const ss = SpreadsheetApp.openById(SHEET_ID);
       const sheet = ss.getSheetByName('Bestellingen');
       if (!sheet) return jsonOutput({ status: 'ok', bestellingen: [] });
@@ -456,9 +461,11 @@ function doGet(e) {
           if (!gebruiker) return true;
           const opgeslagenGebruiker = String(r[ci('gebruiker')] || '').toLowerCase().trim();
           const opgeslagenNaam      = String(r[ci('naam')]      || '').toLowerCase().trim();
+          // Nieuwe rijen: match op gebruiker-kolom (login-naam)
+          // Oude rijen zonder gebruiker-kolom: match op naam-kolom (volledige naam)
           return opgeslagenGebruiker
             ? opgeslagenGebruiker === gebruiker
-            : opgeslagenNaam === gebruiker;
+            : (filterNaam && opgeslagenNaam === filterNaam);
         })
         .map(r => {
           const datumRaw      = ci('datum')      >= 0 ? r[ci('datum')]      : '';

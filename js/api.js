@@ -368,10 +368,10 @@ function logBestellingSheets(data) {
           eenheid:     i.eenheid,
           leverancier: i.leverancier || '',
         }));
-        const leverdatum    = data.leverdatum || localStorage.getItem('leverdatum') || '';
-        const leverdatumTxt = leverdatum
-          ? new Date(leverdatum + 'T12:00:00').toLocaleDateString('nl-NL', { day:'2-digit', month:'long', year:'numeric' })
-          : '—';
+        const leverdatum    = data.leverdatum || localStorage.getItem('leverdatum') || 'zsm';
+        const leverdatumTxt = !leverdatum || leverdatum === 'zsm'
+          ? 'Zo snel mogelijk'
+          : new Date(leverdatum + 'T12:00:00').toLocaleDateString('nl-NL', { day:'2-digit', month:'long', year:'numeric' });
 
         slaHistorieOp({
           datum:         new Date().toLocaleString('nl-NL'),
@@ -389,24 +389,11 @@ function logBestellingSheets(data) {
         // Bevestigingsscherm
         const totaalStuks = histItems.reduce((s, a) => s + a.qty, 0);
         document.getElementById('bevestiging-samenvatting').innerHTML = `
-          <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin-bottom:12px">
-            <span style="color:var(--muted)">Monteur</span><span style="font-weight:600">${data.naam || '—'}</span>
-            <span style="color:var(--muted)">Project</span><span style="font-weight:600">${data.projectnaam || '—'}</span>
-            <span style="color:var(--muted)">Leverdatum</span><span style="font-weight:600;color:var(--navy)">${leverdatumTxt}</span>
-            <span style="color:var(--muted)">Afleveradres</span><span style="font-weight:600">${data.locatie || '—'}</span>
-          </div>
-          <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:6px">Bestelde artikelen</div>
-          <div style="background:var(--white);border-radius:8px;overflow:hidden;border:1px solid var(--border)">
-            ${histItems.map((a, i) => `
-              <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:${i%2===0?'var(--white)':'var(--bg)'};font-size:.82rem">
-                <span style="font-weight:700;color:var(--navy);min-width:28px">${a.qty}×</span>
-                <span style="flex:1">${a.naam}</span>
-                <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.74rem">${a.code}</span>
-              </div>`).join('')}
-            <div style="background:var(--navy);color:var(--green);padding:7px 10px;font-size:.8rem;font-weight:700;display:flex;justify-content:space-between">
-              <span>Totaal</span><span>${totaalStuks} stuks · ${histItems.length} artikel${histItems.length !== 1 ? 'en' : ''}</span>
-            </div>
-          </div>`;
+          <div class="s-row"><span>Monteur</span><span>${data.naam || '—'}</span></div>
+          <div class="s-row"><span>Project</span><span>${data.projectnaam || (data.projectnummer ? data.projectnummer : '—')}</span></div>
+          <div class="s-row"><span>Leverdatum</span><span>${leverdatumTxt}</span></div>
+          <div class="s-row"><span>Afleveradres</span><span>${data.locatie || '—'}</span></div>
+          <div class="s-row total"><span>Totaal</span><span>${totaalStuks} stuks · ${histItems.length} artikel${histItems.length !== 1 ? 'en' : ''}</span></div>`;
 
         document.getElementById('bevestiging-overlay').style.display = 'flex';
         cart = {};

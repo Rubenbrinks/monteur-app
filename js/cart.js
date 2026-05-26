@@ -478,7 +478,8 @@ function renderHistorie() {
     return;
   }
   el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.9rem">⏳ Bestellingen laden...</div>';
-  fetch(`${url}?actie=bestellingen_lezen&gebruiker=${encodeURIComponent(sessie.gebruiker)}&t=${Date.now()}`)
+  const _persoon = (() => { try { return JSON.parse(localStorage.getItem('emondt_persoon') || '{}'); } catch(e) { return {}; } })();
+  fetch(`${url}?actie=bestellingen_lezen&gebruiker=${encodeURIComponent(sessie.gebruiker)}&naam=${encodeURIComponent(_persoon.naam || '')}&t=${Date.now()}`)
     .then(r => r.json())
     .then(r => {
       if (r.status !== 'ok') throw new Error(r.message || 'Fout');
