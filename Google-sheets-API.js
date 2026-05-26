@@ -401,37 +401,45 @@ function doGet(e) {
         let logSheet = ss.getSheetByName('Bestellingen');
         if (!logSheet) {
           logSheet = ss.insertSheet('Bestellingen');
-          logSheet.appendRow(['Datum','Naam','Telefoon','Afdeling','Projectnummer','Projectnaam','Locatie','Leverdatum','Artikelen','Opmerkingen','Gebruiker','ArtikelenData']);
+          logSheet.appendRow(['Datum','Monteur','Telefoon','Afdeling','Projectnummer','Projectnaam','Afleveradres','Leverdatum','Artikelen','Opmerking','Gebruiker','ArtikelenData']);
+          SpreadsheetApp.flush();
         } else {
           // Voeg ontbrekende kolommen toe aan bestaande sheet
           const headerRij = logSheet.getRange(1, 1, 1, logSheet.getLastColumn()).getValues()[0];
-          const headers = headerRij.map(h => String(h).trim().toLowerCase());
-          if (!headers.includes('datum'))        logSheet.getRange(1, logSheet.getLastColumn() + 1).setValue('Datum');
-          if (!headers.includes('gebruiker'))    logSheet.getRange(1, logSheet.getLastColumn() + 1).setValue('Gebruiker');
-          if (!headers.includes('artikelendata'))logSheet.getRange(1, logSheet.getLastColumn() + 1).setValue('ArtikelenData');
+          const headers = headerRij.map(h => String(h).replace(/\s/g, ' ').trim().toLowerCase());
+          if (!headers.includes('datum'))        { logSheet.getRange(1, logSheet.getLastColumn() + 1).setValue('Datum');        SpreadsheetApp.flush(); }
+          if (!headers.includes('gebruiker'))    { logSheet.getRange(1, logSheet.getLastColumn() + 1).setValue('Gebruiker');    SpreadsheetApp.flush(); }
+          if (!headers.includes('artikelendata')){ logSheet.getRange(1, logSheet.getLastColumn() + 1).setValue('ArtikelenData'); SpreadsheetApp.flush(); }
         }
         // Lees kolomposities dynamisch zodat volgorde niet uitmaakt
+        // Strip non-ASCII en whitespace om onzichtbare tekens in kolomhoofden te negeren
         const hRow = logSheet.getRange(1, 1, 1, logSheet.getLastColumn()).getValues()[0];
         const hIdx = {};
-        hRow.forEach((h, i) => { hIdx[String(h).trim().toLowerCase()] = i; });
+        hRow.forEach((h, i) => { hIdx[String(h).replace(/[^\x20-\x7E]/g, '').trim().toLowerCase()] = i; });
+        Logger.log('Bestellingen hIdx: ' + JSON.stringify(hIdx));
+        Logger.log('p.naam=' + p.naam + ' | p.locatie=' + p.locatie);
         const artikelenTekst = regels.map(r =>
           `${r.qty}× ${r.naam} (${r.code})${r.eenheid ? ' per ' + r.eenheid : ''}${r.leverancier ? ' – ' + r.leverancier : ''}`
         ).join('\n');
         const logRij = new Array(hRow.length).fill('');
-        logRij[hIdx['datum']]          = p.datum          || '';
-        logRij[hIdx['monteur']]        = p.naam           || '';
-        logRij[hIdx['telefoon']]       = p.telefoon       || '';
-        logRij[hIdx['afdeling']]       = p.afdeling       || '';
-        logRij[hIdx['projectnummer']]  = p.projectnummer  || '';
-        logRij[hIdx['projectnaam']]    = p.projectnaam    || '';
-        logRij[hIdx['afleveradres']]   = p.locatie        || '';
-        logRij[hIdx['leverdatum']]     = p.leverdatum     || '';
-        logRij[hIdx['artikelen']]      = artikelenTekst;
-        logRij[hIdx['opmerking']]      = p.opmerkingen    || '';
-        logRij[hIdx['gebruiker']]      = p.gebruiker      || '';
-        logRij[hIdx['artikelendata']]  = p.artikelen      || '';
+        const _set = (key, val) => { if (hIdx[key] !== undefined) logRij[hIdx[key]] = val; };
+        _set('datum',          p.datum         || '');
+        _set('monteur',        p.naam          || '');
+        _set('naam',           p.naam          || '');  // fallback voor sheets met 'Naam' kolom
+        _set('telefoon',       p.telefoon      || '');
+        _set('afdeling',       p.afdeling      || '');
+        _set('projectnummer',  p.projectnummer || '');
+        _set('projectnaam',    p.projectnaam   || '');
+        _set('afleveradres',   p.locatie       || '');
+        _set('locatie',        p.locatie       || '');  // fallback
+        _set('leverdatum',     p.leverdatum    || '');
+        _set('artikelen',      artikelenTekst);
+        _set('opmerking',      p.opmerkingen   || '');
+        _set('opmerkingen',    p.opmerkingen   || '');  // fallback
+        _set('gebruiker',      p.gebruiker     || '');
+        _set('artikelendata',  p.artikelen     || '');
         logSheet.appendRow(logRij);
-      } catch(logErr) { /* logging is optioneel */ }
+      } catch(logErr) { Logger.log('Bestelling log fout: ' + logErr.toString()); }
 
       return jsonOutput({ status: 'ok', provider: MAIL_PROVIDER });
 

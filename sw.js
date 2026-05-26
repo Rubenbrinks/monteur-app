@@ -1,5 +1,5 @@
 // ── Emondt Materiaalapp – Service Worker ──────────────────────
-const CACHE_NAAM = 'emondt-materiaalapp-v15';
+const CACHE_NAAM = 'emondt-materiaalapp-v2.0.0';
 
 const TE_CACHEN = [
   './',
@@ -69,19 +69,7 @@ self.addEventListener('fetch', event => {
         cache.match('./index.html').then(cached => {
           const fetchPromise = fetch(event.request, { cache: 'no-store' })
             .then(res => {
-              if (res && res.ok) {
-                const newTag = res.headers.get('ETag') || res.headers.get('Last-Modified');
-                const oldTag = cached
-                  ? (cached.headers.get('ETag') || cached.headers.get('Last-Modified'))
-                  : null;
-                cache.put('./index.html', res.clone());
-                // Alleen melden als er een gecachede versie was én de inhoud echt is gewijzigd
-                if (cached && newTag && newTag !== oldTag) {
-                  self.clients.matchAll().then(clients =>
-                    clients.forEach(c => c.postMessage({ type: 'SW_UPDATE_KLAAR' }))
-                  );
-                }
-              }
+              if (res && res.ok) cache.put('./index.html', res.clone());
               return res;
             })
             .catch(() => cached);

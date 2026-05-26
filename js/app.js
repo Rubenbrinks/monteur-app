@@ -84,50 +84,44 @@ function initialiseerApp() {
   document.getElementById('vrij-overlay').addEventListener('click', function(e) { if (e.target === this) sluitVrijArtikel(); });
   document.getElementById('vrij-toevoegen-btn').addEventListener('click', customArtikelToevoegen);
 
-  // ── SERVICE WORKER: registratie + automatisch updaten ────────
+  // ── SERVICE WORKER: registratie + update-banner ─────────────
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js', {
-      updateViaCache: 'none'  // Nooit de SW zelf cachen — altijd vers ophalen
+      updateViaCache: 'none'
     }).then(reg => {
 
-      // Controleer direct op update bij elke app-open
       reg.update();
 
-      // Luister naar nieuwe SW die beschikbaar komt
+      const toonUpdateBanner = () => {
+        if (sessionStorage.getItem('emondt_net_bijgewerkt')) return;
+        const banner = document.getElementById('update-banner');
+        if (banner) banner.style.display = 'flex';
+      };
+
+      // Nieuwe SW gevonden — toon banner zodra die klaarstaat
       reg.addEventListener('updatefound', () => {
         const nieuweSW = reg.installing;
         if (!nieuweSW) return;
         nieuweSW.addEventListener('statechange', () => {
           if (nieuweSW.state === 'installed' && navigator.serviceWorker.controller) {
-            // Nieuwe versie klaar — activeer direct en herlaad
-            nieuweSW.postMessage({ type: 'SKIP_WAITING' });
+            toonUpdateBanner();
           }
         });
       });
 
-      // Als er al een wachtende SW is bij openen (bijv. tab was open tijdens update)
-      if (reg.waiting) {
-        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      // Al een wachtende SW bij openen (bijv. tab was open tijdens update)
+      if (reg.waiting && navigator.serviceWorker.controller) {
+        toonUpdateBanner();
       }
 
     }).catch(err => console.warn('[SW] Registratie mislukt:', err));
 
-    // Herlaad de pagina zodra de nieuwe SW de controle overneemt
+    // Herlaad zodra nieuwe SW de controle overneemt
     let herladen = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (herladen) return;
       herladen = true;
       window.location.reload();
-    });
-
-    // Toon melding als er een update op de achtergrond is geladen
-    navigator.serviceWorker.addEventListener('message', event => {
-      if (event.data?.type === 'SW_UPDATE_KLAAR') {
-        // Niet tonen als we net zelf herladen hebben (bevestigUpdate-flow)
-        if (sessionStorage.getItem('emondt_net_bijgewerkt')) return;
-        const banner = document.getElementById('update-banner');
-        if (banner) banner.style.display = 'flex';
-      }
     });
   }
 
@@ -141,7 +135,13 @@ function initialiseerApp() {
 function bevestigUpdate() {
   document.getElementById('update-banner').style.display = 'none';
   sessionStorage.setItem('emondt_net_bijgewerkt', '1');
-  location.reload();
+  navigator.serviceWorker.getRegistration().then(reg => {
+    if (reg && reg.waiting) {
+      reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+    } else {
+      location.reload();
+    }
+  });
 }
 
 
