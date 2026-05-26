@@ -145,6 +145,51 @@ function bevestigUpdate() {
 }
 
 
+function formatTelefoon(input) {
+  let v = input.value.replace(/\D/g, '');
+  if (v.length > 10) v = v.slice(0, 10);
+  if (v.length > 2)  v = v.slice(0, 2) + '-' + v.slice(2);
+  input.value = v;
+}
+
+function slaProfielOp() {
+  const url    = getSheetsUrl();
+  const sessie = getAuthSessie();
+  if (!url || !sessie) { showToast('❌ Niet ingelogd of geen koppeling.'); return; }
+
+  const naam     = (document.getElementById('naam')?.value     || '').trim();
+  const telefoon = (document.getElementById('telefoon')?.value || '').trim();
+  const afdeling = (document.getElementById('afdeling')?.value || '');
+  const email    = (document.getElementById('ontvanger2')?.value || '').trim();
+
+  const btn = document.getElementById('profiel-opslaan-btn');
+  if (btn) { btn.textContent = '⏳ Opslaan...'; btn.disabled = true; }
+
+  const params = new URLSearchParams({
+    actie: 'profiel_opslaan', gebruiker: sessie.gebruiker,
+    naam, telefoon, afdeling, email, t: Date.now(),
+  });
+
+  fetch(`${url}?${params}`)
+    .then(r => r.json())
+    .then(r => {
+      if (btn) { btn.textContent = 'Opslaan'; btn.disabled = false; }
+      if (r.status === 'ok') {
+        try {
+          const p = JSON.parse(localStorage.getItem('emondt_persoon') || '{}');
+          localStorage.setItem('emondt_persoon', JSON.stringify({ ...p, naam, telefoon, afdeling, ontvanger2: email }));
+        } catch(e) {}
+        showToast('✓ Gegevens opgeslagen');
+      } else {
+        showToast('❌ ' + (r.message || 'Opslaan mislukt'));
+      }
+    })
+    .catch(() => {
+      if (btn) { btn.textContent = 'Opslaan'; btn.disabled = false; }
+      showToast('❌ Verbinding mislukt');
+    });
+}
+
 // ── OPSLAAN / LADEN ───────────────────────────────────────────
 
 function getInfo() {

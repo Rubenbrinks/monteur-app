@@ -324,7 +324,7 @@
     </div>
     <div class="field">
       <label>Telefoonnummer <span class="req">*</span></label>
-      <input type="tel" id="telefoon" placeholder="06 – – – – – – – –" oninput="saveInfo()" />
+      <input type="tel" id="telefoon" placeholder="06-XXXXXXXX" oninput="formatTelefoon(this);saveInfo()" inputmode="numeric" />
     </div>
     <div class="field">
       <label>Afdeling <span class="req">*</span></label>
@@ -339,6 +339,7 @@
       <label>E-mailadres (optioneel)</label>
       <input type="email" id="ontvanger2" placeholder="jouw@email.nl" oninput="saveInfo()" />
     </div>
+    <button id="profiel-opslaan-btn" class="btn btn-primary" onclick="slaProfielOp()" style="width:100%;margin-top:4px">Opslaan</button>
   </div>
 </div>
 

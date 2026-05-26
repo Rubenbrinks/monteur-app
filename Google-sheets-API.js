@@ -203,6 +203,39 @@ function doGet(e) {
     }
   }
 
+  // ── PROFIEL OPSLAAN ──────────────────────────────────────
+  if (actie === 'profiel_opslaan') {
+    try {
+      const gebruiker = (e.parameter.gebruiker || '').toLowerCase().trim();
+      if (!gebruiker) return jsonOutput({ status: 'error', message: 'Niet ingelogd.' });
+
+      const ss    = SpreadsheetApp.openById(SHEET_ID);
+      const sheet = ss.getSheetByName('Gebruikers');
+      if (!sheet) return jsonOutput({ status: 'error', message: 'Tabblad "Gebruikers" niet gevonden.' });
+
+      const data    = sheet.getDataRange().getValues();
+      const headers = data[0].map(h => String(h).trim().toLowerCase());
+      const userIdx     = headers.indexOf('gebruikersnaam');
+      const naamIdx     = headers.indexOf('naam');
+      const telIdx      = headers.indexOf('telefoon');
+      const afdelingIdx = headers.indexOf('afdeling');
+      const emailIdx    = headers.indexOf('email');
+
+      for (let i = 1; i < data.length; i++) {
+        if (String(data[i][userIdx]).trim().toLowerCase() === gebruiker) {
+          if (naamIdx     >= 0) sheet.getRange(i + 1, naamIdx     + 1).setValue(e.parameter.naam     || '');
+          if (telIdx      >= 0) sheet.getRange(i + 1, telIdx      + 1).setValue(e.parameter.telefoon || '');
+          if (afdelingIdx >= 0) sheet.getRange(i + 1, afdelingIdx + 1).setValue(e.parameter.afdeling || '');
+          if (emailIdx    >= 0) sheet.getRange(i + 1, emailIdx    + 1).setValue(e.parameter.email    || '');
+          return jsonOutput({ status: 'ok' });
+        }
+      }
+      return jsonOutput({ status: 'error', message: 'Gebruiker niet gevonden.' });
+    } catch(err) {
+      return jsonOutput({ status: 'error', message: err.message });
+    }
+  }
+
   // ── WACHTWOORD WIJZIGEN ───────────────────────────────────
   if (actie === 'wachtwoord_wijzigen') {
     try {
