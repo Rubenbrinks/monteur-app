@@ -68,10 +68,10 @@ function checkLogin() {
         try {
           const bestaand = JSON.parse(localStorage.getItem('emondt_persoon') || '{}');
           const updated = {
-            naam:      bestaand.naam      || r.gebruiker || '',
-            telefoon:  bestaand.telefoon  || r.telefoon  || '',
-            ontvanger2:bestaand.ontvanger2|| r.email     || '',
-            afdeling:  bestaand.afdeling  || '',
+            naam:      r.naam      || bestaand.naam      || r.gebruiker || '',
+            telefoon:  r.telefoon  || bestaand.telefoon  || '',
+            ontvanger2:r.email     || bestaand.ontvanger2 || '',
+            afdeling:  r.afdeling  || bestaand.afdeling  || '',
           };
           localStorage.setItem('emondt_persoon', JSON.stringify(updated));
         } catch(e) {}

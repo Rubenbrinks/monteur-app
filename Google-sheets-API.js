@@ -249,20 +249,24 @@ function doGet(e) {
 
       const data    = sheet.getDataRange().getValues();
       const headers = data[0].map(h => String(h).trim().toLowerCase());
-      const userIdx = headers.indexOf('gebruikersnaam');
-      const pwIdx   = headers.indexOf('wachtwoord');
-      const rolIdx  = headers.indexOf('rol');
-      const telIdx  = headers.indexOf('telefoon');
-      const emailIdx= headers.indexOf('email');
+      const userIdx     = headers.indexOf('gebruikersnaam');
+      const pwIdx       = headers.indexOf('wachtwoord');
+      const rolIdx      = headers.indexOf('rol');
+      const telIdx      = headers.indexOf('telefoon');
+      const emailIdx    = headers.indexOf('email');
+      const naamIdx     = headers.indexOf('naam');
+      const afdelingIdx = headers.indexOf('afdeling');
 
       for (let i = 1; i < data.length; i++) {
         const rij = data[i];
         if (String(rij[userIdx]).trim().toLowerCase() === gebruikersnaam &&
             String(rij[pwIdx]).trim() === wachtwoord) {
-          const rol      = rolIdx   >= 0 ? String(rij[rolIdx]).trim().toLowerCase()  : 'monteur';
-          const telefoon = telIdx   >= 0 ? String(rij[telIdx]).trim()                : '';
-          const email    = emailIdx >= 0 ? String(rij[emailIdx]).trim()              : '';
-          return jsonOutput({ status: 'ok', rol, gebruiker: gebruikersnaam, telefoon, email });
+          const rol      = rolIdx      >= 0 ? String(rij[rolIdx]).trim().toLowerCase()   : 'monteur';
+          const telefoon = telIdx      >= 0 ? String(rij[telIdx]).trim()                 : '';
+          const email    = emailIdx    >= 0 ? String(rij[emailIdx]).trim()               : '';
+          const naam     = naamIdx     >= 0 ? String(rij[naamIdx]).trim()                : '';
+          const afdeling = afdelingIdx >= 0 ? String(rij[afdelingIdx]).trim()            : '';
+          return jsonOutput({ status: 'ok', rol, gebruiker: gebruikersnaam, telefoon, email, naam, afdeling });
         }
       }
       return jsonOutput({ status: 'ongeldig', message: 'Onjuiste gebruikersnaam of wachtwoord.' });
@@ -402,12 +406,9 @@ function doGet(e) {
           // Voeg ontbrekende kolommen toe aan bestaande sheet
           const headerRij = logSheet.getRange(1, 1, 1, logSheet.getLastColumn()).getValues()[0];
           const headers = headerRij.map(h => String(h).trim().toLowerCase());
-          if (!headers.includes('gebruiker')) {
-            logSheet.getRange(1, logSheet.getLastColumn() + 1).setValue('Gebruiker');
-          }
-          if (!headers.includes('artikelendata')) {
-            logSheet.getRange(1, logSheet.getLastColumn() + 1).setValue('ArtikelenData');
-          }
+          if (!headers.includes('datum'))        logSheet.getRange(1, logSheet.getLastColumn() + 1).setValue('Datum');
+          if (!headers.includes('gebruiker'))    logSheet.getRange(1, logSheet.getLastColumn() + 1).setValue('Gebruiker');
+          if (!headers.includes('artikelendata'))logSheet.getRange(1, logSheet.getLastColumn() + 1).setValue('ArtikelenData');
         }
         // Lees kolomposities dynamisch zodat volgorde niet uitmaakt
         const hRow = logSheet.getRange(1, 1, 1, logSheet.getLastColumn()).getValues()[0];
@@ -418,15 +419,15 @@ function doGet(e) {
         ).join('\n');
         const logRij = new Array(hRow.length).fill('');
         logRij[hIdx['datum']]          = p.datum          || '';
-        logRij[hIdx['naam']]           = p.naam           || '';
+        logRij[hIdx['monteur']]        = p.naam           || '';
         logRij[hIdx['telefoon']]       = p.telefoon       || '';
         logRij[hIdx['afdeling']]       = p.afdeling       || '';
         logRij[hIdx['projectnummer']]  = p.projectnummer  || '';
         logRij[hIdx['projectnaam']]    = p.projectnaam    || '';
-        logRij[hIdx['locatie']]        = p.locatie        || '';
+        logRij[hIdx['afleveradres']]   = p.locatie        || '';
         logRij[hIdx['leverdatum']]     = p.leverdatum     || '';
         logRij[hIdx['artikelen']]      = artikelenTekst;
-        logRij[hIdx['opmerkingen']]    = p.opmerkingen    || '';
+        logRij[hIdx['opmerking']]      = p.opmerkingen    || '';
         logRij[hIdx['gebruiker']]      = p.gebruiker      || '';
         logRij[hIdx['artikelendata']]  = p.artikelen      || '';
         logSheet.appendRow(logRij);
@@ -460,9 +461,9 @@ function doGet(e) {
         .filter(r => {
           if (!gebruiker) return true;
           const opgeslagenGebruiker = String(r[ci('gebruiker')] || '').toLowerCase().trim();
-          const opgeslagenNaam      = String(r[ci('naam')]      || '').toLowerCase().trim();
+          const opgeslagenNaam      = String(r[ci('monteur')] || '').toLowerCase().trim();
           // Nieuwe rijen: match op gebruiker-kolom (login-naam)
-          // Oude rijen zonder gebruiker-kolom: match op naam-kolom (volledige naam)
+          // Oude rijen zonder gebruiker-kolom: match op monteur-kolom (volledige naam)
           return opgeslagenGebruiker
             ? opgeslagenGebruiker === gebruiker
             : (filterNaam && opgeslagenNaam === filterNaam);
@@ -479,14 +480,14 @@ function doGet(e) {
           const cel = name => ci(name) >= 0 ? String(r[ci(name)] || '') : '';
           return {
             datum:          fmtDatum(datumRaw),
-            naam:           cel('naam'),
+            naam:           cel('monteur'),
             telefoon:       cel('telefoon'),
             afdeling:       cel('afdeling'),
             projectnummer:  cel('projectnummer'),
             projectnaam:    cel('projectnaam'),
-            locatie:        cel('locatie'),
+            locatie:        cel('afleveradres'),
             leverdatum:     fmtLever(leverdatumRaw),
-            opmerkingen:    cel('opmerkingen'),
+            opmerkingen:    cel('opmerking'),
             artikelenData:  cel('artikelendata'),
             artikelenTekst: cel('artikelen'),
           };
