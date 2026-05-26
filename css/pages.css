@@ -221,8 +221,8 @@
     .bevestiging-artikel:last-child{border-bottom:none}
     .bevestiging-artikel-qty{font-weight:700;color:var(--navy);min-width:36px;flex-shrink:0}
 
-    /* Footer social links: geen kleurwijziging na klikken */
-    footer a:visited { color: var(--muted) !important; }
+    footer a, footer a:visited { color: #111 !important; text-decoration: none; transition: color .15s; }
+    footer a:hover { color: var(--green) !important; }
     /* ═══ PAGINA LOGIN ══════════════════════════════════════════ */
     #login-scherm{position:fixed;inset:0;z-index:9999;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-direction:column;padding:24px}
     #login-scherm.verborgen{display:none}
