@@ -694,6 +694,8 @@ function voegGekoppeldToe(bronCode, secCode) {
 function toonVerpakking(e, kaart) {
   if (e.target.closest('.qty-wrap')) return;
   e.stopPropagation();
+  const bestaand = kaart.querySelector('.verpakking-popup');
+  if (bestaand) { bestaand.remove(); return; }
   document.querySelectorAll('.verpakking-popup').forEach(p => p.remove());
   const code = kaart.id.replace('card-', '').replace('fav-card-', '');
   const naam       = kaart.dataset.naam       || '';
@@ -720,6 +722,10 @@ function toonVerpakking(e, kaart) {
       <span>${isFav ? '★' : '☆'}</span>
       <span>${isFav ? 'Verwijder uit favorieten' : 'Voeg toe aan favorieten'}</span>
     </button>`;
+
+  popup.addEventListener('click', e => {
+    if (!e.target.closest('button') && !e.target.closest('a')) popup.remove();
+  });
 
   kaart.appendChild(popup);
   setTimeout(() => {
