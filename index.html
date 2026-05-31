@@ -437,16 +437,22 @@
 
 <div class="screen" id="tab-winkelwagen">
   <div id="cart-content"></div>
-  <div class="form-card" style="margin-top:14px">
-    <div class="form-card-title">Project</div>
-    <div class="field-2">
-      <div class="field">
-        <label>Projectnummer</label>
-        <input type="text" id="projectnummer" placeholder="bijv. 2024-0123" oninput="saveInfo();cartAutoExpand()" />
-      </div>
-      <div class="field">
-        <label>Projectnaam <span class="req">*</span></label>
-        <input type="text" id="projectnaam" placeholder="Omschrijving" oninput="saveInfo();cartAutoExpand()" />
+  <div class="form-card inklapbaar" id="cart-project-card" style="margin-top:14px">
+    <button class="inklapbaar-header" onclick="toggleInklapbaar('cart-project-card')" aria-expanded="false">
+      <span class="form-card-title" style="margin-bottom:0">Project</span>
+      <svg class="inklapbaar-arrow" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+    <div class="inklapbaar-body">
+      <div style="height:14px"></div>
+      <div class="field-2">
+        <div class="field">
+          <label>Projectnummer</label>
+          <input type="text" id="projectnummer" placeholder="bijv. 2024-0123" oninput="saveInfo();cartAutoExpand()" />
+        </div>
+        <div class="field">
+          <label>Projectnaam <span class="req">*</span></label>
+          <input type="text" id="projectnaam" placeholder="Omschrijving" oninput="saveInfo();cartAutoExpand()" />
+        </div>
       </div>
     </div>
   </div>

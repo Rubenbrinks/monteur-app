@@ -41,6 +41,7 @@ function cartAutoExpand() {
   const locatieKeuze = document.getElementById('locatie-keuze')?.value || '';
   const locatieTekst = (document.getElementById('locatie')?.value || '').trim();
 
+  openInklapbaar('cart-project-card');
   if (projectnaam || projectnr) openInklapbaar('cart-levering-card');
 
   const leveringIngevuld = locatieKeuze && (locatieKeuze !== 'vrij' || locatieTekst);
