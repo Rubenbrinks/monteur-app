@@ -724,7 +724,10 @@ function toonVerpakking(e, kaart) {
     </button>`;
 
   popup.addEventListener('click', e => {
-    if (!e.target.closest('button') && !e.target.closest('a')) popup.remove();
+    if (!e.target.closest('button') && !e.target.closest('a')) {
+      e.stopPropagation();
+      popup.remove();
+    }
   });
 
   kaart.appendChild(popup);
