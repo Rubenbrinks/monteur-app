@@ -263,27 +263,33 @@ function leegMaken() {
 function verstuurEmail() {
   const inf = getInfo();
   const items = Object.entries(cart);
-  if (!items.length) { alert('Voeg eerst artikelen toe.'); return; }
+  if (!items.length) { showToast('⚠️ Voeg eerst artikelen toe.'); showTab('artikelen'); return; }
 
   let leverdatum = 'zsm';
   try { leverdatum = localStorage.getItem('leverdatum') || 'zsm'; } catch(e){}
 
   const verplicht = [
-    {id:'naam',label:'Naam',tab:'info'},{id:'afdeling',label:'Afdeling',tab:'info'},
-    {id:'projectnaam',label:'Projectnaam',tab:'winkelwagen'},{id:'locatie',label:'Afleveradres',tab:'winkelwagen'},
-    {id:'telefoon',label:'Telefoonnummer',tab:'info'},
+    {id:'naam',label:'Naam',tab:'info',kaart:null},
+    {id:'afdeling',label:'Afdeling',tab:'info',kaart:null},
+    {id:'projectnaam',label:'Projectnaam',tab:'winkelwagen',kaart:'cart-project-card'},
+    {id:'locatie',label:'Afleveradres',tab:'winkelwagen',kaart:'cart-levering-card'},
+    {id:'telefoon',label:'Telefoonnummer',tab:'info',kaart:null},
   ];
   for (const v of verplicht) {
     if (!inf[v.id]||inf[v.id].trim()==='') {
-      alert(`Vul het verplichte veld "${v.label}" in.`); showTab(v.tab);
-      const el = document.getElementById(v.id); if(el) el.focus(); return;
+      showTab(v.tab);
+      if (v.kaart) openInklapbaar(v.kaart);
+      showToast(`⚠️ Vul "${v.label}" in.`);
+      setTimeout(() => { const el = document.getElementById(v.id); if(el) el.focus(); }, 350);
+      return;
     }
   }
 
   // ── Leverdatum verplicht ──────────────────────────────────
   if (!leverdatum) {
-    alert('Kies een gewenste leverdatum.');
     showTab('winkelwagen');
+    openInklapbaar('cart-leverdatum-card');
+    showToast('⚠️ Kies een gewenste leverdatum.');
     return;
   }
 

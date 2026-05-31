@@ -188,6 +188,15 @@ header {
 .field input:focus, .field select:focus, .field textarea:focus {
   border-color: var(--green); background: var(--surface3);
 }
+.field input:-webkit-autofill,
+.field input:-webkit-autofill:hover,
+.field input:-webkit-autofill:focus,
+.field textarea:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--surface2) inset;
+  -webkit-text-fill-color: var(--text);
+  caret-color: var(--text);
+  transition: background-color 5000s ease-in-out 0s;
+}
 .field select { appearance: none; -webkit-appearance: none; cursor: pointer; }
 .field textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
 .req { color: var(--green); }
