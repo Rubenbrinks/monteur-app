@@ -801,6 +801,8 @@ function setQty(code, input) {
   _setCart(code, waarde);
 }
 
+let _syncingLinked = false;
+
 function _setCart(code, nieuw) {
   const oud = cart[code] || 0;
   if (nieuw === 0) delete cart[code]; else cart[code] = nieuw;
@@ -824,6 +826,21 @@ function _setCart(code, nieuw) {
     const kaart = document.getElementById('card-' + code) || document.getElementById('fav-card-' + code);
     const lti = kaart?.dataset?.linktoitems;
     if (lti && lti.trim()) toonIsolatieSuggestie(code, lti.trim());
+  }
+  // Sync gekoppelde artikelen die al in de cart zitten
+  if (!_syncingLinked && nieuw > 0 && nieuw !== oud) {
+    const art = ARTIKELEN.find(a => a.code === code);
+    const lti = art?.linktoitems || '';
+    if (lti.trim()) {
+      _syncingLinked = true;
+      lti.split('/').map(c => c.trim()).filter(Boolean).forEach(secCode => {
+        if (cart[secCode]) {
+          const qty = rondeOpStap(nieuw, getStap(secCode));
+          _setCart(secCode, qty);
+        }
+      });
+      _syncingLinked = false;
+    }
   }
 }
 
