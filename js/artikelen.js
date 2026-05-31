@@ -367,12 +367,18 @@ function renderArtikelen(lijst, isZoek) {
     return;
   }
 
-  // ── Platte lijst bij zoekresultaten ──────────────────────
+  // ── Gegroepeerd per hoofdcategorie bij zoekresultaten ────
   if (isZoek) {
-    const blok = document.createElement('div');
-    blok.className = 'artikel-blok';
-    lijst.forEach(a => renderArtikelCard(a, blok));
-    c.appendChild(blok);
+    [...new Set(lijst.map(a => a.cat))].forEach(cat => {
+      const hdr = document.createElement('div');
+      hdr.className = 'cat-label';
+      hdr.innerHTML = `<span>${cat}</span>`;
+      c.appendChild(hdr);
+      const blok = document.createElement('div');
+      blok.className = 'artikel-blok';
+      lijst.filter(a => a.cat === cat).forEach(a => renderArtikelCard(a, blok));
+      c.appendChild(blok);
+    });
     return;
   }
 
