@@ -138,6 +138,7 @@ function initialiseerApp() {
 function bevestigUpdate() {
   document.getElementById('update-banner').style.display = 'none';
   sessionStorage.setItem('emondt_net_bijgewerkt', '1');
+  try { localStorage.removeItem('emondt_artikelen_ts'); } catch(e) {}
   navigator.serviceWorker.getRegistration().then(reg => {
     if (reg && reg.waiting) {
       reg.waiting.postMessage({ type: 'SKIP_WAITING' });
