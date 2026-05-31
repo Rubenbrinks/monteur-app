@@ -580,7 +580,6 @@ function renderArtikelCard(artikel, container) {
           value="${qty || 0}" onchange="setQty('${artikel.code}',this)" onclick="this.select()"
           style="width:28px;text-align:center;border:none;background:none;font-size:.9rem;font-weight:600;color:inherit;font-family:'Inter','DM Sans',sans-serif;padding:0" />
         <button class="k1-btn" style="width:28px;height:28px" onclick="changeQty('${artikel.code}',1,event)">+</button>
-        <button class="k1-info" onclick="event.stopPropagation();toonVerpakking(event,document.getElementById('${cardId}'))" title="Info">i</button>
       </div>`;
 
   } else if (weergaveModus === 'b') {
@@ -609,7 +608,6 @@ function renderArtikelCard(artikel, container) {
             style="width:${stap >= 10 ? '44' : '28'}px;text-align:center;border:none;background:none;font-size:.9rem;font-weight:600;color:inherit;font-family:'Inter','DM Sans',sans-serif;padding:0" />
           <button class="k1-btn" onclick="changeQty('${artikel.code}',1,event)">+</button>
         </div>
-        <button class="k1-info" onclick="event.stopPropagation();toonVerpakking(event,document.getElementById('${cardId}'))" title="Info">i</button>
       </div>`;
 
   } else {
@@ -631,7 +629,6 @@ function renderArtikelCard(artikel, container) {
           value="${qty || 0}" onchange="setQty('${artikel.code}',this)" onclick="this.select()"
           style="width:${stap >= 10 ? '44' : '28'}px;text-align:center;border:none;background:none;font-size:.9rem;font-weight:600;color:inherit;font-family:'Inter','DM Sans',sans-serif;padding:0" />
         <button class="k1-btn" onclick="changeQty('${artikel.code}',1,event)">+</button>
-        <button class="k1-info" onclick="event.stopPropagation();toonVerpakking(event,document.getElementById('${cardId}'))" title="Info">i</button>
       </div>`;
   }
 
@@ -640,7 +637,7 @@ function renderArtikelCard(artikel, container) {
   el.dataset.naam        = artikel.naam        || '';
   el.dataset.linktoitems = artikel.linktoitems || '';
   el.dataset.details     = artikel.details     || '';
-  el.onclick = null;
+  el.onclick = (e) => toonVerpakking(e, el);
   container.appendChild(el);
   autoSizeQty(document.getElementById(qtyId));
 }
