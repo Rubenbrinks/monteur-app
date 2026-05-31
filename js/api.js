@@ -290,7 +290,7 @@ function resetTuImport() {
 document.addEventListener('DOMContentLoaded', () => {
   const dz = document.getElementById('tu-dropzone');
   if (!dz) return;
-  dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor = 'var(--navy)'; });
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor = 'var(--green)'; });
   dz.addEventListener('dragleave', () => { dz.style.borderColor = ''; });
   dz.addEventListener('drop', e => {
     e.preventDefault();

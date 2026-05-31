@@ -1,26 +1,99 @@
 /* ── Emondt Materiaalapp — variables.css ────────────────── */
 
 :root {
-      --bg:#f0f2f5;
-      --surface:#ffffff;
-      --border:#e2e6ec;
-      --navy:#041c42;
-      --navy2:#0d2d5e;
-      --green:#AEC336;
-      --green-dark:#8fa028;
-      --green-light:#f2f6d8;
-      --muted:#7a8aa0;
-      --text:#1a2332;
-      --white:#fff;
-      --danger:#e53e3e;
-      --danger-light:#fff5f5;
-      --radius:14px;
-      --radius-sm:10px;
-      --shadow:0 2px 12px rgba(4,28,66,.08);
-      --shadow-lg:0 8px 32px rgba(4,28,66,.14);
-      --nav-h:72px;
-      --header-h:64px;
-    }
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-    html{scroll-behavior:smooth}
-    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;padding-bottom:var(--nav-h)}
+  /* Backgrounds */
+  --bg:        #070c18;
+  --surface:   #0f1520;
+  --surface2:  #161e2e;
+  --surface3:  #1e2840;
+
+  /* Brand */
+  --navy:       #041c42;
+  --green:      #aec336;
+  --green-bright: #c4d94b;
+  --green-dim:  rgba(174,195,54,.12);
+  --green-border: rgba(174,195,54,.22);
+  --green-light: rgba(174,195,54,.08);
+
+  /* Text */
+  --text:           #dde4f0;
+  --text-secondary: #8b95aa;
+  --muted:          #4e5870;
+  --white:          #ffffff;
+
+  /* Borders */
+  --border:       rgba(255,255,255,.07);
+  --border-strong: rgba(255,255,255,.14);
+
+  /* States */
+  --danger:       #fc6868;
+  --danger-light: rgba(252,104,104,.12);
+  --warning:      #f59e0b;
+  --warning-bg:   rgba(245,158,11,.1);
+
+  /* Shadows */
+  --shadow:       0 2px 16px rgba(0,0,0,.5);
+  --shadow-lg:    0 8px 40px rgba(0,0,0,.7);
+  --shadow-green: 0 0 24px rgba(174,195,54,.18);
+
+  /* Layout */
+  --radius:    14px;
+  --radius-sm: 10px;
+  --radius-lg: 20px;
+  --nav-h:     68px;
+  --header-h:  58px;
+}
+
+/* ── LIGHT MODE OVERRIDES ═══════════════════════════════════ */
+[data-theme="light"] {
+  --bg:        #f0f2f5;
+  --surface:   #ffffff;
+  --surface2:  #f4f6f9;
+  --surface3:  #e8ecf2;
+
+  --text:           #1a2332;
+  --text-secondary: #5a6a7e;
+  --muted:          #96a4b5;
+  --white:          #1a2332;
+
+  --border:        rgba(0,0,0,.08);
+  --border-strong: rgba(0,0,0,.14);
+
+  --danger-light: rgba(220,38,38,.08);
+
+  --shadow:       0 2px 12px rgba(4,28,66,.07);
+  --shadow-lg:    0 8px 32px rgba(4,28,66,.13);
+  --shadow-green: 0 4px 16px rgba(174,195,54,.28);
+
+  --green-dim:    rgba(174,195,54,.12);
+  --green-border: rgba(174,195,54,.35);
+  --green-light:  rgba(174,195,54,.1);
+}
+
+/* ── VISIBILITY HELPERS ══════════════════════════════════════ */
+.verborgen { display: none !important; }
+
+*, *::before, *::after {
+  box-sizing: border-box; margin: 0; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  font-family: 'Inter', 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  padding-bottom: var(--nav-h);
+}

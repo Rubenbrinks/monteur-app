@@ -4,6 +4,9 @@
 
 // ── INIT ──────────────────────────────────────────────────────
 window.onload = () => {
+  // Initialiseer thema-knop labels
+  updateThemaKnop();
+
   // Versienummer alvast tonen (ook op loginpagina)
   if ('serviceWorker' in navigator) {
     caches.keys().then(keys => {
@@ -204,7 +207,7 @@ function showToast(msg) {
   void t.offsetWidth; // force reflow voor animatie-reset
   t.classList.add('show');
   clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
 }
 
 function customArtikelToevoegen() {

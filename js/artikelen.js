@@ -45,18 +45,18 @@ function renderTelefoonlijst(contacten, zoekterm='') {
       const telefoon = r.telefoon  || Object.values(r)[4] || '';
       const mobiel   = r.mobiel    || Object.values(r)[5] || '';
       if (!naam) return;
-      html += `<div style="background:var(--white);border-radius:var(--radius);padding:12px 14px;box-shadow:var(--shadow);border:1.5px solid var(--border);margin-bottom:8px">
+      html += `<div style="background:var(--surface);border-radius:var(--radius);padding:12px 14px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:8px">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:${intern||telefoon||mobiel ? '10px' : '0'}">
-          <div style="width:40px;height:40px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:var(--white);flex-shrink:0">${naam.charAt(0).toUpperCase()}</div>
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--green-dim);border:1px solid var(--green-border);display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:var(--green);flex-shrink:0">${naam.charAt(0).toUpperCase()}</div>
           <div>
             <div style="font-size:.95rem;font-weight:700;color:var(--text)">${naam}</div>
             ${functie ? `<div style="font-size:.76rem;color:var(--muted);margin-top:1px">${functie}</div>` : ''}
           </div>
         </div>
         ${intern||telefoon||mobiel ? `<div style="display:flex;flex-wrap:wrap;gap:6px">
-          ${intern   ? `<a href="tel:${intern.replace(/\s/g,'')}"   style="display:inline-flex;align-items:center;gap:5px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;text-decoration:none;color:var(--navy);font-size:.76rem;font-weight:600"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.38 2 2 0 0 1 3.61 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Intern ${intern}</a>` : ''}
-          ${telefoon ? `<a href="tel:${telefoon.replace(/\s/g,'')}" style="display:inline-flex;align-items:center;gap:5px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;text-decoration:none;color:var(--navy);font-size:.76rem;font-weight:600"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.38 2 2 0 0 1 3.61 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>${telefoon}</a>` : ''}
-          ${mobiel   ? `<a href="tel:${mobiel.replace(/\s/g,'')}"   style="display:inline-flex;align-items:center;gap:5px;background:var(--green-light);border:1.5px solid var(--green);border-radius:8px;padding:6px 10px;text-decoration:none;color:var(--navy);font-size:.76rem;font-weight:600"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>${mobiel}</a>` : ''}
+          ${intern   ? `<a href="tel:${intern.replace(/\s/g,'')}"   style="display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1.5px solid var(--border-strong);border-radius:8px;padding:6px 10px;text-decoration:none;color:var(--text-secondary);font-size:.76rem;font-weight:600"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.38 2 2 0 0 1 3.61 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Intern ${intern}</a>` : ''}
+          ${telefoon ? `<a href="tel:${telefoon.replace(/\s/g,'')}" style="display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1.5px solid var(--border-strong);border-radius:8px;padding:6px 10px;text-decoration:none;color:var(--text-secondary);font-size:.76rem;font-weight:600"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.62 3.38 2 2 0 0 1 3.61 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>${telefoon}</a>` : ''}
+          ${mobiel   ? `<a href="tel:${mobiel.replace(/\s/g,'')}"   style="display:inline-flex;align-items:center;gap:5px;background:var(--green-dim);border:1.5px solid var(--green-border);border-radius:8px;padding:6px 10px;text-decoration:none;color:var(--green);font-size:.76rem;font-weight:600"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>${mobiel}</a>` : ''}
         </div>` : ''}
       </div>`;
     });
@@ -108,18 +108,15 @@ function filterCategorie(cat) {
 let filterPad = []; // breadcrumb: [{label, niveau, cat, sub, subsub}]
 
 function openFilterSheet() {
-  // Herstel filterPad op basis van huidige actieve filters
   filterPad = [];
   if (activeCat) filterPad.push({ cat: activeCat });
   if (activeSubcat) filterPad.push({ sub: activeSubcat });
-
   toonFilterNiveau();
-  document.getElementById('filter-overlay').style.display = 'flex';
+  _sheetOpen('filter-overlay');
 }
 
 function sluitFilterSheet() {
-  document.getElementById('filter-overlay').style.display = 'none';
-  applyFilters();
+  _sheetSluit('filter-overlay', () => applyFilters());
 }
 
 function filterSheetTerug() {
@@ -226,7 +223,7 @@ function maakFilterRij(ico, naam, aantal, heeftKinderen, actief, onClick) {
 
 function updateFilterUI() {
   const btn   = document.getElementById('filter-btn');
-  const label = document.getElementById('filter-btn-label');
+  const badge = document.getElementById('filter-btn-badge');
   const actiefLabel = document.getElementById('actief-filter-label');
 
   const catEl      = document.getElementById('filter-crumb-cat');
@@ -240,18 +237,18 @@ function updateFilterUI() {
 
   if (delen.length) {
     btn.classList.add('actief');
-    label.textContent = 'Filter (' + delen.length + ')';
+    if (badge) { badge.textContent = delen.length; badge.style.display = 'block'; }
     actiefLabel.style.display = 'flex';
 
-    catEl.style.display    = activeCat    ? 'inline-flex' : 'none';
-    subEl.style.display    = activeSubcat ? 'inline-flex' : 'none';
+    catEl.style.display    = activeCat       ? 'inline-flex' : 'none';
+    subEl.style.display    = activeSubcat    ? 'inline-flex' : 'none';
     subsubEl.style.display = activeSubsubcat ? 'inline-flex' : 'none';
-    if (catNaam && activeCat)       catNaam.textContent    = activeCat;
-    if (subNaam && activeSubcat)    subNaam.textContent    = activeSubcat;
+    if (catNaam && activeCat)          catNaam.textContent    = activeCat;
+    if (subNaam && activeSubcat)       subNaam.textContent    = activeSubcat;
     if (subsubNaam && activeSubsubcat) subsubNaam.textContent = activeSubsubcat;
   } else {
     btn.classList.remove('actief');
-    label.textContent = 'Filter';
+    if (badge) badge.style.display = 'none';
     actiefLabel.style.display = 'none';
     if (catEl) catEl.style.display = subEl.style.display = subsubEl.style.display = 'none';
   }
@@ -305,7 +302,8 @@ function applyFilters() {
       return trefwoorden.every(w => t.includes(w));
     });
   }
-  renderArtikelen(lijst, trefwoorden.length > 0);
+  const heeftFilter = !!(activeCat || activeSubcat || activeSubsubcat);
+  renderArtikelen(lijst, trefwoorden.length > 0 || heeftFilter);
 }
 
 
@@ -378,20 +376,6 @@ function renderArtikelen(lijst, isZoek) {
     return;
   }
 
-  // ── Alles-blok bovenaan ───────────────────────────────────
-  const allesToggle = document.createElement('button');
-  allesToggle.id = 'alles-toggle-btn';
-  allesToggle.style.cssText = 'width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--white);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-family:"DM Sans",sans-serif;font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:2px';
-  allesToggle.innerHTML = `<span>Alles uitklappen <span style="font-size:.74rem;font-weight:400;color:var(--muted)">${lijst.length}</span></span><span id="alles-arrow" style="font-size:.65rem;color:var(--muted);transition:transform .2s">▶</span>`;
-  allesToggle.onclick = () => toggleAllesBlok(lijst);
-  c.appendChild(allesToggle);
-
-  const allesBody = document.createElement('div');
-  allesBody.id = 'alles-body';
-  allesBody.style.display = 'none';
-  allesBody.style.marginBottom = '8px';
-  c.appendChild(allesBody);
-
   // ── Harmonica per categorie ───────────────────────────────
   let ci = 0;
   [...new Set(lijst.map(a => a.cat))].forEach(cat => {
@@ -403,7 +387,7 @@ function renderArtikelen(lijst, isZoek) {
     hdr.className = 'cat-label';
     hdr.style.cursor = 'pointer';
     hdr.style.justifyContent = 'space-between';
-    hdr.innerHTML = `<span>${cat}</span><span id="catarrow-${catIdx}" style="font-size:.65rem;color:#3B6D11;transition:transform .2s">▶</span>`;
+    hdr.innerHTML = `<span>${cat}</span><span id="catarrow-${catIdx}" style="font-size:.65rem;color:var(--green);transition:transform .2s">▶</span>`;
     c.appendChild(hdr);
 
     const body = document.createElement('div');
@@ -434,7 +418,6 @@ function renderArtikelen(lijst, isZoek) {
           [...new Set(subItems.map(a => a.subsubcat).filter(Boolean))].forEach(ss => {
             const ssItems = subItems.filter(a => a.subsubcat === ss);
             const ssIdx   = ssi++;
-
             const sshdr = document.createElement('div');
             sshdr.className = 'subsubcat-label';
             sshdr.style.cursor = 'pointer';
@@ -442,7 +425,6 @@ function renderArtikelen(lijst, isZoek) {
             sshdr.innerHTML = `<span>${ss}</span><span id="ssarrow-${catIdx}-${subIdx}-${ssIdx}" style="font-size:.6rem;color:var(--muted);transition:transform .2s">▶</span>`;
             sshdr.onclick = () => accordionSubsub(catIdx, subIdx, ssIdx);
             subBody.appendChild(sshdr);
-
             const ssBody = document.createElement('div');
             ssBody.id = `ssbody-${catIdx}-${subIdx}-${ssIdx}`;
             ssBody.style.display = 'none';
@@ -476,59 +458,58 @@ function renderArtikelen(lijst, isZoek) {
 
   const nCats = ci;
   document.querySelectorAll('.cat-label').forEach((el, i) => {
-    el.onclick = () => { sluitAllesBlok(); accordionCat(i, nCats); };
+    el.onclick = () => accordionCat(i, nCats);
   });
 }
 
 let _allesOpen = false;
-let _allesLijst = [];
 
-function toggleAllesBlok(lijst) {
-  _allesOpen = !_allesOpen;
-  const body  = document.getElementById('alles-body');
-  const arrow = document.getElementById('alles-arrow');
-  const btn   = document.getElementById('alles-toggle-btn');
-  if (!body) return;
-
-  if (_allesOpen) {
-    // Sluit harmonica
-    document.querySelectorAll('[id^="catbody-"]').forEach(el => { el.style.display = 'none'; });
-    document.querySelectorAll('[id^="catarrow-"]').forEach(el => { el.style.transform = ''; });
-
-    // Vul alles-body als nog leeg — of herbouw bij andere modus
-    body.innerHTML = '';
-    body.className = 'artikel-grid modus-' + (weergaveModus || 'a');
-    // Groepeer per categorie met een kop erboven
-    const cats = [...new Set((lijst || _allesLijst).map(a => a.cat))];
-    cats.forEach(cat => {
-      const catItems = (lijst || _allesLijst).filter(a => a.cat === cat);
-      const kop = document.createElement('div');
-      kop.className = 'cat-label';
-      kop.style.marginBottom = '4px';
-      kop.textContent = cat;
-      body.appendChild(kop);
-
-      const blok = document.createElement('div');
-      blok.className = 'artikel-blok';
-      catItems.forEach(a => renderArtikelCard(a, blok));
-      body.appendChild(blok);
-    });
-    body.style.display = 'block';
-    if (arrow) arrow.style.transform = 'rotate(90deg)';
-    if (btn) btn.style.borderColor = 'var(--navy)';
-  } else {
-    sluitAllesBlok();
+function _accordOpen(el, arrow) {
+  el.style.display = 'block';
+  el.style.overflow = 'hidden';
+  el.style.transition = 'none';
+  el.style.maxHeight = '0';
+  // Meet hoogte na display:block zodat browser layout heeft berekend
+  const h = el.scrollHeight;
+  requestAnimationFrame(() => {
+    el.style.transition = 'max-height .28s ease-in';
+    el.style.maxHeight = h + 'px';
+  });
+  function onDone(e) {
+    if (e.propertyName !== 'max-height') return;
+    // Verwijder overflow:hidden zodat inhoud niet afgeknipt wordt
+    el.style.overflow = '';
+    el.style.maxHeight = 'none';
+    el.style.transition = '';
+    el.removeEventListener('transitionend', onDone);
   }
+  el.addEventListener('transitionend', onDone);
+  if (arrow) arrow.style.transform = 'rotate(90deg)';
 }
 
-function sluitAllesBlok() {
-  _allesOpen = false;
-  const body  = document.getElementById('alles-body');
-  const arrow = document.getElementById('alles-arrow');
-  const btn   = document.getElementById('alles-toggle-btn');
-  if (body) body.style.display = 'none';
+function _accordSluit(el, arrow) {
+  // Zet eerst expliciet de huidige hoogte (instant, geen transitie)
+  el.style.transition = 'none';
+  el.style.overflow = 'hidden';
+  el.style.maxHeight = el.scrollHeight + 'px';
+  requestAnimationFrame(() => {
+    el.style.transition = 'max-height .22s ease-out';
+    el.style.maxHeight = '0';
+  });
+  function onDone(e) {
+    if (e.propertyName !== 'max-height') return;
+    el.style.display = 'none';
+    el.style.overflow = '';
+    el.style.maxHeight = '';
+    el.style.transition = '';
+    el.removeEventListener('transitionend', onDone);
+  }
+  el.addEventListener('transitionend', onDone);
   if (arrow) arrow.style.transform = '';
-  if (btn) btn.style.borderColor = '';
+}
+
+function _accordIsOpen(el) {
+  return el.style.display !== 'none' && el.style.maxHeight !== '0px';
 }
 
 function accordionCat(ci, nCats) {
@@ -537,9 +518,10 @@ function accordionCat(ci, nCats) {
     const a = document.getElementById('catarrow-' + i);
     if (!b) continue;
     const isThis  = i === ci;
-    const wasOpen = b.style.display !== 'none';
-    b.style.display = isThis && !wasOpen ? 'block' : 'none';
-    if (a) a.style.transform = isThis && !wasOpen ? 'rotate(90deg)' : '';
+    const wasOpen = _accordIsOpen(b);
+    if (isThis && wasOpen)  _accordSluit(b, a);
+    else if (isThis)        _accordOpen(b, a);
+    else if (wasOpen)       _accordSluit(b, a);
   }
 }
 
@@ -547,28 +529,24 @@ function accordionSub(ci, si) {
   const body  = document.getElementById(`subbody-${ci}-${si}`);
   const arrow = document.getElementById(`subarrow-${ci}-${si}`);
   if (!body) return;
-  // Sluit andere subcats in zelfde cat
   document.querySelectorAll(`[id^="subbody-${ci}-"]`).forEach(el => {
-    if (el !== body && el.style.display !== 'none') {
-      el.style.display = 'none';
+    if (el !== body && _accordIsOpen(el)) {
       const parts = el.id.split('-');
-      const a = document.getElementById(`subarrow-${parts[1]}-${parts[2]}`);
-      if (a) a.style.transform = '';
+      _accordSluit(el, document.getElementById(`subarrow-${parts[1]}-${parts[2]}`));
     }
   });
-  const open = body.style.display !== 'none';
-  body.style.display = open ? 'none' : 'block';
-  if (arrow) arrow.style.transform = open ? '' : 'rotate(90deg)';
+  if (_accordIsOpen(body)) _accordSluit(body, arrow);
+  else _accordOpen(body, arrow);
 }
 
 function accordionSubsub(ci, si, ssi) {
   const body  = document.getElementById(`ssbody-${ci}-${si}-${ssi}`);
   const arrow = document.getElementById(`ssarrow-${ci}-${si}-${ssi}`);
   if (!body) return;
-  const open = body.style.display !== 'none';
-  body.style.display = open ? 'none' : 'block';
-  if (arrow) arrow.style.transform = open ? '' : 'rotate(90deg)';
+  if (_accordIsOpen(body)) _accordSluit(body, arrow);
+  else _accordOpen(body, arrow);
 }
+
 
 function renderArtikelCard(artikel, container) {
   const isFavContainer = container.id === 'fav-lijst';
@@ -583,63 +561,70 @@ function renderArtikelCard(artikel, container) {
   el.id = cardId;
 
   if (weergaveModus === 'c') {
-    // Modus C1: tegel — naam bovenaan, knoppen onderaan
-    el.style.flexDirection = 'column';
-    el.style.alignItems = 'flex-start';
-    el.style.gap = '8px';
+    // Modus C: compact raster — naam + minimal info, qty onderaan
+    el.className += ' card-c';
     el.innerHTML = `
-      <div style="flex:1;min-width:0">
-        <div class="artikel-naam" style="font-size:.84rem;line-height:1.3">${artikel.naam}</div>
-        <div style="font-size:.7rem;color:var(--muted);margin-top:2px">${artikel.code} · per ${artikel.eenheid}${heeftWarning ? ' <span style="color:#b87020;font-weight:600">⚠</span>' : ''}</div>
+      <div class="card-c-body">
+        <div class="artikel-naam card-c-naam">${artikel.naam}</div>
+        <div class="card-c-meta">${artikel.code} · ${artikel.eenheid}${heeftWarning ? ' <span class="warn-badge">⚠</span>' : ''}</div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;width:100%" onclick="event.stopPropagation()">
-        <div style="display:flex;align-items:center;gap:4px">
-          <button class="k1-btn k1-btn-min" style="width:26px;height:26px" onclick="changeQty('${artikel.code}',-1,event)">−</button>
-          <input class="qty-val" type="number" min="0" step="${stap}" id="${qtyId}"
-            value="${qty || 0}" onchange="setQty('${artikel.code}',this)" onclick="this.select()"
-            style="width:26px;text-align:center;border:none;background:none;font-size:.88rem;font-weight:600;color:inherit;font-family:'DM Sans',sans-serif;padding:0" />
-          <button class="k1-btn k1-btn-plus" style="width:26px;height:26px" onclick="changeQty('${artikel.code}',1,event)">+</button>
-        </div>
-        <button class="k1-info" style="width:26px;height:26px" onclick="event.stopPropagation();toonVerpakking(event,document.getElementById('${cardId}'))" title="Info">i</button>
+      <div class="card-c-footer" onclick="event.stopPropagation()">
+        <button class="k1-btn" style="width:28px;height:28px" onclick="changeQty('${artikel.code}',-1,event)">−</button>
+        <input class="qty-val" type="number" min="0" step="${stap}" id="${qtyId}"
+          value="${qty || 0}" onchange="setQty('${artikel.code}',this)" onclick="this.select()"
+          style="width:28px;text-align:center;border:none;background:none;font-size:.9rem;font-weight:600;color:inherit;font-family:'Inter','DM Sans',sans-serif;padding:0" />
+        <button class="k1-btn" style="width:28px;height:28px" onclick="changeQty('${artikel.code}',1,event)">+</button>
+        <button class="k1-info" onclick="event.stopPropagation();toonVerpakking(event,document.getElementById('${cardId}'))" title="Info">i</button>
       </div>`;
+
   } else if (weergaveModus === 'b') {
-    // Modus B1: naam groot in header, knoppen in footer-balk
-    el.style.flexDirection = 'column';
-    el.style.padding = '0';
-    el.style.overflow = 'hidden';
+    // Modus B: rijke kaart — naam, details, productlink, favoriet, qty
+    el.className += ' card-b';
     el.innerHTML = `
-      <div style="padding:11px 14px">
-        <div class="artikel-naam" style="font-size:.92rem">${artikel.naam}</div>
-        <div style="font-size:.72rem;color:var(--muted);margin-top:3px">${artikel.code}${artikel.leverancier ? ' · ' + artikel.leverancier : ''} · per ${artikel.eenheid}${heeftWarning ? ' <span style="color:#b87020;font-weight:600">⚠</span>' : ''}</div>
+      <div class="card-b-header">
+        <div style="flex:1;min-width:0">
+          <div class="artikel-naam">${artikel.naam}</div>
+          <div class="card-b-meta">${artikel.code}${artikel.leverancier ? ' · ' + artikel.leverancier : ''} · per ${artikel.eenheid}${heeftWarning ? ' <span class="warn-badge">⚠</span>' : ''}</div>
+          ${artikel.details ? `<div class="card-b-details">${artikel.details.replace(/\n/g,'<br>')}</div>` : ''}
+        </div>
+        <button class="card-b-fav${FAVORIETEN.has(artikel.code) ? ' actief' : ''}"
+          onclick="event.stopPropagation();toggleFavoriet('${artikel.code}');this.classList.toggle('actief',FAVORIETEN.has('${artikel.code}'));this.textContent=FAVORIETEN.has('${artikel.code}')?'★':'☆'"
+          title="${FAVORIETEN.has(artikel.code) ? 'Verwijder uit favorieten' : 'Voeg toe aan favorieten'}">${FAVORIETEN.has(artikel.code) ? '★' : '☆'}</button>
       </div>
-      <div onclick="event.stopPropagation()" style="border-top:1px solid var(--border);padding:7px 14px;background:var(--bg);display:flex;align-items:center;justify-content:space-between">
+      ${artikel.link ? `<a href="${artikel.link}" target="_blank" class="card-b-link" onclick="event.stopPropagation()">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Productpagina
+      </a>` : ''}
+      <div class="card-b-footer" onclick="event.stopPropagation()">
         <div style="display:flex;align-items:center;gap:6px">
-          <button class="k1-btn k1-btn-min" onclick="changeQty('${artikel.code}',-1,event)">−</button>
+          <button class="k1-btn" onclick="changeQty('${artikel.code}',-1,event)">−</button>
           <input class="qty-val" type="number" min="0" step="${stap}" id="${qtyId}"
             value="${qty || 0}" onchange="setQty('${artikel.code}',this)" onclick="this.select()"
-            style="width:${stap >= 10 ? '44' : '28'}px;text-align:center;border:none;background:none;font-size:.9rem;font-weight:600;color:inherit;font-family:'DM Sans',sans-serif;padding:0" />
-          <button class="k1-btn k1-btn-plus" onclick="changeQty('${artikel.code}',1,event)">+</button>
+            style="width:${stap >= 10 ? '44' : '28'}px;text-align:center;border:none;background:none;font-size:.9rem;font-weight:600;color:inherit;font-family:'Inter','DM Sans',sans-serif;padding:0" />
+          <button class="k1-btn" onclick="changeQty('${artikel.code}',1,event)">+</button>
         </div>
         <button class="k1-info" onclick="event.stopPropagation();toonVerpakking(event,document.getElementById('${cardId}'))" title="Info">i</button>
       </div>`;
+
   } else {
-    // Modus A: compacte rij
+    // Modus A: compacte rij — naam links, qty rechts
+    el.className += ' card-a';
     el.innerHTML = `
-      <div class="artikel-body">
+      <div class="card-a-body">
         <div class="artikel-naam">${artikel.naam}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:0 6px;margin-top:2px">
-          <span style="font-size:.72rem;color:var(--muted)">${artikel.code}</span>
-          ${artikel.leverancier ? `<span style="font-size:.72rem;color:var(--muted)">· ${artikel.leverancier}</span>` : ''}
-          <span style="font-size:.72rem;color:var(--muted)">· per ${artikel.eenheid}</span>
-          ${heeftWarning ? `<span style="font-size:.68rem;color:#b87020;font-weight:600">⚠ per meter</span>` : ''}
+        <div class="card-a-meta">
+          <span>${artikel.code}</span>
+          ${artikel.leverancier ? `<span>· ${artikel.leverancier}</span>` : ''}
+          <span>· per ${artikel.eenheid}</span>
+          ${heeftWarning ? `<span class="warn-badge">⚠</span>` : ''}
         </div>
       </div>
       <div class="k1-qty" onclick="event.stopPropagation()">
-        <button class="k1-btn k1-btn-min" onclick="changeQty('${artikel.code}',-1,event)">−</button>
+        <button class="k1-btn" onclick="changeQty('${artikel.code}',-1,event)">−</button>
         <input class="qty-val" type="number" min="0" step="${stap}" id="${qtyId}"
           value="${qty || 0}" onchange="setQty('${artikel.code}',this)" onclick="this.select()"
-          style="width:${stap >= 10 ? '44' : '28'}px;text-align:center;border:none;background:none;font-size:.9rem;font-weight:600;color:inherit;font-family:'DM Sans',sans-serif;padding:0" />
-        <button class="k1-btn k1-btn-plus" onclick="changeQty('${artikel.code}',1,event)">+</button>
+          style="width:${stap >= 10 ? '44' : '28'}px;text-align:center;border:none;background:none;font-size:.9rem;font-weight:600;color:inherit;font-family:'Inter','DM Sans',sans-serif;padding:0" />
+        <button class="k1-btn" onclick="changeQty('${artikel.code}',1,event)">+</button>
         <button class="k1-info" onclick="event.stopPropagation();toonVerpakking(event,document.getElementById('${cardId}'))" title="Info">i</button>
       </div>`;
   }
@@ -682,17 +667,17 @@ function toonIsolatieSuggestie(bronCode, linktoitems) {
         <div style="font-size:.74rem;color:var(--muted);margin-top:2px">${art.code} · per ${art.eenheid}</div>
       </div>
       <button onclick="event.stopPropagation();voegGekoppeldToe('${bronCode}','${art.code}');document.getElementById('suggestie-overlay').style.display='none'"
-        style="background:var(--green);color:var(--navy);border:none;border-radius:8px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap">
+        style="background:var(--green);color:#000;border:none;border-radius:8px;padding:8px 14px;font-family:'Inter','DM Sans',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap">
         + Toevoegen
       </button>`;
     inhoud.appendChild(rij);
   });
 
-  overlay.style.display = 'flex';
+  _sheetOpen('suggestie-overlay');
 }
 
 function sluitSuggestie() {
-  document.getElementById('suggestie-overlay').style.display = 'none';
+  _sheetSluit('suggestie-overlay');
 }
 
 function voegGekoppeldToe(bronCode, secCode) {
@@ -723,11 +708,11 @@ function toonVerpakking(e, kaart) {
     ${link ? `<a href="${link}" target="_blank" class="verpakking-link" onclick="event.stopPropagation()" style="display:block;margin-bottom:8px">↗ Open productpagina</a>` : ''}
     <button onclick="event.stopPropagation();toggleFavorietVanPopup('${code}',this)" style="
       display:flex;align-items:center;gap:6px;width:100%;
-      background:${isFav ? '#fff3cd' : 'rgba(255,255,255,.12)'};
-      color:${isFav ? '#b8860b' : 'var(--white)'};
-      border:1px solid ${isFav ? '#f0c040' : 'rgba(255,255,255,.2)'};
+      background:${isFav ? 'var(--green-dim)' : 'rgba(255,255,255,.08)'};
+      color:${isFav ? 'var(--green)' : 'var(--text)'};
+      border:1px solid ${isFav ? 'var(--green-border)' : 'rgba(255,255,255,.14)'};
       border-radius:7px;padding:7px 10px;font-size:.82rem;font-weight:600;
-      cursor:pointer;font-family:'DM Sans',sans-serif;
+      cursor:pointer;font-family:'Inter','DM Sans',sans-serif;
     ">
       <span>${isFav ? '★' : '☆'}</span>
       <span>${isFav ? 'Verwijder uit favorieten' : 'Voeg toe aan favorieten'}</span>
@@ -745,9 +730,9 @@ function toonVerpakking(e, kaart) {
 function toggleFavorietVanPopup(code, btn) {
   toggleFavoriet(code);
   const isFav = FAVORIETEN.has(code);
-  btn.style.background = isFav ? '#fff3cd' : 'rgba(255,255,255,.12)';
-  btn.style.color = isFav ? '#b8860b' : 'var(--white)';
-  btn.style.borderColor = isFav ? '#f0c040' : 'rgba(255,255,255,.2)';
+  btn.style.background = isFav ? 'var(--green-dim)' : 'rgba(255,255,255,.08)';
+  btn.style.color = isFav ? 'var(--green)' : 'var(--text)';
+  btn.style.borderColor = isFav ? 'var(--green-border)' : 'rgba(255,255,255,.14)';
   btn.querySelector('span:first-child').textContent = isFav ? '★' : '☆';
   btn.querySelector('span:last-child').textContent = isFav ? 'Verwijder uit favorieten' : 'Voeg toe aan favorieten';
 }
@@ -820,6 +805,12 @@ function _setCart(code, nieuw) {
   });
   document.querySelectorAll('#card-' + code + ', #fav-card-' + code).forEach(cEl => {
     cEl.classList.toggle('selected', nieuw > 0);
+    if (oud === 0 && nieuw > 0) {
+      cEl.classList.remove('card-pulse');
+      void cEl.offsetWidth;
+      cEl.classList.add('card-pulse');
+      cEl.addEventListener('animationend', () => cEl.classList.remove('card-pulse'), { once: true });
+    }
   });
   updateBadge();
   updateCartSamenvatting();
@@ -838,8 +829,15 @@ function updateBadge() {
   if (countEl) countEl.textContent = total;
   const badge = document.getElementById('nav-badge');
   if (badge) {
+    const wasZichtbaar = badge.style.display !== 'none';
     badge.style.display = total > 0 ? 'flex' : 'none';
     badge.textContent = total;
+    if (total > 0) {
+      badge.classList.remove('bounce');
+      void badge.offsetWidth;
+      badge.classList.add('bounce');
+      badge.addEventListener('animationend', () => badge.classList.remove('bounce'), { once: true });
+    }
   }
 }
 

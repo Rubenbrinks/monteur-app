@@ -49,7 +49,7 @@ function setWeergave(modus) {
   // Update weergave-knop actief
   document.querySelectorAll('.weergave-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('wbtn-a')?.classList.toggle('active', modus === 'a');
-  document.getElementById('wbtn-b')?.classList.toggle('active', modus !== 'a');
+  document.getElementById('wbtn-b')?.classList.toggle('active', modus === 'b' || modus === 'c');
 
   // Update checkmarks in keuze-overlay
   ['a','b','c'].forEach(m => {
@@ -82,18 +82,15 @@ function setWeergave(modus) {
 }
 
 function openWeergaveKeuze() {
-  const overlay = document.getElementById('weergave-overlay');
-  if (overlay) overlay.style.display = 'flex';
-  // Markeer actieve modus
   ['a','b','c'].forEach(m => {
     const el    = document.getElementById('wkeuze-' + m);
     const check = document.getElementById('wkeuze-' + m + '-check');
     if (el) el.style.borderColor = weergaveModus === m ? '#639922' : '';
     if (check) check.style.display = weergaveModus === m ? 'block' : 'none';
   });
+  _sheetOpen('weergave-overlay');
 }
 
 function sluitWeergaveKeuze() {
-  const overlay = document.getElementById('weergave-overlay');
-  if (overlay) overlay.style.display = 'none';
+  _sheetSluit('weergave-overlay');
 }

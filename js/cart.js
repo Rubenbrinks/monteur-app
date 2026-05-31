@@ -31,9 +31,9 @@ function renderCart() {
         <div class="cart-code">${a.code}${a.leverancier ? ' · ' + a.leverancier : ''} · per ${a.eenheid}</div>
       </div>
       <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-        <button onclick="changeCartQty('${code}',-1)" style="width:30px;height:30px;border:1.5px solid var(--border);border-radius:7px;background:var(--bg);color:var(--navy);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">−</button>
-        <input type="number" min="0" step="${(()=>{const m=String(a.eenheid||'').match(/^(\d+)/);return m?m[1]:'1'})()}" value="${qty}" onchange="changeCartQty('${code}',0,this.value)" oninput="autoSizeQty(this)" style="height:30px;text-align:center;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:700;color:var(--navy);background:var(--bg);outline:none;-moz-appearance:textfield;min-width:34px;width:${Math.max(3,String(qty).length+1)}ch;padding:0 4px" />
-        <button onclick="changeCartQty('${code}',1)" style="width:30px;height:30px;border:1.5px solid var(--border);border-radius:7px;background:var(--bg);color:var(--navy);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">+</button>
+        <button onclick="changeCartQty('${code}',-1)" class="cart-qty-btn">−</button>
+        <input type="number" min="0" step="${(()=>{const m=String(a.eenheid||'').match(/^(\d+)/);return m?m[1]:'1'})()}" value="${qty}" onchange="changeCartQty('${code}',0,this.value)" oninput="autoSizeQty(this)" class="cart-qty-input" style="width:${Math.max(3,String(qty).length+1)}ch" />
+        <button onclick="changeCartQty('${code}',1)" class="cart-qty-btn">+</button>
       </div>
       <button class="del-btn" onclick="removeItem('${code}')">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -68,6 +68,8 @@ function renderCart() {
   }
 
   el.innerHTML = html;
+  // Herstel inklapbare secties bij winkelwagen open
+  cartAutoExpand();
   // Update samenvatting onderaan
   const inf = getInfo();
   const _levD1 = (() => { try { return localStorage.getItem('leverdatum') || 'zsm'; } catch(e){ return 'zsm'; } })();
@@ -160,12 +162,12 @@ function _setLeverdatumModus(modus) {
   const datumBtn  = document.getElementById('lev-datum-btn');
   const datumInput = document.getElementById('leverdatum-static');
   if (modus === 'zsm') {
-    if (zsmBtn)    { zsmBtn.style.background = 'var(--navy)'; zsmBtn.style.color = '#fff'; zsmBtn.style.borderColor = 'var(--navy)'; }
-    if (datumBtn)  { datumBtn.style.background = 'transparent'; datumBtn.style.color = 'var(--text)'; datumBtn.style.borderColor = 'var(--border)'; }
+    if (zsmBtn)    { zsmBtn.style.background = 'var(--green-dim)'; zsmBtn.style.color = 'var(--green)'; zsmBtn.style.borderColor = 'var(--green-border)'; }
+    if (datumBtn)  { datumBtn.style.background = 'var(--surface2)'; datumBtn.style.color = 'var(--text-secondary)'; datumBtn.style.borderColor = 'var(--border-strong)'; }
     if (datumInput) datumInput.style.display = 'none';
   } else {
-    if (zsmBtn)    { zsmBtn.style.background = 'transparent'; zsmBtn.style.color = 'var(--text)'; zsmBtn.style.borderColor = 'var(--border)'; }
-    if (datumBtn)  { datumBtn.style.background = 'var(--navy)'; datumBtn.style.color = '#fff'; datumBtn.style.borderColor = 'var(--navy)'; }
+    if (zsmBtn)    { zsmBtn.style.background = 'var(--surface2)'; zsmBtn.style.color = 'var(--text-secondary)'; zsmBtn.style.borderColor = 'var(--border-strong)'; }
+    if (datumBtn)  { datumBtn.style.background = 'var(--green-dim)'; datumBtn.style.color = 'var(--green)'; datumBtn.style.borderColor = 'var(--green-border)'; }
     if (datumInput) datumInput.style.display = '';
   }
 }
@@ -443,19 +445,19 @@ function _renderHistorieLijst(hist) {
           <span style="color:var(--muted)">Monteur</span><span style="font-weight:600">${b.naam || '—'}</span>
           <span style="color:var(--muted)">Afdeling</span><span>${b.afdeling || '—'}</span>
           <span style="color:var(--muted)">Afleveradres</span><span>${b.locatie || '—'}</span>
-          <span style="color:var(--muted)">Leverdatum</span><span style="font-weight:600;color:var(--navy)">${leverdatumTxt}</span>
+          <span style="color:var(--muted)">Leverdatum</span><span style="font-weight:600;color:var(--green)">${leverdatumTxt}</span>
           ${b.opmerkingen ? `<span style="color:var(--muted)">Opmerkingen</span><span style="font-style:italic">${b.opmerkingen}</span>` : ''}
         </div>
 
         <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:6px">Artikelen</div>
         <div style="background:var(--bg);border-radius:8px;overflow:hidden;margin-bottom:12px">
           ${artikelen.length ? artikelen.map((a, ai) => `
-            <div class="hist-artikel-rij" style="background:${ai % 2 === 0 ? 'var(--white)' : 'var(--bg)'}">
+            <div class="hist-artikel-rij" style="background:${ai % 2 === 0 ? 'var(--surface2)' : 'transparent'}">
               <span class="hist-artikel-qty">${a.qty}×</span>
               <span style="flex:1">${a.naam}</span>
               <span style="color:var(--muted);font-size:.74rem;font-family:'DM Mono',monospace">${a.code}</span>
             </div>`).join('') : `<div style="padding:10px 12px;font-size:.82rem;color:var(--muted)">Artikeldetails niet beschikbaar</div>`}
-          ${artikelen.length ? `<div style="background:var(--navy);color:var(--green);padding:7px 12px;font-size:.8rem;font-weight:700;display:flex;justify-content:space-between">
+          ${artikelen.length ? `<div style="background:var(--green-dim);border-top:1px solid var(--green-border);color:var(--green);padding:7px 12px;font-size:.8rem;font-weight:700;display:flex;justify-content:space-between">
             <span>Totaal</span><span>${totaal} stuks · ${artikelen.length} artikel${artikelen.length !== 1 ? 'en' : ''}</span>
           </div>` : ''}
         </div>

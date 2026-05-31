@@ -1,52 +1,208 @@
 /* ── Emondt Materiaalapp — components.css ────────────────── */
 
 /* ═══ BUTTONS ═══════════════════════════════════════════════ */
-    .btn{
-      display:flex;align-items:center;justify-content:center;gap:8px;
-      width:100%;padding:17px;border-radius:var(--radius);border:none;
-      font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:700;
-      letter-spacing:.04em;text-transform:uppercase;
-      cursor:pointer;transition:opacity .15s,transform .1s;margin-bottom:10px;
-    }
-    .btn:active{transform:scale(.98);opacity:.88}
-    .btn-primary{background:var(--green);color:var(--navy);box-shadow:0 4px 16px rgba(174,195,54,.3)}
-    .btn-danger{background:var(--danger-light);color:var(--danger);border:2px solid #fca5a5}
-    .btn-secondary{background:var(--bg);color:var(--muted);border:2px solid var(--border)}
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 15px 20px;
+  border-radius: var(--radius); border: none;
+  font-family: 'Inter', 'DM Sans', sans-serif;
+  font-size: .9rem; font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase;
+  cursor: pointer; transition: opacity .15s, transform .1s, box-shadow .15s;
+  margin-bottom: 10px;
+}
+.btn:active { transform: scale(.98); opacity: .88; }
 
-    /* ═══ TOAST ═════════════════════════════════════════════════ */
-    #toast{
-      position:fixed;bottom:calc(var(--nav-h) + 20px);left:50%;
-      transform:translateX(-50%) translateY(120px);
-      opacity:0;
-      background:var(--navy);color:var(--white);
-      font-size:.9rem;font-weight:500;
-      padding:12px 22px;border-radius:30px;
-      border-left:4px solid var(--green);
-      z-index:9999;
-      transition:transform .3s ease, opacity .3s ease;
-      white-space:nowrap;pointer-events:none;
-      box-shadow:var(--shadow-lg);
-    }
-    #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.btn-primary {
+  background: var(--green); color: #000;
+  box-shadow: 0 4px 20px rgba(174,195,54,.25);
+}
+.btn-primary:active { box-shadow: none; }
 
-    /* ═══ DEV MODAL ═════════════════════════════════════════════ */
-    #dev-overlay{position:fixed;inset:0;background:rgba(4,28,66,.7);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
-    #dev-overlay.open{display:flex}
-    .dev-modal{background:var(--white);border-radius:var(--radius);padding:28px 24px;width:100%;max-width:360px;box-shadow:var(--shadow-lg)}
-    .dev-titel{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--green);margin-bottom:14px}
-    .dev-artikel-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1.5px solid var(--border);font-size:.9rem}
-    .dev-artikel-row:last-child{border-bottom:none}
-    .dev-artikel-row .info{flex:1;min-width:0}
-    .dev-artikel-row .info span{display:block;font-size:.74rem;color:var(--muted)}
-    .csv-info{background:var(--green-light);border:1.5px solid var(--green);border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:.82rem;color:var(--text);line-height:1.7}
-    .csv-info code{background:rgba(0,0,0,.08);padding:1px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:.85rem}
+.btn-secondary {
+  background: var(--surface2); color: var(--text-secondary);
+  border: 1.5px solid var(--border-strong);
+}
+.btn-secondary:active { background: var(--surface3); }
 
-    /* ═══ PWA BANNER ════════════════════════════════════════════ */
-    #pwa-banner{
-      display:none;position:fixed;bottom:var(--nav-h);left:0;right:0;
-      background:var(--navy);border-top:3px solid var(--green);
-      padding:14px 18px;z-index:9000;align-items:center;gap:12px;
-      box-shadow:0 -4px 20px rgba(4,28,66,.25);
-    }
-    #pwa-banner .txt{flex:1;font-size:.86rem;color:var(--white);line-height:1.5}
-    #pwa-banner strong{color:var(--green)}
+.btn-danger {
+  background: var(--danger-light); color: var(--danger);
+  border: 1.5px solid rgba(252,104,104,.3);
+}
+
+/* ═══ FORM CARDS ══════════════════════════════════════════════ */
+.form-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 18px;
+  margin-bottom: 14px;
+}
+.form-card-title {
+  font-size: .72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .12em;
+  color: var(--green); margin-bottom: 18px;
+}
+.form-card.inklapbaar { padding: 16px 18px; }
+.form-card.inklapbaar .inklapbaar-body { padding-top: 0; }
+
+/* ═══ TOAST ═════════════════════════════════════════════════ */
+#toast {
+  position: fixed; bottom: calc(var(--nav-h) + 20px); left: 50%;
+  transform: translateX(-50%) translateY(120px);
+  opacity: 0;
+  background: var(--surface3); color: var(--text);
+  font-size: .88rem; font-weight: 600;
+  padding: 12px 22px; border-radius: 30px;
+  border-left: 3px solid var(--green);
+  z-index: 9999;
+  transition: transform .3s ease, opacity .3s ease;
+  white-space: nowrap; pointer-events: none;
+  box-shadow: var(--shadow-lg);
+}
+#toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* ═══ PWA BANNER ════════════════════════════════════════════ */
+#pwa-banner {
+  display: none; position: fixed;
+  bottom: var(--nav-h); left: 0; right: 0;
+  background: var(--surface2);
+  border-top: 1px solid var(--border-strong);
+  padding: 14px 18px; z-index: 9000;
+  align-items: center; gap: 12px;
+  box-shadow: var(--shadow);
+}
+#pwa-banner .txt { flex: 1; font-size: .86rem; color: var(--text); line-height: 1.5; }
+#pwa-banner strong { color: var(--green); }
+
+/* ═══ DEV MODAL ═════════════════════════════════════════════ */
+#dev-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.75);
+  z-index: 500; display: none;
+  align-items: center; justify-content: center; padding: 20px;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+#dev-overlay.open { display: flex; }
+.dev-modal {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg); padding: 28px 24px;
+  width: 100%; max-width: 360px; box-shadow: var(--shadow-lg);
+}
+.dev-titel {
+  font-size: .7rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .14em;
+  color: var(--green); margin-bottom: 14px;
+}
+
+.dev-artikel-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+  font-size: .9rem; color: var(--text);
+}
+.dev-artikel-row:last-child { border-bottom: none; }
+.dev-artikel-row .info { flex: 1; min-width: 0; }
+.dev-artikel-row .info span { display: block; font-size: .74rem; color: var(--muted); }
+
+.csv-info {
+  background: var(--green-dim);
+  border: 1px solid var(--green-border);
+  border-radius: var(--radius-sm); padding: 14px 16px;
+  margin-bottom: 14px; font-size: .82rem;
+  color: var(--text); line-height: 1.7;
+}
+.csv-info code {
+  background: rgba(255,255,255,.06); padding: 1px 6px;
+  border-radius: 4px; font-family: 'DM Mono', monospace;
+  font-size: .82rem; color: var(--green);
+}
+
+/* ═══ ADMIN CARDS ═════════════════════════════════════════════ */
+.admin-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 10px;
+  overflow: hidden;
+}
+.admin-kaart-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px; width: 100%;
+  background: none; border: none;
+  font-family: 'Inter', 'DM Sans', sans-serif;
+  font-size: .9rem; font-weight: 600; color: var(--text);
+  cursor: pointer; transition: background .15s; text-align: left;
+}
+.admin-kaart-header:active { background: var(--surface2); }
+.admin-arrow {
+  color: var(--muted); font-size: .72rem; transition: transform .2s;
+}
+.admin-kaart-header.open .admin-arrow { transform: rotate(90deg); }
+.admin-kaart-body { padding: 18px 18px 20px; border-top: 1px solid var(--border); }
+
+.beheer-sect {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 18px 14px;
+  margin-bottom: 14px;
+}
+.beheer-titel {
+  font-size: .7rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .12em;
+  color: var(--green); margin-bottom: 14px;
+}
+
+/* ═══ SUMMARY BOX ═════════════════════════════════════════════ */
+.summary-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.summary-box strong { color: var(--text); }
+
+/* ═══ EMPTY CART / LEGE STATE ════════════════════════════════ */
+.empty-cart {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; padding: 48px 20px;
+  color: var(--muted);
+}
+.empty-cart svg { margin-bottom: 14px; opacity: .4; }
+.empty-cart p { font-size: .9rem; line-height: 1.6; }
+.empty-cart strong { color: var(--green); }
+
+/* ═══ DATE INPUT ═════════════════════════════════════════════ */
+input[type="date"] {
+  color-scheme: dark;
+}
+[data-theme="light"] input[type="date"] {
+  color-scheme: light;
+}
+
+/* ═══ SHEET ANIMATIES ════════════════════════════════════════ */
+@keyframes sheetOpen {
+  from { transform: translateY(28px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes sheetSluit {
+  from { transform: translateY(0);    opacity: 1; }
+  to   { transform: translateY(28px); opacity: 0; }
+}
+.sheet-open  { animation: sheetOpen  .26s cubic-bezier(0.32, 0.72, 0, 1); }
+.sheet-sluit { animation: sheetSluit .18s ease-in forwards; }
+
+/* ═══ CARD PULSE ═════════════════════════════════════════════ */
+@keyframes cardPulse {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.025); }
+  100% { transform: scale(1); }
+}
+.artikel-card.card-pulse { animation: cardPulse .22s ease-out; }
+
+/* ═══ BADGE BOUNCE ═══════════════════════════════════════════ */
+@keyframes badgeBounce {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.45); }
+  70%  { transform: scale(.88); }
+  100% { transform: scale(1); }
+}
+.nav-cart-badge.bounce { animation: badgeBounce .32s ease-out; }

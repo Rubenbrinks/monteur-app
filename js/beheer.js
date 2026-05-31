@@ -47,20 +47,30 @@ function laadBestellingenOverzicht() {
 
         const titel = [naam, projectnaam].filter(Boolean).join(' – ');
 
-        const artikelRegels = artikelen.split('\n').filter(Boolean).map(r => {
-          const delen = r.split('-');
-          if (delen.length >= 3) {
-            const qty   = delen[0];
-            const code  = delen[1];
-            const naam2 = delen.slice(2).join('-');
-            return `<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);font-size:.8rem">
-              <span style="font-weight:700;color:var(--navy);min-width:28px">${qty}×</span>
-              <span style="flex:1">${naam2}</span>
-              <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.72rem">${code}</span>
+        // Artikelen: formaat "qty×code×naam×eenheid×leverancier" per pipe, of "qty-code-naam" per newline
+        let artikelRegels = '';
+        if (artikelen.includes('×')) {
+          artikelRegels = artikelen.split('|').filter(Boolean).map(r => {
+            const [qty, code, naam2, eenheid] = r.split('×');
+            return `<div class="best-artikel-rij">
+              <span class="best-artikel-qty">${qty||'?'}×</span>
+              <span style="flex:1;font-size:.82rem;color:var(--text)">${naam2||code||r}</span>
+              <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.7rem">${code||''}</span>
             </div>`;
-          }
-          return `<div style="font-size:.8rem;padding:3px 0;color:var(--muted)">${r}</div>`;
-        }).join('');
+          }).join('');
+        } else {
+          artikelRegels = artikelen.split('\n').filter(Boolean).map(r => {
+            const m = r.match(/^(\d+)[×x\-]\s*([A-Z0-9\-]+)[,\s\-]+(.+)$/i);
+            if (m) {
+              return `<div class="best-artikel-rij">
+                <span class="best-artikel-qty">${m[1]}×</span>
+                <span style="flex:1;font-size:.82rem;color:var(--text)">${m[3]}</span>
+                <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.7rem">${m[2]}</span>
+              </div>`;
+            }
+            return `<div style="font-size:.8rem;padding:3px 0;color:var(--text-secondary)">${r}</div>`;
+          }).join('');
+        }
 
         return `
         <div class="hist-item" style="cursor:default">
@@ -72,11 +82,11 @@ function laadBestellingenOverzicht() {
           <div class="hist-detail" id="best-overzicht-${i}" onclick="event.stopPropagation()">
             <div style="display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:.82rem;margin-bottom:10px">
               <span style="color:var(--muted)">Locatie</span><span style="font-weight:600">${locatie}</span>
-              <span style="color:var(--muted)">Leverdatum</span><span style="font-weight:600;color:var(--navy)">${leverdatum}</span>
+              <span style="color:var(--muted)">Leverdatum</span><span style="font-weight:600;color:var(--green)">${leverdatum}</span>
               ${opmerkingen ? `<span style="color:var(--muted)">Opmerking</span><span style="font-style:italic">${opmerkingen}</span>` : ''}
             </div>
             <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:6px">Artikelen</div>
-            <div style="background:var(--bg);border-radius:8px;padding:6px 10px">${artikelRegels || '<span style="color:var(--muted);font-size:.8rem">Geen artikeldetails beschikbaar</span>'}</div>
+            <div class="best-artikelen-wrap">${artikelRegels || '<span style="color:var(--muted);font-size:.8rem;padding:8px 0;display:block">Geen artikeldetails beschikbaar</span>'}</div>
           </div>
         </div>`;
       }).join('');
@@ -220,7 +230,7 @@ function adminZoek() {
         <div class="admin-artikel-code">${a.code}${a.cat ? ' · ' + a.cat : ''}${a.eenheid ? ' · per ' + a.eenheid : ''}</div>
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0">
-        <button onclick="adminBewerk('${a.code}')" style="background:var(--navy);color:var(--white);border:none;border-radius:8px;padding:6px 10px;font-size:.76rem;font-weight:600;cursor:pointer">✏️ Bewerk</button>
+        <button onclick="adminBewerk('${a.code}')" style="background:var(--surface3);color:var(--text);border:1.5px solid var(--border-strong);border-radius:8px;padding:6px 10px;font-size:.76rem;font-weight:600;cursor:pointer">Bewerk</button>
         <button onclick="adminVerwijder('${a.code}')" style="background:var(--danger-light);color:var(--danger);border:1.5px solid #fca5a5;border-radius:8px;padding:6px 10px;font-size:.76rem;font-weight:600;cursor:pointer">🗑</button>
       </div>
     </div>`).join('');
@@ -235,10 +245,10 @@ function adminBewerk(code) {
 
   const form = document.createElement('div');
   form.id = 'admin-bewerk-form';
-  form.style.cssText = 'background:var(--bg);border-radius:12px;padding:16px;margin-top:12px;border:1.5px solid var(--navy)';
+  form.style.cssText = 'background:var(--surface2);border-radius:12px;padding:16px;margin-top:12px;border:1.5px solid var(--border-strong)';
   form.innerHTML = `
-    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--navy);margin-bottom:12px">
-      ✏️ Bewerken: ${a.naam}
+    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:12px">
+      Bewerken: ${a.naam}
     </div>
     <div class="field"><label>Naam</label><input type="text" id="bewerk-naam" value="${a.naam || ''}" /></div>
     <div class="field-2">
@@ -334,12 +344,12 @@ function voegOntvangerToe(waarde) {
   rij.innerHTML = `
     <input type="email" class="email-ontvanger-input"
       placeholder="email@emondt.nl" value="${waarde || ''}"
-      style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;
-             font-size:.9rem;font-family:'DM Sans',sans-serif;color:var(--text);
-             background:var(--white);outline:none" />
+      style="flex:1;padding:10px 12px;border:1.5px solid var(--border-strong);border-radius:10px;
+             font-size:.9rem;font-family:'Inter','DM Sans',sans-serif;color:var(--text);
+             background:var(--surface2);outline:none" />
     <button onclick="this.parentElement.remove()"
-      style="width:34px;height:34px;border:1.5px solid var(--border);border-radius:8px;
-             background:var(--white);color:var(--muted);cursor:pointer;font-size:1.1rem;
+      style="width:34px;height:34px;border:1.5px solid var(--border-strong);border-radius:8px;
+             background:var(--surface2);color:var(--muted);cursor:pointer;font-size:1.1rem;
              display:flex;align-items:center;justify-content:center;flex-shrink:0">×</button>`;
   lijst.appendChild(rij);
 }

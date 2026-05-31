@@ -4,6 +4,105 @@
 
 let deferredInstallPrompt = null;
 
+// ── INKLAPBAAR ────────────────────────────────────────────────
+function toggleInklapbaar(id) {
+  const kaart = document.getElementById(id);
+  if (!kaart) return;
+  const body = kaart.querySelector('.inklapbaar-body');
+  const btn  = kaart.querySelector('.inklapbaar-header');
+  if (!body) return;
+  const isOpen = kaart.classList.contains('inklapbaar-open');
+  if (isOpen) {
+    body.style.maxHeight = body.scrollHeight + 'px';
+    requestAnimationFrame(() => requestAnimationFrame(() => { body.style.maxHeight = '0'; }));
+    kaart.classList.remove('inklapbaar-open');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  } else {
+    kaart.classList.add('inklapbaar-open');
+    body.style.maxHeight = body.scrollHeight + 'px';
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+    body.addEventListener('transitionend', function h(e) {
+      if (e.propertyName !== 'max-height') return;
+      if (kaart.classList.contains('inklapbaar-open')) body.style.maxHeight = 'none';
+      body.removeEventListener('transitionend', h);
+    });
+  }
+}
+
+function openInklapbaar(id) {
+  const kaart = document.getElementById(id);
+  if (!kaart || kaart.classList.contains('inklapbaar-open')) return;
+  toggleInklapbaar(id);
+}
+
+function cartAutoExpand() {
+  const projectnaam = (document.getElementById('projectnaam')?.value || '').trim();
+  const projectnr   = (document.getElementById('projectnummer')?.value || '').trim();
+  const locatieKeuze = document.getElementById('locatie-keuze')?.value || '';
+  const locatieTekst = (document.getElementById('locatie')?.value || '').trim();
+
+  if (projectnaam || projectnr) openInklapbaar('cart-levering-card');
+
+  const leveringIngevuld = locatieKeuze && (locatieKeuze !== 'vrij' || locatieTekst);
+  if (leveringIngevuld) openInklapbaar('cart-leverdatum-card');
+}
+
+// ── SHEET ANIMATIES ───────────────────────────────────────────
+function _sheetOpen(overlayId) {
+  const overlay = document.getElementById(overlayId);
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  const sheet = overlay.querySelector(':scope > div');
+  if (sheet) {
+    sheet.classList.remove('sheet-sluit');
+    void sheet.offsetWidth;
+    sheet.classList.add('sheet-open');
+  }
+}
+
+function _sheetSluit(overlayId, callback) {
+  const overlay = document.getElementById(overlayId);
+  if (!overlay) return;
+  const sheet = overlay.querySelector(':scope > div');
+  if (!sheet) { overlay.style.display = 'none'; if (callback) callback(); return; }
+  sheet.classList.remove('sheet-open');
+  sheet.classList.add('sheet-sluit');
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    sheet.classList.remove('sheet-sluit');
+    if (callback) callback();
+  }, 180);
+}
+
+// ── THEMA ─────────────────────────────────────────────────────
+function getLichtDonker() {
+  return localStorage.getItem('emondt_theme') === 'light' ? 'light' : 'dark';
+}
+
+function toggleThema() {
+  const huidig = getLichtDonker();
+  const nieuw  = huidig === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('emondt_theme', nieuw);
+  if (nieuw === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  updateThemaKnop();
+}
+
+function updateThemaKnop() {
+  const isDark = getLichtDonker() === 'dark';
+  document.querySelectorAll('.thema-toggle-label').forEach(el => {
+    el.textContent = isDark ? 'Lichte modus' : 'Donkere modus';
+  });
+  document.querySelectorAll('.thema-toggle-icon').forEach(el => {
+    el.innerHTML = isDark
+      ? '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
+      : '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  });
+}
+
 // ── DRAWER ────────────────────────────────────────────────────
 function toggleDrawer() {
   const d = document.getElementById('drawer'), o = document.getElementById('overlay'), h = document.getElementById('hamburger');
@@ -18,14 +117,15 @@ function closeDrawer() {
 // ── VRIJ ARTIKEL ─────────────────────────────────────────────
 function openVrijArtikel() {
   closeDrawer();
-  document.getElementById('vrij-overlay').style.display = 'flex';
+  _sheetOpen('vrij-overlay');
   setTimeout(() => document.getElementById('custom-naam').focus(), 100);
 }
 function sluitVrijArtikel() {
-  document.getElementById('vrij-overlay').style.display = 'none';
-  document.getElementById('custom-naam').value = '';
-  document.getElementById('custom-code').value = '';
-  document.getElementById('custom-qty').value = '1';
+  _sheetSluit('vrij-overlay', () => {
+    document.getElementById('custom-naam').value = '';
+    document.getElementById('custom-code').value = '';
+    document.getElementById('custom-qty').value = '1';
+  });
 }
 
 
@@ -131,10 +231,10 @@ function toonCategorieTegels() {
         const iconen = ['🔧','⚡','🌡️','🔩','🧊','💧','🔌','🛠️','📦','🔄'];
         const ico = iconen[cats.indexOf(cat) % iconen.length];
         return `<button onclick="filterCategorie('${cat.replace(/'/g,"\\'")}');applyFilters()"
-          style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);
+          style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
                  padding:16px 12px;text-align:left;cursor:pointer;box-shadow:var(--shadow);
-                 display:flex;flex-direction:column;gap:4px;transition:border-color .15s;font-family:'DM Sans',sans-serif">
-          <span style="font-size:.85rem;font-weight:700;color:var(--navy);line-height:1.3">${cat}</span>
+                 display:flex;flex-direction:column;gap:4px;transition:border-color .15s,background .15s;font-family:'Inter','DM Sans',sans-serif">
+          <span style="font-size:.85rem;font-weight:700;color:var(--text);line-height:1.3">${cat}</span>
           <span style="font-size:.72rem;color:var(--muted)">${n} artikel${n !== 1 ? 'en' : ''}</span>
         </button>`;
       }).join('')}
