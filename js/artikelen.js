@@ -723,13 +723,6 @@ function toonVerpakking(e, kaart) {
       <span>${isFav ? 'Verwijder uit favorieten' : 'Voeg toe aan favorieten'}</span>
     </button>`;
 
-  popup.addEventListener('click', e => {
-    if (!e.target.closest('button') && !e.target.closest('a')) {
-      e.stopPropagation();
-      popup.remove();
-    }
-  });
-
   kaart.appendChild(popup);
   setTimeout(() => {
     document.addEventListener('click', function sluiter() {
