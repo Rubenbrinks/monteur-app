@@ -298,7 +298,7 @@ function applyFilters() {
   if (activeSubsubcat)    lijst = lijst.filter(a => a.subsubcat === activeSubsubcat);
   if (trefwoorden.length) {
     lijst = lijst.filter(a => {
-      const t = [a.naam, a.code, a.leverancier, a.cat, a.subcat, a.subsubcat, a.trefwoorden].join(' ').toLowerCase();
+      const t = [a.naam, a.code, a.leverancier, a.cat, a.subcat, a.subsubcat, a.trefwoorden, a.details].join(' ').toLowerCase();
       return trefwoorden.every(w => t.includes(w));
     });
   }
