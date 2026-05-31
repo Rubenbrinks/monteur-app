@@ -280,7 +280,6 @@ function verstuurEmail() {
       showTab(v.tab);
       if (v.kaart) openInklapbaar(v.kaart);
       showToast(`⚠️ Vul "${v.label}" in.`);
-      setTimeout(() => { const el = document.getElementById(v.id); if(el) el.focus(); }, 350);
       return;
     }
   }
