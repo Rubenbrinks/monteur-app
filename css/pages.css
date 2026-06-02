@@ -26,15 +26,17 @@
   border-radius: var(--radius);
   padding: 22px 20px;
   display: flex; align-items: center; justify-content: space-between;
-  cursor: pointer; transition: background .2s, border-color .2s; min-height: 90px;
+  cursor: pointer; transition: background .2s, border-color .2s, box-shadow .22s ease, transform .18s ease; min-height: 90px;
+  box-shadow: var(--elev-2);
 }
-.bento-primary:active { background: var(--surface2); border-color: var(--border-strong); }
+.bento-primary:active { background: var(--surface2); border-color: var(--border-strong); box-shadow: var(--elev-1); transform: scale(.99); }
 .bento-primary-content { display: flex; align-items: center; gap: 16px; }
 .bento-primary-icon {
   width: 52px; height: 52px; border-radius: 14px;
   background: var(--green-dim); border: 1px solid var(--green-border);
   display: flex; align-items: center; justify-content: center;
   color: var(--green); flex-shrink: 0;
+  box-shadow: var(--glow-green-sm);
 }
 .bento-primary-label { font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 2px; }
 .bento-primary-sub   { font-size: .8rem; color: var(--text-secondary); }
@@ -48,9 +50,10 @@
   border-radius: var(--radius); padding: 20px 16px;
   display: flex; flex-direction: column; align-items: flex-start;
   gap: 12px; cursor: pointer;
-  transition: background .2s, border-color .2s; min-height: 96px;
+  transition: background .2s, border-color .2s, box-shadow .22s ease, transform .18s ease; min-height: 96px;
+  box-shadow: var(--elev-2);
 }
-.bento-tile:active { background: var(--surface2); border-color: var(--border-strong); }
+.bento-tile:active { background: var(--surface2); border-color: var(--border-strong); box-shadow: var(--elev-1); transform: scale(.98); }
 .bento-tile svg { color: var(--green); }
 .bento-tile span { font-size: .82rem; font-weight: 600; color: var(--text-secondary); line-height: 1.2; }
 
