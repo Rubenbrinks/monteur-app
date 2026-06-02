@@ -303,7 +303,26 @@ function applyFilters() {
     });
   }
   const heeftFilter = !!(activeCat || activeSubcat || activeSubsubcat);
-  renderArtikelen(lijst, trefwoorden.length > 0 || heeftFilter);
+  const suggesties = (trefwoorden.length && !lijst.length) ? zoekSuggesties(trefwoorden) : [];
+  renderArtikelen(lijst, trefwoorden.length > 0 || heeftFilter, suggesties);
+}
+
+function zoekSuggesties(trefwoorden) {
+  return ARTIKELEN
+    .map(a => {
+      const t = [a.naam, a.code, a.cat, a.subcat, a.trefwoorden, a.details].join(' ').toLowerCase();
+      const score = trefwoorden.filter(w => t.includes(w)).length;
+      return { a, score };
+    })
+    .filter(x => x.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+    .map(x => x.a);
+}
+
+function zoekOpSuggestie(naam) {
+  const el = document.getElementById('zoek');
+  if (el) { el.value = naam; applyFilters(); }
 }
 
 
@@ -349,21 +368,41 @@ window.addEventListener('scroll', () => {
 
 
 // ── ARTIKELEN ─────────────────────────────────────────────────
-function renderArtikelen(lijst, isZoek) {
+function renderArtikelen(lijst, isZoek, suggesties = []) {
   const c = document.getElementById('artikel-lijst');
   c.className = 'artikel-grid modus-' + (weergaveModus || 'a');
   c.innerHTML = '';
   if (!lijst.length) {
-    c.innerHTML = isZoek
-      ? `<div style="text-align:center;padding:40px 20px;color:var(--muted)">
-          <div style="font-size:1.6rem;margin-bottom:10px">🔍</div>
-          <div style="font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:6px">Geen artikelen gevonden</div>
-          <div style="font-size:.82rem;margin-bottom:18px">Probeer andere zoekwoorden, of voeg een vrij artikel toe.</div>
-          <button onclick="openVrijArtikel()" class="btn btn-primary" style="display:inline-flex;padding:9px 18px;font-size:.84rem">
-            ✏️ Vrij artikel toevoegen
-          </button>
-        </div>`
-      : '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.86rem">Geen artikelen gevonden.</div>';
+    if (isZoek) {
+      const suggestieHtml = suggesties.length
+        ? `<div style="margin-bottom:18px;text-align:left">
+            <div style="font-size:.78rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px">Bedoelde je misschien...</div>
+            ${suggesties.map(a => `
+              <button onclick="zoekOpSuggestie(${JSON.stringify(a.naam)})"
+                style="display:block;width:100%;text-align:left;background:var(--surface2);border:1px solid var(--border-strong);
+                border-radius:var(--radius-sm);padding:9px 12px;margin-bottom:6px;cursor:pointer;
+                font-family:'Inter','DM Sans',sans-serif;font-size:.86rem;color:var(--text)">
+                <span style="font-weight:600">${a.naam}</span>
+                <span style="color:var(--muted);font-size:.76rem;margin-left:6px">${a.code} · per ${a.eenheid}</span>
+              </button>`).join('')}
+           </div>`
+        : '';
+      c.innerHTML = `<div style="padding:40px 20px 20px;color:var(--muted)">
+          <div style="text-align:center;margin-bottom:20px">
+            <div style="font-size:1.6rem;margin-bottom:10px">🔍</div>
+            <div style="font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:6px">Geen artikelen gevonden</div>
+            <div style="font-size:.82rem;margin-bottom:18px">Probeer andere zoekwoorden, of voeg een vrij artikel toe.</div>
+          </div>
+          ${suggestieHtml}
+          <div style="text-align:center">
+            <button onclick="openVrijArtikel()" class="btn btn-primary" style="display:inline-flex;padding:9px 18px;font-size:.84rem">
+              ✏️ Vrij artikel toevoegen
+            </button>
+          </div>
+        </div>`;
+    } else {
+      c.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.86rem">Geen artikelen gevonden.</div>';
+    }
     return;
   }
 
