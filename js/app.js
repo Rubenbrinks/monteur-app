@@ -36,6 +36,10 @@ function initialiseerApp() {
     if (card) card.style.display = 'none';
   }
 
+  // Swipe-down voor bevestiging-overlay (geen _sheetOpen)
+  const bSheet = document.querySelector('#bevestiging-overlay > div');
+  if (bSheet) _voegSwipeToeToe(bSheet, () => sluitBevestiging(false));
+
   laadOpgeslagenIconen();
   loadInfo();
   loadCart();

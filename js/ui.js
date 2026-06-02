@@ -49,12 +49,42 @@ function cartAutoExpand() {
 }
 
 // ── SHEET ANIMATIES ───────────────────────────────────────────
+function _voegSwipeToeToe(sheet, sluitFn) {
+  if (sheet._swipeAttached) return;
+  sheet._swipeAttached = true;
+  let startY = 0, startTime = 0, actief = false;
+
+  sheet.addEventListener('touchstart', e => {
+    startY = e.touches[0].clientY;
+    startTime = Date.now();
+    actief = true;
+    sheet.style.transition = 'none';
+  }, { passive: true });
+
+  sheet.addEventListener('touchmove', e => {
+    if (!actief) return;
+    const dy = e.touches[0].clientY - startY;
+    if (dy > 0) sheet.style.transform = `translateY(${dy}px)`;
+  }, { passive: true });
+
+  sheet.addEventListener('touchend', e => {
+    if (!actief) return;
+    actief = false;
+    const dy = e.changedTouches[0].clientY - startY;
+    const snel = Date.now() - startTime < 250;
+    sheet.style.transition = '';
+    sheet.style.transform = '';
+    if (dy > 80 || (snel && dy > 30)) sluitFn();
+  }, { passive: true });
+}
+
 function _sheetOpen(overlayId) {
   const overlay = document.getElementById(overlayId);
   if (!overlay) return;
   overlay.style.display = 'flex';
   const sheet = overlay.querySelector(':scope > div');
   if (sheet) {
+    _voegSwipeToeToe(sheet, () => _sheetSluit(overlayId));
     sheet.classList.remove('sheet-sluit');
     void sheet.offsetWidth;
     sheet.classList.add('sheet-open');

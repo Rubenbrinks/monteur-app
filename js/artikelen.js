@@ -307,11 +307,32 @@ function applyFilters() {
   renderArtikelen(lijst, trefwoorden.length > 0 || heeftFilter, suggesties);
 }
 
+function _levenshtein(a, b) {
+  if (Math.abs(a.length - b.length) > 3) return 99;
+  const dp = Array.from({length: a.length + 1}, (_, i) =>
+    Array.from({length: b.length + 1}, (_, j) => i === 0 ? j : j === 0 ? i : 0)
+  );
+  for (let i = 1; i <= a.length; i++)
+    for (let j = 1; j <= b.length; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+  return dp[a.length][b.length];
+}
+
 function zoekSuggesties(trefwoorden) {
+  const woorden = trefwoorden.filter(w => w.length >= 3);
+  if (!woorden.length) return [];
   return ARTIKELEN
     .map(a => {
-      const t = [a.naam, a.code, a.cat, a.subcat, a.trefwoorden, a.details].join(' ').toLowerCase();
-      const score = trefwoorden.filter(w => t.includes(w)).length;
+      const naam = (a.naam || '').toLowerCase();
+      const naamWoorden = naam.split(/[\s\-\/,]+/).filter(w => w.length >= 3);
+      const velden = [naam, (a.code||''), (a.trefwoorden||''), (a.details||'')].join(' ').toLowerCase();
+      let score = 0;
+      woorden.forEach(w => {
+        if (velden.includes(w)) { score += 3; return; }
+        const maxDist = w.length <= 4 ? 1 : 2;
+        if (naamWoorden.some(nw => _levenshtein(w, nw) <= maxDist)) { score += 2; return; }
+        if (naamWoorden.some(nw => nw.length >= 3 && nw.substring(0, w.length) === w)) score += 1;
+      });
       return { a, score };
     })
     .filter(x => x.score > 0)
@@ -375,30 +396,27 @@ function renderArtikelen(lijst, isZoek, suggesties = []) {
   if (!lijst.length) {
     if (isZoek) {
       const suggestieHtml = suggesties.length
-        ? `<div style="margin-bottom:18px;text-align:left">
-            <div style="font-size:.78rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px">Bedoelde je misschien...</div>
-            ${suggesties.map(a => `
-              <button onclick="zoekOpSuggestie(${JSON.stringify(a.naam)})"
-                style="display:block;width:100%;text-align:left;background:var(--surface2);border:1px solid var(--border-strong);
-                border-radius:var(--radius-sm);padding:9px 12px;margin-bottom:6px;cursor:pointer;
-                font-family:'Inter','DM Sans',sans-serif;font-size:.86rem;color:var(--text)">
-                <span style="font-weight:600">${a.naam}</span>
-                <span style="color:var(--muted);font-size:.76rem;margin-left:6px">${a.code} · per ${a.eenheid}</span>
-              </button>`).join('')}
-           </div>`
+        ? suggesties.map(a => {
+            const veiligNaam = a.naam.replace(/'/g, "\\'");
+            return `<div style="font-size:.9rem;color:var(--text-secondary);margin-bottom:8px;text-align:center">
+              Bedoelde je misschien
+              <button onclick="zoekOpSuggestie('${veiligNaam}')"
+                style="background:none;border:none;padding:0;cursor:pointer;font-family:'Inter','DM Sans',sans-serif;
+                font-size:.9rem;font-weight:700;color:var(--green);text-decoration:underline;text-underline-offset:2px">
+                ${a.naam}</button>?
+            </div>`;
+          }).join('')
         : '';
-      c.innerHTML = `<div style="padding:40px 20px 20px;color:var(--muted)">
-          <div style="text-align:center;margin-bottom:20px">
-            <div style="font-size:1.6rem;margin-bottom:10px">🔍</div>
-            <div style="font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:6px">Geen artikelen gevonden</div>
-            <div style="font-size:.82rem;margin-bottom:18px">Probeer andere zoekwoorden, of voeg een vrij artikel toe.</div>
-          </div>
+      c.innerHTML = `<div style="padding:32px 20px 20px;color:var(--muted);text-align:center">
+          <div style="font-size:1.6rem;margin-bottom:10px">🔍</div>
+          <div style="font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:16px">Geen artikelen gevonden</div>
           ${suggestieHtml}
-          <div style="text-align:center">
-            <button onclick="openVrijArtikel()" class="btn btn-primary" style="display:inline-flex;padding:9px 18px;font-size:.84rem">
-              ✏️ Vrij artikel toevoegen
-            </button>
+          <div style="font-size:.9rem;color:var(--text-secondary);margin-bottom:12px${suggesties.length ? ';margin-top:16px' : ''}">
+            pas je zoekopdracht aan of voeg handmatig een artikel toe:
           </div>
+          <button onclick="openVrijArtikel()" class="btn btn-primary" style="display:inline-flex;padding:9px 18px;font-size:.84rem">
+            ✏️ Vrij artikel toevoegen
+          </button>
         </div>`;
     } else {
       c.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.86rem">Geen artikelen gevonden.</div>';

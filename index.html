@@ -617,7 +617,11 @@
     </div>
     <div class="field">
       <label>Aantal <span class="req">*</span></label>
-      <input type="number" id="custom-qty" min="1" value="1" />
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="k1-btn" style="flex-shrink:0" onclick="const q=document.getElementById('custom-qty');q.value=Math.max(1,(parseInt(q.value)||1)-1)">−</button>
+        <input type="number" id="custom-qty" class="qty-val" min="1" value="1" style="width:60px;height:36px;text-align:center" />
+        <button class="k1-btn" style="flex-shrink:0" onclick="const q=document.getElementById('custom-qty');q.value=(parseInt(q.value)||0)+1">+</button>
+      </div>
     </div>
     <div class="field" style="margin-bottom:20px">
       <label>Artikelnummer (optioneel)</label>
