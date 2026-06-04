@@ -40,36 +40,27 @@ function laadBestellingenOverzicht() {
         const projectnaam = b.projectnaam  || '';
         const locatie     = b.afleveradres || b.locatie     || '—';
         const opmerkingen = b.opmerkingen  || '';
-        const artikelen   = b.artikelen    || '';
-
         const besteldatum = fmtDatum(b.datum);
         const leverdatum  = fmtDatum(b.leverdatum);
 
         const titel = [naam, projectnaam].filter(Boolean).join(' – ');
 
-        // Artikelen: formaat "qty×code×naam×eenheid×leverancier" per pipe, of "qty-code-naam" per newline
+        // Gebruik machine-leesbare ArtikelenData als die beschikbaar is, anders fallback op leesbare tekst
+        const artikelItems = b.artikelendata
+          ? _parseArtikelenData(b.artikelendata)
+          : _parseArtikelenTekst(b.artikelen || '');
+
         let artikelRegels = '';
-        if (artikelen.includes('×')) {
-          artikelRegels = artikelen.split('|').filter(Boolean).map(r => {
-            const [qty, code, naam2, eenheid] = r.split('×');
-            return `<div class="best-artikel-rij">
-              <span class="best-artikel-qty">${qty||'?'}×</span>
-              <span style="flex:1;font-size:.82rem;color:var(--text)">${naam2||code||r}</span>
-              <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.7rem">${code||''}</span>
-            </div>`;
-          }).join('');
-        } else {
-          artikelRegels = artikelen.split('\n').filter(Boolean).map(r => {
-            const m = r.match(/^(\d+)[×x\-]\s*([A-Z0-9\-]+)[,\s\-]+(.+)$/i);
-            if (m) {
-              return `<div class="best-artikel-rij">
-                <span class="best-artikel-qty">${m[1]}×</span>
-                <span style="flex:1;font-size:.82rem;color:var(--text)">${m[3]}</span>
-                <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.7rem">${m[2]}</span>
-              </div>`;
-            }
-            return `<div style="font-size:.8rem;padding:3px 0;color:var(--text-secondary)">${r}</div>`;
-          }).join('');
+        if (artikelItems.length) {
+          artikelRegels = artikelItems.map(a => `
+            <div class="best-artikel-rij">
+              <span class="best-artikel-qty">${a.qty}×</span>
+              <span style="flex:1;font-size:.82rem;color:var(--text)">${a.naam || a.code || '—'}</span>
+              <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.7rem">${a.code}</span>
+            </div>`).join('');
+        } else if (b.artikelen) {
+          artikelRegels = (b.artikelen).split('\n').filter(Boolean)
+            .map(r => `<div style="font-size:.8rem;padding:3px 0;color:var(--text-secondary)">${r}</div>`).join('');
         }
 
         return `

@@ -420,8 +420,9 @@ function _parseArtikelenTekst(tekst) {
 }
 
 function _getArtikelen(b) {
-  if (b.artikelenData) return _parseArtikelenData(b.artikelenData);
-  return _parseArtikelenTekst(b.artikelenTekst || '');
+  const data = b.artikelenData || b.artikelendata || '';
+  if (data) return _parseArtikelenData(data);
+  return _parseArtikelenTekst(b.artikelenTekst || b.artikelentekst || '');
 }
 
 function _renderHistorieLijst(hist) {
