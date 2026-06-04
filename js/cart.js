@@ -460,8 +460,7 @@ function _renderHistorieLijst(hist) {
           ${artikelen.length ? artikelen.map((a, ai) => `
             <div class="hist-artikel-rij" style="background:${ai % 2 === 0 ? 'var(--surface2)' : 'transparent'}">
               <span class="hist-artikel-qty">${a.qty}×</span>
-              <span style="flex:1">${a.naam}</span>
-              <span style="color:var(--muted);font-size:.74rem;font-family:'DM Mono',monospace">${a.code}</span>
+              <span style="flex:1">${a.naam}${a.code ? ' (' + a.code + ')' : ''} per ${a.eenheid || 'stuk'}${a.leverancier ? ' – ' + a.leverancier : ''}</span>
             </div>`).join('') : `<div style="padding:10px 12px;font-size:.82rem;color:var(--muted)">Artikeldetails niet beschikbaar</div>`}
           ${artikelen.length ? `<div style="background:var(--green-dim);border-top:1px solid var(--green-border);color:var(--green);padding:7px 12px;font-size:.8rem;font-weight:700;display:flex;justify-content:space-between">
             <span>Totaal</span><span>${totaal} stuks · ${artikelen.length} artikel${artikelen.length !== 1 ? 'en' : ''}</span>

@@ -55,8 +55,7 @@ function laadBestellingenOverzicht() {
           artikelRegels = artikelItems.map(a => `
             <div class="best-artikel-rij">
               <span class="best-artikel-qty">${a.qty}×</span>
-              <span style="flex:1;font-size:.82rem;color:var(--text)">${a.naam || a.code || '—'}</span>
-              <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:.7rem">${a.code}</span>
+              <span style="flex:1;font-size:.82rem;color:var(--text)">${a.naam || a.code || '—'}${a.code ? ' (' + a.code + ')' : ''} per ${a.eenheid || 'stuk'}${a.leverancier ? ' – ' + a.leverancier : ''}</span>
             </div>`).join('');
         } else if (b.artikelen) {
           artikelRegels = (b.artikelen).split('\n').filter(Boolean)
