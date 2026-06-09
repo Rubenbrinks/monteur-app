@@ -133,7 +133,7 @@
 .admin-kaart-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 16px 18px; width: 100%;
-  background: none; border: none;
+  background: none; border: none; -webkit-appearance: none; appearance: none;
   font-family: 'Inter', 'DM Sans', sans-serif;
   font-size: .9rem; font-weight: 600; color: var(--text);
   cursor: pointer; transition: background .15s; text-align: left;
