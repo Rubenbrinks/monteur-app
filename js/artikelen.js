@@ -629,7 +629,7 @@ function renderArtikelCard(artikel, container) {
     el.innerHTML = `
       <div class="card-c-body">
         <div class="artikel-naam card-c-naam">${artikel.naam}</div>
-        <div class="card-c-meta">${artikel.code} · ${artikel.eenheid}${heeftWarning ? ' <span class="warn-badge">⚠</span>' : ''}</div>
+        <div class="card-c-meta">${artikel.code} · ${artikel.eenheid}${heeftWarning ? ' <span class="warn-badge">⚠ Let op: bestellen per meter</span>' : ''}</div>
       </div>
       <div class="card-c-footer" onclick="event.stopPropagation()">
         <button class="k1-btn" style="width:28px;height:28px" onclick="changeQty('${artikel.code}',-1,event)">−</button>
