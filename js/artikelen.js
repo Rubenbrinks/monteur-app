@@ -618,6 +618,7 @@ function renderArtikelCard(artikel, container) {
   const qty    = cart[artikel.code] || 0;
   const stap   = getStap(artikel.code);
   const heeftWarning = artikel.warning && artikel.warning.includes('*');
+  const warningTekst = heeftWarning ? (artikel.warning.replace(/\*/g, '').trim() || 'bestel per meter') : '';
 
   const el = document.createElement('div');
   el.className = 'artikel-card' + (qty > 0 ? ' selected' : '');
@@ -629,7 +630,7 @@ function renderArtikelCard(artikel, container) {
     el.innerHTML = `
       <div class="card-c-body">
         <div class="artikel-naam card-c-naam">${artikel.naam}</div>
-        <div class="card-c-meta">${artikel.code} · ${artikel.eenheid}${heeftWarning ? ' <span class="warn-badge">⚠ Let op: bestellen per meter</span>' : ''}</div>
+        <div class="card-c-meta">${artikel.code} · ${artikel.eenheid}${heeftWarning ? ` <span class="warn-badge">⚠ ${warningTekst}</span>` : ''}</div>
       </div>
       <div class="card-c-footer" onclick="event.stopPropagation()">
         <button class="k1-btn" style="width:28px;height:28px" onclick="changeQty('${artikel.code}',-1,event)">−</button>
@@ -646,7 +647,7 @@ function renderArtikelCard(artikel, container) {
       <div class="card-b-header">
         <div style="flex:1;min-width:0">
           <div class="artikel-naam">${artikel.naam}</div>
-          <div class="card-b-meta">${artikel.code}${artikel.leverancier ? ' · ' + artikel.leverancier : ''} · per ${artikel.eenheid}${heeftWarning ? ' <span class="warn-badge">⚠</span>' : ''}</div>
+          <div class="card-b-meta">${artikel.code}${artikel.leverancier ? ' · ' + artikel.leverancier : ''} · per ${artikel.eenheid}${heeftWarning ? ` <span class="warn-badge">⚠ ${warningTekst}</span>` : ''}</div>
           ${artikel.details ? `<div class="card-b-details">${artikel.details.replace(/\n/g,'<br>')}</div>` : ''}
         </div>
         <button class="card-b-fav${FAVORIETEN.has(artikel.code) ? ' actief' : ''}"
@@ -677,7 +678,7 @@ function renderArtikelCard(artikel, container) {
           <span>${artikel.code}</span>
           ${artikel.leverancier ? `<span>· ${artikel.leverancier}</span>` : ''}
           <span>· per ${artikel.eenheid}</span>
-          ${heeftWarning ? `<span class="warn-badge">⚠</span>` : ''}
+          ${heeftWarning ? `<span class="warn-badge">⚠ ${warningTekst}</span>` : ''}
         </div>
       </div>
       <div class="k1-qty" onclick="event.stopPropagation()">
@@ -810,7 +811,7 @@ function autoSizeQty(el) {
 function getStap(code) {
   const artikel = ARTIKELEN.find(a => a.code === code);
   if (!artikel) return 1;
-  const match = String(artikel.eenheid || '').match(/^(\d+)/);
+  const match = String(artikel.verpakking || '').match(/^(\d+)/);
   return match ? parseInt(match[1]) : 1;
 }
 
