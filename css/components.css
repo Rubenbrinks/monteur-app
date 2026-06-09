@@ -144,6 +144,7 @@
   transition: transform .2s;
 }
 .admin-arrow svg { display: block; }
+.admin-arrow path { stroke: var(--muted); }
 .admin-kaart-header.open .admin-arrow { transform: rotate(90deg); }
 .admin-kaart-body { padding: 18px 18px 20px; border-top: 1px solid var(--border); }
 

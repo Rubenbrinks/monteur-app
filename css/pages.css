@@ -220,6 +220,7 @@
   color: var(--muted); flex-shrink: 0;
   transition: transform .22s ease; margin-left: 8px;
 }
+.inklapbaar-arrow path { stroke: var(--muted); }
 .inklapbaar-open .inklapbaar-arrow { transform: rotate(90deg); }
 .inklapbaar-header .gids-titel {
   font-size: .92rem; font-weight: 700;
