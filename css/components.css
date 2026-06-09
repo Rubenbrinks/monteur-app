@@ -140,8 +140,10 @@
 }
 .admin-kaart-header:active { background: var(--surface2); }
 .admin-arrow {
-  color: var(--muted); font-size: .72rem; transition: transform .2s;
+  color: var(--muted); display: flex; align-items: center; flex-shrink: 0;
+  transition: transform .2s;
 }
+.admin-arrow svg { display: block; }
 .admin-kaart-header.open .admin-arrow { transform: rotate(90deg); }
 .admin-kaart-body { padding: 18px 18px 20px; border-top: 1px solid var(--border); }
 

@@ -665,7 +665,7 @@
   <!-- 1. Koppeling -->
   <div class="admin-card">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-koppeling',this)">
-      <span>Test Functies</span><span class="admin-arrow">▶</span>
+      <span>Test Functies</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </button>
     <div id="kaart-koppeling" class="admin-kaart-body" style="display:none">
       <div style="display:flex;gap:8px;margin-bottom:8px">
@@ -680,7 +680,7 @@
   <!-- 2. Artikeldatabase -->
   <div class="admin-card">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-database',this)">
-      <span>Artikeldatabase</span><span class="admin-arrow">▶</span>
+      <span>Artikeldatabase</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </button>
     <div id="kaart-database" class="admin-kaart-body" style="display:none">
       <p style="font-size:.84rem;color:var(--text-secondary);margin-bottom:12px;line-height:1.6">Kolomtitels: <code style="background:var(--surface2);padding:1px 5px;border-radius:4px;font-size:.78rem;color:var(--green)">code · naam · cat · subcat · subsubcat · eenheid · leverancier · warning · verpakking · afbeelding · link · linktoitems</code></p>
@@ -693,7 +693,7 @@
   <!-- 3. Artikel toevoegen -->
   <div class="admin-card">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-toevoegen',this)">
-      <span>Artikel toevoegen</span><span class="admin-arrow">▶</span>
+      <span>Artikel toevoegen</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </button>
     <div id="kaart-toevoegen" class="admin-kaart-body" style="display:none">
       <div class="field"><label>Artikelnummer <span class="req">*</span></label><input type="text" id="admin-code" placeholder="bijv. KT-0099" /></div>
@@ -718,7 +718,7 @@
   <!-- 4. Artikel bewerken / verwijderen -->
   <div class="admin-card">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-bewerken',this)">
-      <span>Artikel bewerken / verwijderen</span><span class="admin-arrow">▶</span>
+      <span>Artikel bewerken / verwijderen</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </button>
     <div id="kaart-bewerken" class="admin-kaart-body" style="display:none">
       <div class="field">
@@ -732,7 +732,7 @@
   <!-- 5. CSV importeren -->
   <div class="admin-card">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-csv',this)">
-      <span>CSV importeren — Technische Unie</span><span class="admin-arrow">▶</span>
+      <span>CSV importeren — Technische Unie</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </button>
     <div id="kaart-csv" class="admin-kaart-body" style="display:none">
       <p style="font-size:.84rem;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">Exporteer artikelen vanuit <strong>mijn.tu.nl</strong> als CSV. Kolommen <code style="background:var(--surface2);padding:1px 5px;border-radius:4px;font-size:.78rem;color:var(--green)">Artikelnummer</code>, <code style="background:var(--surface2);padding:1px 5px;border-radius:4px;font-size:.78rem;color:var(--green)">Artikelomschrijving</code> en <code style="background:var(--surface2);padding:1px 5px;border-radius:4px;font-size:.78rem;color:var(--green)">Verpakkingseenheid</code> worden overgenomen.</p>
@@ -757,7 +757,7 @@
   <!-- 6. Bestellingenoverzicht -->
   <div class="admin-card">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-bestellingen',this);if(!this.classList.contains('was-opened')){this.classList.add('was-opened');laadBestellingenOverzicht()}">
-      <span>Bestellingenoverzicht</span><span class="admin-arrow">▶</span>
+      <span>Bestellingenoverzicht</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </button>
     <div id="kaart-bestellingen" class="admin-kaart-body" style="display:none">
       <div id="bestellingen-status" style="font-size:.84rem;min-height:18px;margin-bottom:8px"></div>
@@ -769,7 +769,7 @@
   <!-- 7. Emailadressen beheren -->
   <div class="admin-card">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-email',this);if(!this.classList.contains('was-opened')){this.classList.add('was-opened');laadEmailontvangers()}">
-      <span>Emailadressen beheren</span><span class="admin-arrow">▶</span>
+      <span>Emailadressen beheren</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </button>
     <div id="kaart-email" class="admin-kaart-body" style="display:none">
       <p style="font-size:.84rem;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Vaste ontvangers van bestelbevestigingen. Opgeslagen in de "Instellingen" tab van de spreadsheet.</p>
@@ -786,7 +786,7 @@
   <!-- 8. Trefwoorden genereren -->
   <div class="admin-card">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-trefwoorden',this)">
-      <span>Trefwoorden genereren</span><span class="admin-arrow">▶</span>
+      <span>Trefwoorden genereren</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </button>
     <div id="kaart-trefwoorden" class="admin-kaart-body" style="display:none">
       <p style="font-size:.84rem;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Vult de kolom "trefwoorden" in de Artikelen sheet op basis van de artikelnaam en categorie. Vereist: kolom "trefwoorden" in de sheet (mag leeg zijn). Artikelen met bestaande trefwoorden worden overgeslagen.</p>
