@@ -80,34 +80,6 @@
 #pwa-banner .txt { flex: 1; font-size: .86rem; color: var(--text); line-height: 1.5; }
 #pwa-banner strong { color: var(--green); }
 
-/* ═══ DEV MODAL ═════════════════════════════════════════════ */
-#dev-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.75);
-  z-index: 500; display: none;
-  align-items: center; justify-content: center; padding: 20px;
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-}
-#dev-overlay.open { display: flex; }
-.dev-modal {
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-lg); padding: 28px 24px;
-  width: 100%; max-width: 360px; box-shadow: var(--shadow-lg);
-}
-.dev-titel {
-  font-size: .7rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .14em;
-  color: var(--green); margin-bottom: 14px;
-}
-
-.dev-artikel-row {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 0; border-bottom: 1px solid var(--border);
-  font-size: .9rem; color: var(--text);
-}
-.dev-artikel-row:last-child { border-bottom: none; }
-.dev-artikel-row .info { flex: 1; min-width: 0; }
-.dev-artikel-row .info span { display: block; font-size: .74rem; color: var(--muted); }
 
 .csv-info {
   background: var(--green-dim);

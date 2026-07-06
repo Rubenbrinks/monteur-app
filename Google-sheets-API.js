@@ -136,17 +136,17 @@ function doGet(e) {
   if (actie === 'registreer') {
     try {
       const gebruiker  = (e.parameter.gebruiker || '').toLowerCase().trim();
-      const wachtwoord = e.parameter.wachtwoord || '';
+      const naam       = e.parameter.naam       || '';
       const email      = e.parameter.email      || '';
       const telefoon   = e.parameter.telefoon   || '';
       const rol        = e.parameter.rol        || 'monteur';
-      if (!gebruiker || !wachtwoord) return jsonOutput({ status: 'error', message: 'Vul alle velden in.' });
+      if (!gebruiker) return jsonOutput({ status: 'error', message: 'Vul een gebruikersnaam in.' });
 
       const ss  = SpreadsheetApp.openById(SHEET_ID);
       let sheet = ss.getSheetByName('Gebruikers');
       if (!sheet) {
         sheet = ss.insertSheet('Gebruikers');
-        sheet.appendRow(['gebruikersnaam', 'wachtwoord', 'rol', 'email', 'telefoon']);
+        sheet.appendRow(['gebruikersnaam', 'naam', 'rol', 'email', 'telefoon']);
       }
       const data    = sheet.getDataRange().getValues();
       const headers = data[0].map(h => String(h).trim().toLowerCase());
@@ -157,7 +157,7 @@ function doGet(e) {
           return jsonOutput({ status: 'bestaat_al' });
         }
       }
-      const velden = { gebruikersnaam: gebruiker, wachtwoord, rol, email, telefoon };
+      const velden = { gebruikersnaam: gebruiker, naam, rol, email, telefoon };
       const rij = headers.map(h => velden[h] || '');
       sheet.appendRow(rij);
       return jsonOutput({ status: 'ok', gebruiker, rol });
@@ -236,45 +236,12 @@ function doGet(e) {
     }
   }
 
-  // ── WACHTWOORD WIJZIGEN ───────────────────────────────────
-  if (actie === 'wachtwoord_wijzigen') {
-    try {
-      const gebruiker = (e.parameter.gebruiker || '').toLowerCase().trim();
-      const huidig    = e.parameter.huidig || '';
-      const nieuw     = e.parameter.nieuw  || '';
-      if (!gebruiker || !huidig || !nieuw) return jsonOutput({ status: 'error', message: 'Ontbrekende gegevens.' });
-
-      const ss    = SpreadsheetApp.openById(SHEET_ID);
-      const sheet = ss.getSheetByName('Gebruikers');
-      if (!sheet) return jsonOutput({ status: 'error', message: 'Tabblad "Gebruikers" niet gevonden.' });
-
-      const data    = sheet.getDataRange().getValues();
-      const headers = data[0].map(h => String(h).trim().toLowerCase());
-      const userIdx = headers.indexOf('gebruikersnaam');
-      const pwIdx   = headers.indexOf('wachtwoord');
-
-      for (let i = 1; i < data.length; i++) {
-        if (String(data[i][userIdx]).trim().toLowerCase() === gebruiker) {
-          if (String(data[i][pwIdx]).trim() !== huidig) {
-            return jsonOutput({ status: 'error', message: 'Huidig wachtwoord onjuist.' });
-          }
-          sheet.getRange(i + 1, pwIdx + 1).setValue(nieuw);
-          return jsonOutput({ status: 'ok' });
-        }
-      }
-      return jsonOutput({ status: 'error', message: 'Gebruiker niet gevonden.' });
-    } catch(err) {
-      return jsonOutput({ status: 'error', message: err.message });
-    }
-  }
-
-  // ── AUTHENTICATIE ─────────────────────────────────────────
+  // ── AUTHENTICATIE (alleen gebruikersnaam, geen wachtwoord) ─
   if (actie === 'login') {
     try {
       const gebruikersnaam = (e.parameter.gebruiker || '').toLowerCase().trim();
-      const wachtwoord     = e.parameter.wachtwoord || '';
-      if (!gebruikersnaam || !wachtwoord) {
-        return jsonOutput({ status: 'error', message: 'Vul gebruikersnaam en wachtwoord in.' });
+      if (!gebruikersnaam) {
+        return jsonOutput({ status: 'error', message: 'Vul je gebruikersnaam in.' });
       }
       const ss = SpreadsheetApp.openById(SHEET_ID);
       const sheet = ss.getSheetByName('Gebruikers');
@@ -283,7 +250,6 @@ function doGet(e) {
       const data    = sheet.getDataRange().getValues();
       const headers = data[0].map(h => String(h).trim().toLowerCase());
       const userIdx     = headers.indexOf('gebruikersnaam');
-      const pwIdx       = headers.indexOf('wachtwoord');
       const rolIdx      = headers.indexOf('rol');
       const telIdx      = headers.indexOf('telefoon');
       const emailIdx    = headers.indexOf('email');
@@ -292,8 +258,7 @@ function doGet(e) {
 
       for (let i = 1; i < data.length; i++) {
         const rij = data[i];
-        if (String(rij[userIdx]).trim().toLowerCase() === gebruikersnaam &&
-            String(rij[pwIdx]).trim() === wachtwoord) {
+        if (String(rij[userIdx]).trim().toLowerCase() === gebruikersnaam) {
           const rol      = rolIdx      >= 0 ? String(rij[rolIdx]).trim().toLowerCase()   : 'monteur';
           const telefoon = telIdx      >= 0 ? String(rij[telIdx]).trim()                 : '';
           const email    = emailIdx    >= 0 ? String(rij[emailIdx]).trim()               : '';
@@ -302,7 +267,22 @@ function doGet(e) {
           return jsonOutput({ status: 'ok', rol, gebruiker: gebruikersnaam, telefoon, email, naam, afdeling });
         }
       }
-      return jsonOutput({ status: 'ongeldig', message: 'Onjuiste gebruikersnaam of wachtwoord.' });
+      return jsonOutput({ status: 'ongeldig', message: 'Onbekende gebruikersnaam.' });
+    } catch(err) {
+      return jsonOutput({ status: 'error', message: err.message });
+    }
+  }
+
+  // ── BEHEERWACHTWOORD CONTROLEREN ──────────────────────────
+  // Wachtwoord staat in de Instellingen-tab onder de sleutel "beheerwachtwoord".
+  if (actie === 'beheer_login') {
+    try {
+      const wachtwoord = e.parameter.wachtwoord || '';
+      const inst = leesInstellingen();
+      const juist = String(inst.beheerwachtwoord || '').trim();
+      if (!juist) return jsonOutput({ status: 'niet_ingesteld' });
+      if (wachtwoord === juist) return jsonOutput({ status: 'ok' });
+      return jsonOutput({ status: 'ongeldig' });
     } catch(err) {
       return jsonOutput({ status: 'error', message: err.message });
     }

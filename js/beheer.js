@@ -95,53 +95,75 @@ function toggleBestOverzicht(i) {
 }
 
 // ── BESTELDE ARTIKELEN EXPORTEREN (ADMIN) ─────────────────────
-// Parse een besteldatum-string naar een Date (of null). Ondersteunt
-// "dd-mm-jjjj hh:mm" (nl-NL) en ISO/Date-strings.
+// Parse een besteldatum naar een Date (of null). De Bestellingen-cel kan
+// in verschillende vormen binnenkomen, afhankelijk van hoe de sheet hem
+// bewaart:
+//   - "dd-mm-jjjj hh:mm"  (nl-NL tekst, zoals cart.js hem nu opslaat)
+//   - "jjjj-mm-dd..."     (ISO, indien ooit zo opgeslagen)
+//   - Engelse Date-string (als de cel een echt Date-object is → String())
+// We proberen eerst het expliciete NL-formaat, daarna een generieke Date().
 function _parseBestelDatum(raw) {
   if (!raw) return null;
   const s = String(raw).trim();
-  const m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})/);
+  // dd-mm-jjjj (met optionele tijd erachter) — dag eerst, niet ISO
+  const m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})(?:[ T](\d{1,2}):(\d{2}))?/);
   if (m) {
     let jaar = parseInt(m[3], 10);
     if (jaar < 100) jaar += 2000;
-    const d = new Date(jaar, parseInt(m[2], 10) - 1, parseInt(m[1], 10));
-    return isNaN(d) ? null : d;
+    const d = new Date(jaar, parseInt(m[2], 10) - 1, parseInt(m[1], 10),
+      parseInt(m[4] || '0', 10), parseInt(m[5] || '0', 10));
+    return isNaN(d.getTime()) ? null : d;
   }
+  // ISO of Engelse Date-string
   const d = new Date(s);
-  return isNaN(d) ? null : d;
+  return isNaN(d.getTime()) ? null : d;
 }
 
 function exporteerBesteldeArtikelen() {
   const url = getSheetsUrl();
   const statusEl = document.getElementById('export-status');
-  if (!url) { statusEl.innerHTML = '<span style="color:var(--danger)">❌ Geen Web App URL ingesteld.</span>'; return; }
+  const setStatus = (html) => { if (statusEl) statusEl.innerHTML = html; };
+  if (!url) { setStatus('<span style="color:var(--danger)">❌ Geen Web App URL ingesteld.</span>'); return; }
 
   const vanRaw = document.getElementById('export-van')?.value || '';
   const totRaw = document.getElementById('export-tot')?.value || '';
   const vanD = vanRaw ? new Date(vanRaw + 'T00:00:00') : null;
   const totD = totRaw ? new Date(totRaw + 'T23:59:59') : null;
+  if ((vanRaw && !vanD) || (totRaw && !totD) ||
+      (vanD && isNaN(vanD.getTime())) || (totD && isNaN(totD.getTime()))) {
+    setStatus('<span style="color:var(--danger)">❌ Ongeldige datum.</span>');
+    return;
+  }
   if (vanD && totD && vanD > totD) {
-    statusEl.innerHTML = '<span style="color:var(--danger)">❌ "Van"-datum ligt na "Tot"-datum.</span>';
+    setStatus('<span style="color:var(--danger)">❌ "Van"-datum ligt na "Tot"-datum.</span>');
     return;
   }
 
-  statusEl.innerHTML = '<span style="color:var(--muted)">⏳ Bestellingen ophalen...</span>';
+  setStatus('<span style="color:var(--muted)">⏳ Bestellingen ophalen...</span>');
 
   fetch(`${url}?actie=lezen&blad=Bestellingen&t=${Date.now()}`)
     .then(r => r.json())
     .then(data => {
-      if (data.status !== 'ok' || !data.artikelen?.length) {
-        statusEl.innerHTML = '<span style="color:var(--muted)">Geen bestellingen gevonden.</span>';
+      if (!data || data.status !== 'ok' || !Array.isArray(data.artikelen) || !data.artikelen.length) {
+        setStatus('<span style="color:var(--muted)">Geen bestellingen gevonden.</span>');
         return;
       }
 
       let aantalBestellingen = 0;
-      const totalen = {}; // code -> { code, naam, eenheid, leverancier, qty }
+      let overgeslagenZonderDatum = 0;
+      // Sleutel = artikelcode + eenheid, zodat hetzelfde artikel in
+      // verschillende eenheden (bv. "stuk" vs "meter") niet vermengd wordt.
+      const totalen = {};
 
       data.artikelen.forEach(b => {
-        const d = _parseBestelDatum(b.datum);
-        if (vanD && (!d || d < vanD)) return;
-        if (totD && (!d || d > totD)) return;
+        // Bij een actief datumfilter tellen alleen bestellingen met een
+        // leesbare datum die binnen het bereik valt. Zonder filter tellen alle.
+        if (vanD || totD) {
+          const d = _parseBestelDatum(b.datum);
+          if (!d) { overgeslagenZonderDatum++; return; }
+          if (vanD && d < vanD) return;
+          if (totD && d > totD) return;
+        }
         aantalBestellingen++;
 
         const items = b.artikelendata
@@ -149,37 +171,44 @@ function exporteerBesteldeArtikelen() {
           : _parseArtikelenTekst(b.artikelen || '');
 
         items.forEach(a => {
-          const key = a.code || a.naam || '—';
+          const eenheid = (a.eenheid || 'stuk').trim() || 'stuk';
+          const key = (a.code || a.naam || '—') + ' ' + eenheid;
           if (!totalen[key]) {
-            totalen[key] = { code: a.code || '', naam: a.naam || '', eenheid: a.eenheid || 'stuk', leverancier: a.leverancier || '', qty: 0 };
+            totalen[key] = { code: a.code || '', naam: a.naam || '', eenheid, leverancier: a.leverancier || '', qty: 0 };
           }
-          totalen[key].qty += (a.qty || 0);
+          totalen[key].qty += (Number(a.qty) || 0);
           // Vul ontbrekende velden aan vanuit latere regels
           if (!totalen[key].naam && a.naam) totalen[key].naam = a.naam;
           if (!totalen[key].leverancier && a.leverancier) totalen[key].leverancier = a.leverancier;
         });
       });
 
-      const rijen = Object.values(totalen).sort((a, b) =>
-        (a.naam || a.code).localeCompare(b.naam || b.code, 'nl'));
+      const rijen = Object.values(totalen)
+        .filter(r => r.qty > 0)
+        .sort((a, b) => (a.naam || a.code).localeCompare(b.naam || b.code, 'nl'));
 
       if (!rijen.length) {
-        statusEl.innerHTML = '<span style="color:var(--muted)">Geen artikelen in de gekozen periode.</span>';
+        setStatus('<span style="color:var(--muted)">Geen artikelen in de gekozen periode.</span>');
         return;
       }
 
       // CSV opbouwen (puntkomma-scheiding — standaard voor NL-Excel)
       const esc = v => {
         const s = String(v ?? '');
-        return /[";\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+        return /[";\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
       };
       const koppen = ['Artikelnummer', 'Omschrijving', 'Totaal aantal', 'Eenheid', 'Leverancier'];
-      const totaalStuks = rijen.reduce((s, r) => s + r.qty, 0);
       const csvRegels = [koppen.join(';')];
       rijen.forEach(r => {
         csvRegels.push([esc(r.code), esc(r.naam), r.qty, esc(r.eenheid), esc(r.leverancier)].join(';'));
       });
-      csvRegels.push(['', 'TOTAAL', totaalStuks, '', ''].join(';'));
+      // Totaalregel: alleen zinvol als alle regels dezelfde eenheid hebben
+      // (anders zou je bv. stuks en meters bij elkaar optellen).
+      const eenhedenSet = new Set(rijen.map(r => r.eenheid));
+      const totaalAantal = rijen.reduce((s, r) => s + r.qty, 0);
+      const totaalEenheid = eenhedenSet.size === 1 ? [...eenhedenSet][0] : '';
+      const totaalLabel = eenhedenSet.size === 1 ? 'TOTAAL' : 'TOTAAL (gemengde eenheden)';
+      csvRegels.push(['', totaalLabel, totaalAantal, totaalEenheid, ''].join(';'));
       const csv = '﻿' + csvRegels.join('\r\n'); // BOM zodat Excel accenten toont
 
       // Downloaden
@@ -188,28 +217,68 @@ function exporteerBesteldeArtikelen() {
         : '';
       const bestandsnaam = `bestelde-artikelen${periode}.csv`;
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const objUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = bestandsnaam;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      // Fallback voor webviews zonder download-attribuut (bv. sommige iOS
+      // in-app browsers): open de CSV in een nieuw tabblad.
+      if (typeof link.download === 'undefined') {
+        window.open(objUrl, '_blank');
+      } else {
+        link.href = objUrl;
+        link.download = bestandsnaam;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+      setTimeout(() => URL.revokeObjectURL(objUrl), 1000);
 
-      statusEl.innerHTML = `<span style="color:green">✅ ${rijen.length} artikel${rijen.length !== 1 ? 'en' : ''} uit ${aantalBestellingen} bestelling${aantalBestellingen !== 1 ? 'en' : ''} geëxporteerd.</span>`;
+      const waarschuwing = overgeslagenZonderDatum
+        ? ` <span style="color:var(--muted)">(${overgeslagenZonderDatum} bestelling${overgeslagenZonderDatum !== 1 ? 'en' : ''} zonder leesbare datum overgeslagen)</span>`
+        : '';
+      setStatus(`<span style="color:green">✅ ${rijen.length} artikel${rijen.length !== 1 ? 'en' : ''} uit ${aantalBestellingen} bestelling${aantalBestellingen !== 1 ? 'en' : ''} geëxporteerd.</span>${waarschuwing}`);
     })
     .catch(err => {
-      statusEl.innerHTML = `<span style="color:var(--danger)">❌ ${corsErrorMsg(err)}</span>`;
+      setStatus(`<span style="color:var(--danger)">❌ ${corsErrorMsg(err)}</span>`);
     });
 }
 
+// Beheer blijft na één geslaagde wachtwoordcontrole ontgrendeld voor de
+// rest van de sessie (tot herladen/uitloggen). sessionStorage overleeft
+// een navigatie, maar niet het sluiten van de app.
 function beheerUnlocked() {
-  return isAdmin();
+  return sessionStorage.getItem('beheer_auth') === '1';
 }
 
 function openBeheerLogin() {
-  if (isAdmin()) { showTab('beheer-panel'); return; }
-  showToast('⛔ Geen toegang — alleen beschikbaar voor admins. Vraag Ruben Brinks voor toegang.');
+  // Alleen admins zien de beheerknop, maar we controleren de rol hier nogmaals.
+  if (!isAdmin()) {
+    showToast('⛔ Geen toegang — alleen beschikbaar voor admins. Vraag Ruben Brinks voor toegang.');
+    return;
+  }
+  // Al ontgrendeld in deze sessie? → direct openen, geen wachtwoord vragen.
+  if (beheerUnlocked()) { showTab('beheer-panel'); return; }
+
+  const url = getSheetsUrl();
+  if (!url) { showToast('❌ Geen databasekoppeling.'); return; }
+
+  const pw = prompt('Voer het beheerwachtwoord in:');
+  if (pw === null) return;                 // geannuleerd
+  if (!pw.trim()) { showToast('❌ Geen wachtwoord ingevoerd.'); return; }
+
+  showToast('⏳ Wachtwoord controleren...');
+  fetch(`${url}?actie=beheer_login&wachtwoord=${encodeURIComponent(pw)}&t=${Date.now()}`)
+    .then(r => r.json())
+    .then(r => {
+      if (r.status === 'ok') {
+        sessionStorage.setItem('beheer_auth', '1');
+        showTab('beheer-panel');
+      } else if (r.status === 'niet_ingesteld') {
+        showToast('⚠️ Er is nog geen beheerwachtwoord ingesteld in de Instellingen-tab.');
+      } else {
+        showToast('❌ Onjuist beheerwachtwoord.');
+      }
+    })
+    .catch(err => showToast(corsErrorMsg(err)));
 }
 
 // ── BEHEERDERSPANEEL ──────────────────────────────────────────

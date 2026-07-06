@@ -299,9 +299,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// ── DEV BEHEER ────────────────────────────────────────────────
-const DEV_PW = 'Eg@2026!#';
-
 function getSheetsUrl() {
   return SHEETS_API_URL;
 }
@@ -431,69 +428,6 @@ function sluitBevestiging(naarOverzicht) {
   }
 }
 
-function openDev() {
-  // Al ingelogd in deze sessie?
-  if (sessionStorage.getItem('dev_auth') === '1') {
-    closeDrawer();
-    showTab('dev');
-      initDevPage();
-    return;
-  }
-  closeDrawer();
-  document.getElementById('dev-overlay').classList.add('open');
-  document.getElementById('dev-pw').value = '';
-  document.getElementById('dev-pw-err').style.display = 'none';
-  setTimeout(() => document.getElementById('dev-pw').focus(), 100);
-}
-
-function initDevPage() {
-  bouwIconKiezer();
-}
-
-function bouwIconKiezer() {
-  const container = document.getElementById('cat-icon-lijst');
-  if (!container) return;
-  const cats = [...new Set(ARTIKELEN.map(a => a.cat))].filter(Boolean).sort();
-  if (!cats.length) {
-    container.innerHTML = '<div style="color:var(--muted);font-size:.8rem">Laad eerst artikelen om iconen in te stellen.</div>';
-    return;
-  }
-  container.innerHTML = cats.map(cat => {
-    const huidig = ICONS[cat] || ICON_DEFAULTS[cat] || '📦';
-    const opties = ICOON_OPTIES.map(ic =>
-      `<option value="${ic}"${ic===huidig?' selected':''}>${ic}</option>`
-    ).join('');
-    return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:1.1rem;width:28px;text-align:center">${huidig}</span>
-      <span style="flex:1;font-size:.84rem">${cat}</span>
-      <select data-cat="${cat}" style="background:var(--bg);border:1.5px solid var(--border);border-radius:6px;font-size:1rem;padding:4px 6px;color:var(--text);outline:none" onchange="previewIcon(this)">
-        ${opties}
-      </select>
-    </div>`;
-  }).join('');
-}
-
-function previewIcon(sel) {
-  const icoon = sel.value;
-  const preview = sel.parentElement.querySelector('span:first-child');
-  if (preview) preview.textContent = icoon;
-}
-
-function slaIconenOp() {
-  const selects = document.querySelectorAll('#cat-icon-lijst select[data-cat]');
-  selects.forEach(sel => {
-    const cat = sel.dataset.cat;
-    ICONS[cat] = sel.value;
-  });
-  // Opslaan in localStorage
-  try { localStorage.setItem('emondt_icons', JSON.stringify(ICONS)); } catch(e) {}
-  // Drawer vernieuwen
-  bouwDrawerCats();
-  // Artikellijst vernieuwen (iconen in kaartjes updaten)
-  renderArtikelen(activeCat ? ARTIKELEN.filter(a=>a.cat===activeCat) : ARTIKELEN);
-  showToast('✅ Iconen opgeslagen');
-}
-
 function laadOpgeslagenIconen() {
   try {
     const opgeslagen = localStorage.getItem('emondt_icons');
@@ -502,58 +436,6 @@ function laadOpgeslagenIconen() {
       Object.assign(ICONS, parsed);
     }
   } catch(e) {}
-}
-
-function checkPw() {
-  if (document.getElementById('dev-pw').value === DEV_PW) {
-    sessionStorage.setItem('dev_auth', '1');
-    document.getElementById('dev-overlay').classList.remove('open');
-    showTab('dev');
-      initDevPage();
-  } else {
-    document.getElementById('dev-pw-err').style.display = 'block';
-    document.getElementById('dev-pw').value = '';
-  }
-}
-
-function devZoek() {
-  const q = document.getElementById('dev-zoek').value.toLowerCase().trim();
-  const res = document.getElementById('dev-zoek-resultaten');
-  if (!q) { res.innerHTML = ''; return; }
-  const gevonden = ARTIKELEN.filter(a =>
-    a.naam.toLowerCase().includes(q) || a.code.toLowerCase().includes(q)
-  ).slice(0, 15);
-  if (!gevonden.length) {
-    res.innerHTML = '<div style="color:var(--muted);font-size:.84rem;padding:8px 0">Geen resultaten gevonden.</div>';
-    return;
-  }
-  res.innerHTML = gevonden.map(a => `
-    <div class="dev-artikel-row" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px">
-      <div class="info" style="flex:1;min-width:0">
-        <strong style="font-size:.86rem;display:block;word-break:break-word">${a.naam}</strong>
-        <span style="font-size:.7rem;color:var(--muted)">${a.code} · ${a.cat}${a.subcat ? ' › ' + a.subcat : ''}</span>
-      </div>
-      <button data-code="${a.code}" class="btn-del-artikel" style="background:#fdecea;border:1px solid #f5c6c2;color:var(--danger);padding:6px 10px;border-radius:6px;cursor:pointer;font-size:.82rem;flex-shrink:0">🗑 Verwijderen</button>
-    </div>`).join('');
-
-  // Bind events via delegation-safe approach
-  res.querySelectorAll('.btn-del-artikel').forEach(btn => {
-    btn.addEventListener('click', () => devVerwijderArtikel(btn.dataset.code));
-  });
-}
-
-function devVerwijderArtikel(code) {
-  const a = ARTIKELEN.find(x => x.code === code);
-  if (!a || !confirm(`Artikel "${a.naam}" (${code}) verwijderen uit de database?`)) return;
-  ARTIKELEN.splice(ARTIKELEN.findIndex(x => x.code === code), 1);
-  if (cart[code]) { delete cart[code]; saveCart(); updateBadge(); }
-  bouwDrawerCats();
-  devZoek();
-
-  // Verwijder uit Sheets
-  sheetsRequest({ actie: 'verwijderen', code })
-    .then(data => showToast(data.status === 'ok' ? '🗑 Verwijderd uit Sheets' : '⚠️ ' + (data.message||data.status)))
-    .catch(() => showToast('🗑 Lokaal verwijderd (Sheets niet bereikbaar)'));
 }
 
 function updateOnlineStatus() {

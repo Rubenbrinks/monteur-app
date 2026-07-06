@@ -29,17 +29,17 @@ function slaAuthOp(gebruiker, rol) {
 
 function uitloggen() {
   try { localStorage.removeItem(AUTH_KEY); } catch(e) {}
+  try { sessionStorage.removeItem('beheer_auth'); } catch(e) {}
   location.reload();
 }
 
 function checkLogin() {
   const user  = document.getElementById('login-user').value.trim();
-  const pw    = document.getElementById('login-pw').value;
   const fout  = document.getElementById('login-fout');
   const btn   = document.querySelector('#login-scherm .btn-primary');
 
-  if (!user || !pw) {
-    fout.textContent = '❌ Vul gebruikersnaam en wachtwoord in';
+  if (!user) {
+    fout.textContent = '❌ Vul je gebruikersnaam in';
     fout.style.display = 'block';
     return;
   }
@@ -57,7 +57,7 @@ function checkLogin() {
   btn.disabled = true;
   fout.style.display = 'none';
 
-  fetch(`${url}?actie=login&gebruiker=${encodeURIComponent(user)}&wachtwoord=${encodeURIComponent(pw)}&t=${Date.now()}`)
+  fetch(`${url}?actie=login&gebruiker=${encodeURIComponent(user)}&t=${Date.now()}`)
     .then(r => r.json())
     .then(r => {
       btn.textContent = 'Inloggen';
@@ -78,10 +78,8 @@ function checkLogin() {
         document.getElementById('login-scherm').classList.add('verborgen');
         initialiseerApp();
       } else {
-        fout.textContent = '❌ ' + (r.message || 'Onjuiste gegevens');
+        fout.textContent = '❌ ' + (r.message || 'Onbekende gebruikersnaam');
         fout.style.display = 'block';
-        document.getElementById('login-pw').value = '';
-        document.getElementById('login-pw').focus();
         setTimeout(() => { fout.style.display = 'none'; }, 4000);
       }
     })

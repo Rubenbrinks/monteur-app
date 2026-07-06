@@ -24,7 +24,7 @@
     })();
   </script>
   <link rel="stylesheet" href="css/layout.css?v=3.3.2">
-  <link rel="stylesheet" href="css/components.css?v=3.3.2">
+  <link rel="stylesheet" href="css/components.css?v=3.3.5">
   <link rel="stylesheet" href="css/artikelen.css?v=3.3.2">
   <link rel="stylesheet" href="css/pages.css?v=3.3.2">
 </head>
@@ -89,15 +89,10 @@
       <h2>Emondt Materiaalapp</h2>
       <p>Log in om verder te gaan</p>
     </div>
-    <div class="login-fout" id="login-fout" style="display:none">Onjuiste gebruikersnaam of wachtwoord</div>
+    <div class="login-fout" id="login-fout" style="display:none">Onbekende gebruikersnaam</div>
     <div class="field">
       <label>Gebruikersnaam</label>
       <input type="text" id="login-user" placeholder="gebruikersnaam" autocomplete="username"
-        onkeydown="if(event.key==='Enter')document.getElementById('login-pw').focus()" />
-    </div>
-    <div class="field">
-      <label>Wachtwoord</label>
-      <input type="password" id="login-pw" placeholder="wachtwoord" autocomplete="current-password"
         onkeydown="if(event.key==='Enter')checkLogin()" />
     </div>
     <button class="btn btn-primary" onclick="checkLogin()">Inloggen</button>
@@ -124,15 +119,7 @@
     </div>
     <div class="field">
       <label>Telefoonnummer <span class="req">*</span></label>
-      <input type="tel" id="reg-tel" placeholder="06-12345678" />
-    </div>
-    <div class="field">
-      <label>Wachtwoord <span class="req">*</span></label>
-      <input type="password" id="reg-pw" placeholder="minimaal 6 tekens" />
-    </div>
-    <div class="field">
-      <label>Wachtwoord bevestigen <span class="req">*</span></label>
-      <input type="password" id="reg-pw2" placeholder="herhaal wachtwoord"
+      <input type="tel" id="reg-tel" placeholder="06-12345678"
         onkeydown="if(event.key==='Enter')registreerAccount()" />
     </div>
     <button class="btn btn-primary" onclick="registreerAccount()">Account aanmaken</button>
@@ -527,37 +514,6 @@
   </div>
 </div>
 
-<div class="screen" id="tab-dev">
-  <div class="beheer-sect">
-    <div class="beheer-titel">Test Functies</div>
-    <p style="font-size:.84rem;color:var(--muted);margin-bottom:14px;line-height:1.6">Gebruik de testknop om de verbinding te controleren en te bevestigen dat het script bereikbaar is.</p>
-    <div style="display:flex;gap:8px;margin-bottom:8px">
-      <button class="btn btn-primary" onclick="testVerbinding()" style="margin-bottom:0;flex:1">Verbinding testen</button>
-      <button class="btn btn-primary" onclick="herlaadArtikelen()" style="margin-bottom:0;flex:1">Herladen</button>
-    </div>
-    <button class="btn btn-secondary" onclick="testBestellingLog()" style="margin-bottom:8px">Test bestelling loggen</button>
-    <div id="sheets-status" style="font-size:.84rem;line-height:1.6"></div>
-  </div>
-  <div class="beheer-sect">
-    <div class="beheer-titel">Artikeldatabase</div>
-    <div class="csv-info">
-      De artikeldatabase wordt beheerd via Google Sheets. Kolomtitels: <code>code</code>, <code>naam</code>, <code>cat</code>, <code>subcat</code>, <code>subsubcat</code>, <code>eenheid</code>, <code>warning</code>, <code>verpakking</code>, <code>afbeelding</code>.
-    </div>
-    <a href="https://docs.google.com/spreadsheets/d/1c7GeL9KG60aJDRGzoObfnDjOhTj-UKaGGIOSmGwiFvM" target="_blank" style="text-decoration:none">
-      <button class="btn btn-primary" style="margin-bottom:0">Open Google Spreadsheet</button>
-    </a>
-  </div>
-  <div class="beheer-sect">
-    <div class="beheer-titel">Artikel zoeken &amp; verwijderen</div>
-    <div class="field">
-      <label>Zoek op naam of artikelnummer</label>
-      <input type="text" id="dev-zoek" placeholder="bijv. PVC bocht of 6923049..." oninput="devZoek()" />
-    </div>
-    <div id="dev-zoek-resultaten" style="margin-top:8px"></div>
-  </div>
-  <button class="btn btn-secondary" onclick="showTab('artikelen')" style="margin-top:4px">← Terug</button>
-</div>
-
 <div class="screen" id="tab-telefoonlijst">
   <div class="page-header">
     <button class="page-back-btn" onclick="showTab('welkom')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
@@ -573,20 +529,6 @@
     <span>Contacten laden...</span>
   </div>
   <div id="tel-lijst"></div>
-</div>
-
-<!-- DEV LOGIN -->
-<div id="dev-overlay">
-  <div class="dev-modal">
-    <div class="dev-titel">Beheer toegang</div>
-    <p style="font-size:.88rem;color:var(--muted);margin-bottom:16px">Voer het beheerwachtwoord in.</p>
-    <input type="password" id="dev-pw" placeholder="Wachtwoord..." onkeydown="if(event.key==='Enter')checkPw()" style="margin-bottom:10px" />
-    <div id="dev-pw-err" style="color:var(--danger);font-size:.8rem;margin-bottom:12px;display:none">Onjuist wachtwoord</div>
-    <div style="display:flex;gap:10px">
-      <button onclick="checkPw()" style="flex:1;padding:14px;background:var(--green);color:#000;border:none;border-radius:var(--radius-sm);font-family:'Inter','DM Sans',sans-serif;font-size:.9rem;font-weight:700;text-transform:uppercase;cursor:pointer">Inloggen</button>
-      <button onclick="document.getElementById('dev-overlay').classList.remove('open')" style="flex:1;padding:14px;background:var(--surface2);color:var(--muted);border:1.5px solid var(--border-strong);border-radius:var(--radius-sm);font-family:'Inter','DM Sans',sans-serif;font-size:.9rem;font-weight:700;text-transform:uppercase;cursor:pointer">Annuleren</button>
-    </div>
-  </div>
 </div>
 
 <!-- PWA BANNER -->
@@ -799,17 +741,6 @@
     </div>
   </div>
 
-  <!-- 8. Trefwoorden genereren -->
-  <div class="admin-card">
-    <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-trefwoorden',this)">
-      <span>Trefwoorden genereren</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
-    </button>
-    <div id="kaart-trefwoorden" class="admin-kaart-body" style="display:none">
-      <p style="font-size:.84rem;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Vult de kolom "trefwoorden" in de Artikelen sheet op basis van de artikelnaam en categorie. Vereist: kolom "trefwoorden" in de sheet (mag leeg zijn). Artikelen met bestaande trefwoorden worden overgeslagen.</p>
-      <div id="trefwoorden-status" style="font-size:.84rem;min-height:18px;margin-bottom:12px"></div>
-      <button class="btn btn-primary" onclick="startTrefwoordenGenereren()" style="margin-bottom:0;width:100%">Genereer trefwoorden</button>
-    </div>
-  </div>
 
 </div>
 <!-- BESTELBEVESTIGING MODAL -->
@@ -889,12 +820,12 @@
 </div>
 
   <script src="js/config.js?v=3.2.10" defer></script>
-  <script src="js/ui.js?v=3.2.10" defer></script>
-  <script src="js/auth.js?v=3.2.10" defer></script>
-  <script src="js/api.js?v=3.2.10" defer></script>
+  <script src="js/ui.js?v=3.3.5" defer></script>
+  <script src="js/auth.js?v=3.3.5" defer></script>
+  <script src="js/api.js?v=3.3.5" defer></script>
   <script src="js/artikelen.js?v=3.2.10" defer></script>
   <script src="js/cart.js?v=3.2.10" defer></script>
-  <script src="js/beheer.js?v=3.3.4" defer></script>
-  <script src="js/app.js?v=3.2.10" defer></script>
+  <script src="js/beheer.js?v=3.3.5" defer></script>
+  <script src="js/app.js?v=3.3.5" defer></script>
 </body>
 </html>

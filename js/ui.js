@@ -176,8 +176,6 @@ function registreerAccount() {
   const user  = document.getElementById('reg-user').value.trim().toLowerCase();
   const email = document.getElementById('reg-email').value.trim().toLowerCase();
   const tel   = document.getElementById('reg-tel').value.trim();
-  const pw    = document.getElementById('reg-pw').value;
-  const pw2   = document.getElementById('reg-pw2').value;
   const fout  = document.getElementById('registreer-fout');
 
   const setFout = (tekst, ok=false) => {
@@ -186,10 +184,8 @@ function registreerAccount() {
   };
 
   fout.style.display = 'none';
-  if (!naam || !user || !email || !tel || !pw || !pw2) { setFout('❌ Vul alle velden in'); return; }
-  if (!email.includes('@'))                            { setFout('❌ Ongeldig e-mailadres'); return; }
-  if (pw.length < 6)                                  { setFout('❌ Wachtwoord minimaal 6 tekens'); return; }
-  if (pw !== pw2)                                      { setFout('❌ Wachtwoorden komen niet overeen'); return; }
+  if (!naam || !user || !email || !tel) { setFout('❌ Vul alle velden in'); return; }
+  if (!email.includes('@'))             { setFout('❌ Ongeldig e-mailadres'); return; }
 
   const url = getSheetsUrl();
   if (!url) { setFout('❌ Geen databasekoppeling. Vraag een beheerder.'); return; }
@@ -200,7 +196,6 @@ function registreerAccount() {
     actie:      'registreer',
     gebruiker:  user,
     naam:       naam,
-    wachtwoord: pw,
     email:      email,
     telefoon:   tel,
     rol:        'monteur',

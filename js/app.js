@@ -236,8 +236,8 @@ function customArtikelToevoegen() {
 }
 
 function setBeheerStatus(html) {
-  // Update beide status-elementen (tab-dev en tab-beheer-panel)
-  ['sheets-status', 'beheer-status'].forEach(id => {
+  // Update het status-element van het beheerpaneel
+  ['beheer-status'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = html;
   });
