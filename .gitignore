@@ -1,0 +1,3 @@
+# Lokale bestanden die niet naar GitHub / de gedeploybare app horen
+.ignore/
+.claude/
