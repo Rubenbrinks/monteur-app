@@ -94,6 +94,115 @@ function toggleBestOverzicht(i) {
   kaart?.classList.toggle('open', el.classList.contains('open'));
 }
 
+// ── BESTELDE ARTIKELEN EXPORTEREN (ADMIN) ─────────────────────
+// Parse een besteldatum-string naar een Date (of null). Ondersteunt
+// "dd-mm-jjjj hh:mm" (nl-NL) en ISO/Date-strings.
+function _parseBestelDatum(raw) {
+  if (!raw) return null;
+  const s = String(raw).trim();
+  const m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})/);
+  if (m) {
+    let jaar = parseInt(m[3], 10);
+    if (jaar < 100) jaar += 2000;
+    const d = new Date(jaar, parseInt(m[2], 10) - 1, parseInt(m[1], 10));
+    return isNaN(d) ? null : d;
+  }
+  const d = new Date(s);
+  return isNaN(d) ? null : d;
+}
+
+function exporteerBesteldeArtikelen() {
+  const url = getSheetsUrl();
+  const statusEl = document.getElementById('export-status');
+  if (!url) { statusEl.innerHTML = '<span style="color:var(--danger)">❌ Geen Web App URL ingesteld.</span>'; return; }
+
+  const vanRaw = document.getElementById('export-van')?.value || '';
+  const totRaw = document.getElementById('export-tot')?.value || '';
+  const vanD = vanRaw ? new Date(vanRaw + 'T00:00:00') : null;
+  const totD = totRaw ? new Date(totRaw + 'T23:59:59') : null;
+  if (vanD && totD && vanD > totD) {
+    statusEl.innerHTML = '<span style="color:var(--danger)">❌ "Van"-datum ligt na "Tot"-datum.</span>';
+    return;
+  }
+
+  statusEl.innerHTML = '<span style="color:var(--muted)">⏳ Bestellingen ophalen...</span>';
+
+  fetch(`${url}?actie=lezen&blad=Bestellingen&t=${Date.now()}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.status !== 'ok' || !data.artikelen?.length) {
+        statusEl.innerHTML = '<span style="color:var(--muted)">Geen bestellingen gevonden.</span>';
+        return;
+      }
+
+      let aantalBestellingen = 0;
+      const totalen = {}; // code -> { code, naam, eenheid, leverancier, qty }
+
+      data.artikelen.forEach(b => {
+        const d = _parseBestelDatum(b.datum);
+        if (vanD && (!d || d < vanD)) return;
+        if (totD && (!d || d > totD)) return;
+        aantalBestellingen++;
+
+        const items = b.artikelendata
+          ? _parseArtikelenData(b.artikelendata)
+          : _parseArtikelenTekst(b.artikelen || '');
+
+        items.forEach(a => {
+          const key = a.code || a.naam || '—';
+          if (!totalen[key]) {
+            totalen[key] = { code: a.code || '', naam: a.naam || '', eenheid: a.eenheid || 'stuk', leverancier: a.leverancier || '', qty: 0 };
+          }
+          totalen[key].qty += (a.qty || 0);
+          // Vul ontbrekende velden aan vanuit latere regels
+          if (!totalen[key].naam && a.naam) totalen[key].naam = a.naam;
+          if (!totalen[key].leverancier && a.leverancier) totalen[key].leverancier = a.leverancier;
+        });
+      });
+
+      const rijen = Object.values(totalen).sort((a, b) =>
+        (a.naam || a.code).localeCompare(b.naam || b.code, 'nl'));
+
+      if (!rijen.length) {
+        statusEl.innerHTML = '<span style="color:var(--muted)">Geen artikelen in de gekozen periode.</span>';
+        return;
+      }
+
+      // CSV opbouwen (puntkomma-scheiding — standaard voor NL-Excel)
+      const esc = v => {
+        const s = String(v ?? '');
+        return /[";\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+      };
+      const koppen = ['Artikelnummer', 'Omschrijving', 'Totaal aantal', 'Eenheid', 'Leverancier'];
+      const totaalStuks = rijen.reduce((s, r) => s + r.qty, 0);
+      const csvRegels = [koppen.join(';')];
+      rijen.forEach(r => {
+        csvRegels.push([esc(r.code), esc(r.naam), r.qty, esc(r.eenheid), esc(r.leverancier)].join(';'));
+      });
+      csvRegels.push(['', 'TOTAAL', totaalStuks, '', ''].join(';'));
+      const csv = '﻿' + csvRegels.join('\r\n'); // BOM zodat Excel accenten toont
+
+      // Downloaden
+      const periode = (vanRaw || totRaw)
+        ? `_${vanRaw || 'begin'}_tot_${totRaw || 'eind'}`
+        : '';
+      const bestandsnaam = `bestelde-artikelen${periode}.csv`;
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = bestandsnaam;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+
+      statusEl.innerHTML = `<span style="color:green">✅ ${rijen.length} artikel${rijen.length !== 1 ? 'en' : ''} uit ${aantalBestellingen} bestelling${aantalBestellingen !== 1 ? 'en' : ''} geëxporteerd.</span>`;
+    })
+    .catch(err => {
+      statusEl.innerHTML = `<span style="color:var(--danger)">❌ ${corsErrorMsg(err)}</span>`;
+    });
+}
+
 function beheerUnlocked() {
   return isAdmin();
 }
