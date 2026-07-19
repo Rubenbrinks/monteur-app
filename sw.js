@@ -1,5 +1,5 @@
 // ── Emondt Materiaalapp – Service Worker ──────────────────────
-const CACHE_NAAM = 'emondt-materiaalapp-v4.1.2';
+const CACHE_NAAM = 'emondt-materiaalapp-v4.1.3';
 
 const TE_CACHEN = [
   './index.html',
@@ -31,7 +31,11 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   const isHTML = event.request.destination === 'document';
 
-  if (isHTML) {
+  // Alleen de app zelf (root of index.html) valt terug op de gecachte index.html.
+  // Andere pagina's (bv. behandeling.html) mogen NIET door index.html vervangen worden.
+  const isApp = isHTML && (url.pathname.endsWith('/') || url.pathname.endsWith('/index.html'));
+
+  if (isApp) {
     event.respondWith(
       caches.open(CACHE_NAAM).then(cache =>
         cache.match('./index.html').then(cached => {
@@ -44,6 +48,19 @@ self.addEventListener('fetch', event => {
           return cached || fetchPromise;
         })
       )
+    );
+  } else if (isHTML) {
+    // Overige HTML-pagina's: netwerk-eerst, cache als fallback (offline).
+    event.respondWith(
+      fetch(event.request)
+        .then(res => {
+          if (res && res.ok) {
+            const kopie = res.clone();
+            caches.open(CACHE_NAAM).then(c => c.put(event.request, kopie));
+          }
+          return res;
+        })
+        .catch(() => caches.match(event.request))
     );
   } else {
     event.respondWith(
