@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Bestelling in behandeling nemen — Emondt</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif; margin: 0; min-height: 100vh;
+    background: #041c42; color: #fff; display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .kaart {
+    background: #0a2550; border: 1px solid #1c3a6b; border-radius: 16px;
+    padding: 32px 28px; max-width: 440px; width: 100%; text-align: center;
+    box-shadow: 0 12px 40px rgba(0,0,0,.4);
+  }
+  .emoji { font-size: 58px; line-height: 1; margin-bottom: 6px; }
+  h1 { color: #AEC336; font-size: 22px; margin: 10px 0 8px; }
+  p { color: #cfd8e6; font-size: 15px; line-height: 1.55; margin: 6px 0; }
+  .knop {
+    display: inline-block; background: #639922; color: #fff; border: none;
+    font-weight: bold; font-size: 16px; padding: 15px 30px; border-radius: 10px;
+    cursor: pointer; margin-top: 22px; transition: background .15s;
+  }
+  .knop:hover { background: #71ad27; }
+  .knop:disabled { opacity: .6; cursor: default; }
+  .klein { font-size: 12px; color: #7a8aa0; margin-top: 18px; }
+</style>
+</head>
+<body>
+  <div class="kaart" id="kaart">
+    <div class="emoji">🔧</div>
+    <h1>Bestelling in behandeling nemen?</h1>
+    <p id="sub">Je zet deze bestelling op “in behandeling”. De monteur krijgt hiervan een melding.</p>
+    <button class="knop" id="btn" onclick="neemInBehandeling()">✅ Ja, in behandeling nemen</button>
+    <div class="klein">Emondt Materiaalapp</div>
+  </div>
+
+<script>
+  const SUPABASE_URL = 'https://tjypxqquiseejzcwfgwm.supabase.co';
+  const p = new URLSearchParams(location.search);
+  const id = p.get('id');
+  const token = p.get('token');
+
+  function toon(emoji, titel, tekst, knop) {
+    document.querySelector('.emoji').textContent = emoji;
+    document.querySelector('h1').textContent = titel;
+    document.getElementById('sub').innerHTML = tekst;
+    document.getElementById('btn').style.display = knop ? 'inline-block' : 'none';
+  }
+
+  if (!id || !token) {
+    toon('⚠️', 'Ongeldige link', 'Deze link is niet compleet.', false);
+  }
+
+  async function neemInBehandeling() {
+    const btn = document.getElementById('btn');
+    btn.disabled = true; btn.textContent = '⏳ Bezig...';
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/functions/v1/bestelling-status?id=${encodeURIComponent(id)}&token=${encodeURIComponent(token)}&status=in_behandeling`,
+        { method: 'POST' }
+      );
+      const data = await res.json().catch(() => ({}));
+      switch (data.status) {
+        case 'ok':
+          toon('✅', 'Gelukt!',
+            `De bestelling${data.projectnaam ? ' voor <b>' + data.projectnaam + '</b>' : ''} staat nu op “in behandeling”.` +
+            (data.verstuurd ? ' De monteur is met een melding op de hoogte gebracht.' : ' De monteur ziet de status in de app.'),
+            false);
+          break;
+        case 'al_bijgewerkt':
+          toon('ℹ️', 'Al in behandeling', 'Deze bestelling was al in behandeling genomen.', false);
+          break;
+        case 'ongeldige_code':
+          toon('⛔', 'Ongeldige code', 'De beveiligingscode klopt niet.', false);
+          break;
+        case 'niet_gevonden':
+          toon('⚠️', 'Niet gevonden', 'Deze bestelling bestaat niet (meer).', false);
+          break;
+        default:
+          toon('⚠️', 'Er ging iets mis', 'Probeer het later opnieuw.', true);
+          btn.disabled = false; btn.textContent = '✅ Ja, in behandeling nemen';
+      }
+    } catch (e) {
+      toon('⚠️', 'Verbinding mislukt', 'Controleer je internet en probeer opnieuw.', true);
+      btn.disabled = false; btn.textContent = '✅ Ja, in behandeling nemen';
+    }
+  }
+</script>
+</body>
+</html>

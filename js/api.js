@@ -374,10 +374,15 @@ async function _verstuurBestelMail(data, bestelling) {
     ontvangers = inst?.waarde || '';
   } catch(e) {}
 
-  // Link voor de "In behandeling nemen"-knop in de mail (Supabase-functie).
-  const statusUrl = (bestelling?.id && bestelling?.status_token)
-    ? `${SUPABASE_URL}/functions/v1/bestelling-status?id=${bestelling.id}&token=${bestelling.status_token}&status=in_behandeling`
-    : '';
+  // Link voor de "In behandeling nemen"-knop in de mail → bevestigingspagina
+  // op de eigen site (die roept daarna de Supabase-functie aan).
+  let statusUrl = '';
+  if (bestelling?.id && bestelling?.status_token) {
+    const u = new URL('behandeling.html', location.href);
+    u.searchParams.set('id', bestelling.id);
+    u.searchParams.set('token', bestelling.status_token);
+    statusUrl = u.href;
+  }
 
   // Mail formaat: artikelnr×aantal×beschrijving×eenheid×leverancier
   const mailArtikelStr = (data.items || [])
