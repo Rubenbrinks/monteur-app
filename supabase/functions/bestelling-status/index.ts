@@ -31,7 +31,10 @@ function html(inner: string, code = 200): Response {
 <body style="font-family:Arial,Helvetica,sans-serif;background:#041c42;color:#fff;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center">
 <div style="text-align:center;padding:32px;max-width:440px">${inner}</div>
 </body></html>`;
-  return new Response(page, { status: code, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  const headers = new Headers();
+  headers.set('Content-Type', 'text/html; charset=utf-8');
+  headers.set('X-Emondt-Fn', 'v3');
+  return new Response(page, { status: code, headers });
 }
 
 function melding(emoji: string, titel: string, tekst: string, code = 200): Response {
