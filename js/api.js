@@ -28,60 +28,46 @@ function laadArtikelenUitSheets() {
   fetchSheets();
 }
 
-function fetchSheets() {
-  if (!SHEETS_API_URL || SHEETS_API_URL === 'JOUW_WEBAPP_URL_HIER') {
-    // Geen URL — toon cache of uitlegmelding
+async function fetchSheets() {
+  try {
+    const { data, error } = await sb
+      .from('artikelen')
+      .select('*')
+      .eq('actief', true)
+      .order('cat', { ascending: true })
+      .limit(5000);
+    if (error) throw error;
+
+    ARTIKELEN = (data || []).map(a => ({
+      code:         a.code         || '',
+      naam:         a.naam         || '',
+      cat:          a.cat          || '',
+      subcat:       a.subcat       || '',
+      subsubcat:    a.subsubcat    || '',
+      subsubsubcat: a.subsubsubcat || '',
+      eenheid:      a.eenheid      || 'stuk',
+      leverancier:  a.leverancier  || '',
+      warning:      a.warning      || '',
+      verpakking:   a.verpakking   || '',
+      afbeelding:   a.afbeelding   || '',
+      link:         a.link         || '',
+      linktoitems:  a.linktoitems  || '',
+      trefwoorden:  a.trefwoorden  || '',
+      details:      a.details      || '',
+      icon:         ICONS[a.cat] || ICON_DEFAULTS[a.cat] || '📦',
+    })).filter(a => a.code && a.naam);
+
     try {
-      const cached = localStorage.getItem('emondt_artikelen_cache');
-      if (cached) {
-        ARTIKELEN = JSON.parse(cached);
-        renderArtikelen(ARTIKELEN);
-        _naArtikelenGeladen();
-        showToast('📦 Gecachte database geladen');
-        return;
-      }
+      localStorage.setItem('emondt_artikelen_cache', JSON.stringify(ARTIKELEN));
+      localStorage.setItem('emondt_artikelen_ts', Date.now().toString());
     } catch(e) {}
-    const lijst = document.getElementById('artikel-lijst');
-    if (lijst) lijst.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.86rem">⚙️ Koppel de Google Sheets API via Beheer.</div>';
-    return;
+
+    renderArtikelen(ARTIKELEN);
+    _naArtikelenGeladen();
+    showToast('✓ ' + ARTIKELEN.length + ' artikelen geladen');
+  } catch(e) {
+    laadUitCache();
   }
-
-  fetch(SHEETS_API_URL + '?actie=lezen&t=' + Date.now())
-    .then(r => r.json())
-    .then(data => {
-      if (data.status === 'ok' && Array.isArray(data.artikelen)) {
-        ARTIKELEN = data.artikelen.map(a => ({
-          code:        a.code        || '',
-          naam:        a.naam        || '',
-          cat:         a.cat         || '',
-          subcat:      a.subcat      || '',
-          eenheid:     a.eenheid     || 'stuk',
-          leverancier: a.leverancier || '',
-          warning:     a.warning     || '',
-          verpakking:  a.verpakking  || '',
-          afbeelding:  a.afbeelding  || '',
-          subsubcat:   a.subsubcat   || '',
-          link:        a.link        || '',
-          linktoitems: a.linktoitems || '',
-          trefwoorden: a.trefwoorden || '',
-          details:     a.details     || '',
-          icon:        ICONS[a.cat] || ICON_DEFAULTS[a.cat] || '📦',
-        })).filter(a => a.code && a.naam);
-
-        // Sla op in localStorage met timestamp
-        try {
-          localStorage.setItem('emondt_artikelen_cache', JSON.stringify(ARTIKELEN));
-          localStorage.setItem('emondt_artikelen_ts', Date.now().toString());
-        } catch(e) {}
-
-        renderArtikelen(ARTIKELEN);
-        _naArtikelenGeladen();
-        showToast('✓ ' + ARTIKELEN.length + ' artikelen geladen');
-      } else {
-        laadUitCache();
-      }
-    })
-    .catch(() => laadUitCache());
 }
 
 function laadUitCache() {
@@ -229,53 +215,35 @@ function verwerkTuCsv(bestand) {
   reader.readAsText(bestand, 'UTF-8');
 }
 
-function schrijfTuNaarDatabase() {
-  const url = getSheetsUrl();
+async function schrijfTuNaarDatabase() {
   const statusEl = document.getElementById('tu-import-status');
-  if (!url) { statusEl.innerHTML = '<span style="color:var(--danger)">❌ Geen Web App URL ingesteld.</span>'; return; }
   if (!TU_GEVONDEN_ARTIKELEN.length) return;
 
   statusEl.innerHTML = `<span style="color:var(--muted)">⏳ ${TU_GEVONDEN_ARTIKELEN.length} artikelen schrijven naar database...</span>`;
   document.getElementById('tu-schrijf-btn').disabled = true;
 
-  let succes = 0, fouten = 0;
+  const rijen = TU_GEVONDEN_ARTIKELEN.map(a => ({
+    code:        a.code,
+    naam:        a.naam,
+    eenheid:     a.eenheid || 'stuk',
+    leverancier: 'Technische Unie',
+    cat:         'Technische Unie',
+  }));
 
-  const schrijfVolgende = (index) => {
-    if (index >= TU_GEVONDEN_ARTIKELEN.length) {
-      statusEl.innerHTML = succes > 0
-        ? `<span style="color:green">✅ ${succes} artikel${succes !== 1 ? 'en' : ''} opgeslagen in de database${fouten ? ` · ${fouten} overgeslagen` : ''}.</span>`
-        : `<span style="color:var(--danger)">❌ Alle artikelen gefaald (${fouten} fouten).</span>`;
-      document.getElementById('tu-schrijf-btn').disabled = false;
-      herlaadArtikelen();
+  try {
+    // upsert op 'code' zodat bestaande artikelen worden bijgewerkt i.p.v. gedupliceerd.
+    const { error } = await sb.from('artikelen').upsert(rijen, { onConflict: 'code' });
+    document.getElementById('tu-schrijf-btn').disabled = false;
+    if (error) {
+      statusEl.innerHTML = `<span style="color:var(--danger)">❌ Fout: ${error.message}</span>`;
       return;
     }
-
-    const a = TU_GEVONDEN_ARTIKELEN[index];
-    const params = new URLSearchParams({
-      actie:       'toevoegen',
-      code:        a.code,
-      naam:        a.naam,
-      eenheid:     a.eenheid || 'stuk',
-      leverancier: 'Technische Unie',
-      cat:         'Technische Unie',
-      t:           Date.now() + index,
-    });
-
-    fetch(`${url}?${params.toString()}`)
-      .then(r => r.json())
-      .then(r => {
-        if (r.status === 'ok') succes++;
-        else fouten++;
-        statusEl.innerHTML = `<span style="color:var(--muted)">⏳ ${index + 1}/${TU_GEVONDEN_ARTIKELEN.length} verwerkt...</span>`;
-        schrijfVolgende(index + 1);
-      })
-      .catch(() => {
-        fouten++;
-        schrijfVolgende(index + 1);
-      });
-  };
-
-  schrijfVolgende(0);
+    statusEl.innerHTML = `<span style="color:green">✅ ${rijen.length} artikel${rijen.length !== 1 ? 'en' : ''} opgeslagen in de database.</span>`;
+    herlaadArtikelen();
+  } catch(e) {
+    document.getElementById('tu-schrijf-btn').disabled = false;
+    statusEl.innerHTML = `<span style="color:var(--danger)">❌ Verbinding mislukt: ${e.message}</span>`;
+  }
 }
 
 function resetTuImport() {
@@ -314,23 +282,111 @@ function sheetsRequest(params) {
 }
 
 // Bestelling loggen — compact GET request
-function logBestellingSheets(data) {
+async function logBestellingSheets(data) {
+  const sessie = getAuthSessie();
+
+  // Bestelregels netjes als lijst (voor Supabase én de bevestiging).
+  const bestelItems = (data.items || []).map(i => ({
+    code:        i.code,
+    qty:         parseInt(i.qty) || 0,
+    naam:        i.naam || '',
+    eenheid:     i.eenheid || 'stuk',
+    leverancier: i.leverancier || '',
+  }));
+  const totaalStuks = bestelItems.reduce((s, i) => s + i.qty, 0);
+  const leverdatum  = data.leverdatum || localStorage.getItem('leverdatum') || 'zsm';
+
+  // 1. Opslaan in Supabase — de vaste registratie van de bestelling.
+  let nieuweBestelling = null;
+  try {
+    const { data: rij, error } = await sb.from('bestellingen').insert({
+      user_id:        sessie?.id || null,
+      gebruikersnaam: sessie?.gebruiker || '',
+      monteur_naam:   data.naam || '',
+      telefoon:       data.telefoon || '',
+      afdeling:       data.afdeling || '',
+      projectnummer:  data.projectnummer || '',
+      projectnaam:    data.projectnaam || '',
+      afleveradres:   data.locatie || '',
+      leverdatum:     leverdatum,
+      opmerkingen:    data.opmerkingen || '',
+      artikelen:      bestelItems,
+      totaal:         totaalStuks,
+    }).select('id, status_token').single();
+    if (error) { showToast('⚠️ Opslaan mislukt: ' + error.message); return; }
+    nieuweBestelling = rij;
+  } catch(e) {
+    showToast('⚠️ Verbinding mislukt: ' + e.message);
+    return;
+  }
+
+  // 2. Mail versturen via het Google-script (ongewijzigd; alleen voor de mail).
+  _verstuurBestelMail(data, nieuweBestelling);
+
+  // 3. Bevestigingsscherm tonen.
+  const leverdatumTxt = !leverdatum || leverdatum === 'zsm'
+    ? 'Zo snel mogelijk'
+    : new Date(leverdatum + 'T12:00:00').toLocaleDateString('nl-NL', { day:'2-digit', month:'long', year:'numeric' });
+
+  document.getElementById('bevestiging-samenvatting').innerHTML = `
+    <div class="s-row"><span>Monteur</span><span>${data.naam || '—'}</span></div>
+    <div class="s-row"><span>Project</span><span>${data.projectnaam || (data.projectnummer ? data.projectnummer : '—')}</span></div>
+    <div class="s-row"><span>Leverdatum</span><span>${leverdatumTxt}</span></div>
+    <div class="s-row"><span>Afleveradres</span><span>${data.locatie || '—'}</span></div>
+    <div class="s-row total"><span>Totaal</span><span>${totaalStuks} stuks · ${bestelItems.length} artikel${bestelItems.length !== 1 ? 'en' : ''}</span></div>`;
+
+  document.getElementById('bevestiging-overlay').style.display = 'flex';
+
+  // Winkelwagen legen.
+  cart = {};
+  saveCart();
+  updateBadge();
+  renderCart();
+
+  // Project, levering en leverdatum wissen.
+  ['projectnummer','projectnaam','opmerkingen'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const locKeuze = document.getElementById('locatie-keuze');
+  const locInput = document.getElementById('locatie');
+  if (locKeuze) { locKeuze.value = ''; }
+  if (locInput) { locInput.value = ''; locInput.style.display = 'none'; }
+  const levEl = document.getElementById('leverdatum-static');
+  if (levEl) levEl.value = '';
+  try { localStorage.removeItem('leverdatum'); } catch(e){}
+  updateCartSamenvatting();
+}
+
+// De bestelmail loopt voorlopig nog via het Google Apps Script (alleen mail).
+// De ontvangers komen uit Supabase en worden meegestuurd.
+async function _verstuurBestelMail(data, bestelling) {
   const url = getSheetsUrl();
   if (!url) return;
 
-  // Log formaat: aantal-artikelnr-beschrijving
-  const logArtikelStr = (data.items || [])
-    .map(i => `${i.qty}-${i.code}-${(i.naam || '').replace(/[×|]/g, '')}`)
-    .join('|');
+  // Vaste ontvangers uit Supabase ophalen en meesturen naar het mailscript.
+  let ontvangers = '';
+  try {
+    const { data: inst } = await sb
+      .from('instellingen')
+      .select('waarde')
+      .eq('sleutel', 'mail_ontvangers')
+      .maybeSingle();
+    ontvangers = inst?.waarde || '';
+  } catch(e) {}
+
+  // Link voor de "In behandeling nemen"-knop in de mail (Supabase-functie).
+  const statusUrl = (bestelling?.id && bestelling?.status_token)
+    ? `${SUPABASE_URL}/functions/v1/bestelling-status?id=${bestelling.id}&token=${bestelling.status_token}&status=in_behandeling`
+    : '';
 
   // Mail formaat: artikelnr×aantal×beschrijving×eenheid×leverancier
   const mailArtikelStr = (data.items || [])
     .map(i => [
       i.code,
       i.qty,
-      (i.naam       || '').replace(/[×|]/g, ''),
-      (i.eenheid    || 'stuk').replace(/[×|]/g, ''),
-      (i.leverancier|| '').replace(/[×|]/g, ''),
+      (i.naam        || '').replace(/[×|]/g, ''),
+      (i.eenheid     || 'stuk').replace(/[×|]/g, ''),
+      (i.leverancier || '').replace(/[×|]/g, ''),
     ].join('×'))
     .join('|');
 
@@ -344,79 +400,17 @@ function logBestellingSheets(data) {
     projectnaam:   data.projectnaam    || '',
     locatie:       data.locatie        || '',
     leverdatum:    data.leverdatum     || '',
-    opmerkingen:   data.opmerkingen   || '',
+    opmerkingen:   data.opmerkingen    || '',
     ontvanger2:    data.ontvanger2     || '',
+    ontvangers:    ontvangers,
+    status_url:    statusUrl,
     gebruiker:     getAuthSessie()?.gebruiker || '',
     artikelen:     mailArtikelStr,
-    log_artikelen: logArtikelStr,
     totaal:        (data.items || []).reduce((s, i) => s + (parseInt(i.qty)||0), 0),
     t:             Date.now(),
   });
 
-  fetch(`${url}?${params.toString()}`)
-    .then(r => r.json())
-    .then(r => {
-      if (r.status === 'ok') {
-        // Gebruik data.items — niet cart (die wordt daarna pas geleegd)
-        const histItems = (data.items || []).map(i => ({
-          code:        i.code,
-          qty:         i.qty,
-          naam:        i.naam,
-          eenheid:     i.eenheid,
-          leverancier: i.leverancier || '',
-        }));
-        const leverdatum    = data.leverdatum || localStorage.getItem('leverdatum') || 'zsm';
-        const leverdatumTxt = !leverdatum || leverdatum === 'zsm'
-          ? 'Zo snel mogelijk'
-          : new Date(leverdatum + 'T12:00:00').toLocaleDateString('nl-NL', { day:'2-digit', month:'long', year:'numeric' });
-
-        slaHistorieOp({
-          datum:         new Date().toLocaleString('nl-NL'),
-          leverdatum,
-          naam:          data.naam          || '',
-          telefoon:      data.telefoon      || '',
-          afdeling:      data.afdeling      || '',
-          projectnummer: data.projectnummer || '',
-          projectnaam:   data.projectnaam   || '',
-          locatie:       data.locatie       || '',
-          opmerkingen:   data.opmerkingen  || '',
-          artikelen:     histItems,
-        });
-
-        // Bevestigingsscherm
-        const totaalStuks = histItems.reduce((s, a) => s + a.qty, 0);
-        document.getElementById('bevestiging-samenvatting').innerHTML = `
-          <div class="s-row"><span>Monteur</span><span>${data.naam || '—'}</span></div>
-          <div class="s-row"><span>Project</span><span>${data.projectnaam || (data.projectnummer ? data.projectnummer : '—')}</span></div>
-          <div class="s-row"><span>Leverdatum</span><span>${leverdatumTxt}</span></div>
-          <div class="s-row"><span>Afleveradres</span><span>${data.locatie || '—'}</span></div>
-          <div class="s-row total"><span>Totaal</span><span>${totaalStuks} stuks · ${histItems.length} artikel${histItems.length !== 1 ? 'en' : ''}</span></div>`;
-
-        document.getElementById('bevestiging-overlay').style.display = 'flex';
-        cart = {};
-        saveCart();
-        updateBadge();
-        renderCart();
-
-        // Project, levering en leverdatum wissen
-        ['projectnummer','projectnaam','opmerkingen'].forEach(id => {
-          const el = document.getElementById(id); if (el) el.value = '';
-        });
-        const locKeuze = document.getElementById('locatie-keuze');
-        const locInput = document.getElementById('locatie');
-        if (locKeuze) { locKeuze.value = ''; }
-        if (locInput) { locInput.value = ''; locInput.style.display = 'none'; }
-        const levEl = document.getElementById('leverdatum-static');
-        if (levEl) levEl.value = '';
-        try { localStorage.removeItem('leverdatum'); } catch(e){}
-        updateCartSamenvatting();
-      } else {
-        showToast('⚠️ Fout: ' + (r.message || r.status));
-      }
-    })
-    .catch(err => {
-      showToast('⚠️ Verbinding mislukt: ' + err.message);
-    });
+  fetch(`${url}?${params.toString()}`).catch(() => {});
 }
 
 function sluitBevestiging(naarOverzicht) {

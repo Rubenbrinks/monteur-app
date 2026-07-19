@@ -420,6 +420,8 @@ function _parseArtikelenTekst(tekst) {
 }
 
 function _getArtikelen(b) {
+  // Supabase levert de artikelregels al als lijst (jsonb).
+  if (Array.isArray(b._artikelen)) return b._artikelen;
   const data = b.artikelenData || b.artikelendata || '';
   if (data) return _parseArtikelenData(data);
   return _parseArtikelenTekst(b.artikelenTekst || b.artikelentekst || '');
@@ -439,10 +441,16 @@ function _renderHistorieLijst(hist) {
       : new Date(b.leverdatum + 'T12:00:00').toLocaleDateString('nl-NL', {day:'2-digit', month:'long', year:'numeric'});
     const totaal = artikelen.reduce((s, a) => s + (a.qty || 0), 0);
     const kanHerbestellen = artikelen.length > 0;
+    const statusBadge = b.status === 'in_behandeling'
+      ? '<span style="display:inline-block;background:var(--green-dim);color:var(--green);border:1px solid var(--green-border);border-radius:12px;padding:2px 10px;font-size:.72rem;font-weight:700">🔧 In behandeling</span>'
+      : '<span style="display:inline-block;background:var(--surface2);color:var(--muted);border:1px solid var(--border-strong);border-radius:12px;padding:2px 10px;font-size:.72rem;font-weight:600">🕓 Ontvangen</span>';
 
     return `
     <div class="hist-item" onclick="toggleHistDetail(${i})">
-      <div class="hist-datum">${b.datum || '—'}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <div class="hist-datum">${b.datum || '—'}</div>
+        ${statusBadge}
+      </div>
       <div class="hist-project">${b.projectnaam || 'Geen projectnaam'}${b.projectnummer ? ' <span style="font-weight:400;color:var(--muted);font-size:.82rem">· ' + b.projectnummer + '</span>' : ''}</div>
       <div class="hist-meta">${b.naam || '—'} · ${b.afdeling || '—'}</div>
       <div class="hist-detail" id="hist-detail-${i}">
@@ -475,27 +483,39 @@ function _renderHistorieLijst(hist) {
   }).join('');
 }
 
-function renderHistorie() {
+async function renderHistorie() {
   const el = document.getElementById('historie-lijst');
   if (!el) return;
-  const url = getSheetsUrl();
   const sessie = getAuthSessie();
-  if (!url || !sessie) {
-    el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.9rem">Niet beschikbaar — geen verbinding.</div>';
+  if (!sessie) {
+    el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.9rem">Niet beschikbaar — niet ingelogd.</div>';
     return;
   }
   el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.9rem">⏳ Bestellingen laden...</div>';
-  const _persoon = (() => { try { return JSON.parse(localStorage.getItem('emondt_persoon') || '{}'); } catch(e) { return {}; } })();
-  fetch(`${url}?actie=bestellingen_lezen&gebruiker=${encodeURIComponent(sessie.gebruiker)}&naam=${encodeURIComponent(_persoon.naam || '')}&t=${Date.now()}`)
-    .then(r => r.json())
-    .then(r => {
-      if (r.status !== 'ok') throw new Error(r.message || 'Fout');
-      _historieData = r.bestellingen || [];
-      _renderHistorieLijst(_historieData);
-    })
-    .catch(() => {
-      el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.9rem">⚠️ Kon bestellingen niet laden. Controleer verbinding.</div>';
-    });
+  try {
+    const { data, error } = await sb
+      .from('bestellingen')
+      .select('*')
+      .eq('gebruikersnaam', sessie.gebruiker)
+      .order('aangemaakt_op', { ascending: false });
+    if (error) throw error;
+    _historieData = (data || []).map(r => ({
+      datum:         r.aangemaakt_op ? new Date(r.aangemaakt_op).toLocaleString('nl-NL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '',
+      naam:          r.monteur_naam || '',
+      telefoon:      r.telefoon || '',
+      afdeling:      r.afdeling || '',
+      projectnummer: r.projectnummer || '',
+      projectnaam:   r.projectnaam || '',
+      locatie:       r.afleveradres || '',
+      leverdatum:    r.leverdatum || '',
+      opmerkingen:   r.opmerkingen || '',
+      status:        r.status || 'nieuw',
+      _artikelen:    Array.isArray(r.artikelen) ? r.artikelen : [],
+    }));
+    _renderHistorieLijst(_historieData);
+  } catch(e) {
+    el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:.9rem">⚠️ Kon bestellingen niet laden. Controleer verbinding.</div>';
+  }
 }
 
 function toggleHistDetail(i) {

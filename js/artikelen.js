@@ -64,30 +64,30 @@ function renderTelefoonlijst(contacten, zoekterm='') {
   lijst.innerHTML = html || '<p style="color:var(--muted);font-size:.9rem;text-align:center;padding:40px 20px">Geen contacten gevonden.</p>';
 }
 
-function laadTelefoonlijst() {
-  const url = getSheetsUrl();
+async function laadTelefoonlijst() {
   const lijst = document.getElementById('tel-lijst');
   const indicator = document.getElementById('tel-laad-indicator');
-  if (!url || !lijst) return;
+  if (!lijst) return;
   _telData = [];
   if (indicator) indicator.style.display = 'flex';
   lijst.innerHTML = '';
 
-  fetch(url + '?actie=lezen&blad=Telefoonlijst&t=' + Date.now())
-    .then(r => r.json())
-    .then(data => {
-      if (indicator) indicator.style.display = 'none';
-      if (data.status !== 'ok' || !data.artikelen?.length) {
-        lijst.innerHTML = '<p style="color:var(--muted);font-size:.9rem;text-align:center;padding:40px 20px">Geen contacten gevonden in tabblad "Telefoonlijst".</p>';
-        return;
-      }
-      _telData = data.artikelen;
-      renderTelefoonlijst(_telData);
-    })
-    .catch(() => {
-      if (indicator) indicator.style.display = 'none';
-      if (lijst) lijst.innerHTML = '<p style="color:var(--danger);font-size:.9rem;text-align:center;padding:40px 20px">Fout bij laden van telefoonlijst.</p>';
-    });
+  try {
+    const { data, error } = await sb
+      .from('contacten')
+      .select('naam, functie, locatie, intern, telefoon, mobiel')
+      .order('volgorde', { ascending: true });
+    if (indicator) indicator.style.display = 'none';
+    if (error || !data?.length) {
+      lijst.innerHTML = '<p style="color:var(--muted);font-size:.9rem;text-align:center;padding:40px 20px">Geen contacten gevonden.</p>';
+      return;
+    }
+    _telData = data;
+    renderTelefoonlijst(_telData);
+  } catch(e) {
+    if (indicator) indicator.style.display = 'none';
+    lijst.innerHTML = '<p style="color:var(--danger);font-size:.9rem;text-align:center;padding:40px 20px">Fout bij laden van telefoonlijst.</p>';
+  }
 }
 
 function filterCategorie(cat) {
@@ -367,6 +367,8 @@ function showTab(name) {
   if (name === 'artikelen' && ARTIKELEN.length === 0) laadArtikelenUitSheets();
   if (name === 'artikelen' && ARTIKELEN.length > 0) renderArtikelen(ARTIKELEN);
   if (name === 'beheer-panel') {
+    if (typeof vulBeheerDatalists === 'function') vulBeheerDatalists();
+    if (typeof koppelInit === 'function') koppelInit('admin', '');
     const urlEl = document.getElementById('admin-sheets-url');
     if (urlEl) urlEl.value = getSheetsUrl() || '';
     // Toon waarschuwing als lokale omgeving
@@ -712,7 +714,7 @@ function toonIsolatieSuggestie(bronCode, linktoitems) {
   const titel   = document.getElementById('suggestie-titel');
 
   const bronNaam = ARTIKELEN.find(a => a.code === bronCode)?.naam || bronCode;
-  titel.textContent = `Wil je hier ook isolatie bij?`;
+  titel.textContent = `Wil je hier het volgende bij?`;
   inhoud.innerHTML = '';
 
   const sub = document.createElement('p');

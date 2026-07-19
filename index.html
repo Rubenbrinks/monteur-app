@@ -24,7 +24,7 @@
     })();
   </script>
   <link rel="stylesheet" href="css/layout.css?v=3.3.2">
-  <link rel="stylesheet" href="css/components.css?v=3.3.5">
+  <link rel="stylesheet" href="css/components.css?v=4.1.0">
   <link rel="stylesheet" href="css/artikelen.css?v=3.3.2">
   <link rel="stylesheet" href="css/pages.css?v=3.3.2">
 </head>
@@ -69,6 +69,11 @@
       <span class="ico thema-toggle-icon"></span>
       <span class="thema-toggle-label">Lichte modus</span>
     </div>
+    <div id="drawer-meldingen" class="d-item" style="display:none">
+      <span class="ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+      <span id="meldingen-label" style="flex:1">Meldingen</span>
+      <span id="meldingen-toggle" class="toggle-switch" aria-hidden="true"></span>
+    </div>
     <div id="drawer-account"></div>
     <div class="d-item" onclick="uitloggen()" style="color:var(--muted)">
       <span class="ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
@@ -93,10 +98,16 @@
     <div class="field">
       <label>Gebruikersnaam</label>
       <input type="text" id="login-user" placeholder="gebruikersnaam" autocomplete="username"
+        onkeydown="if(event.key==='Enter')document.getElementById('login-pass').focus()" />
+    </div>
+    <div class="field">
+      <label>Wachtwoord</label>
+      <input type="password" id="login-pass" placeholder="wachtwoord" autocomplete="current-password"
         onkeydown="if(event.key==='Enter')checkLogin()" />
     </div>
     <button class="btn btn-primary" onclick="checkLogin()">Inloggen</button>
-    <button class="btn btn-secondary" onclick="toonRegistreren()" style="margin-bottom:0">Account aanmaken</button>
+    <button class="btn btn-secondary" onclick="openWachtwoordPopup('')" style="margin-bottom:8px">Nog geen wachtwoord? Maak er één aan</button>
+    <button class="btn btn-secondary" onclick="toonRegistreren()" style="margin-bottom:0">Nieuw account aanmaken</button>
   </div>
 
   <div class="login-box" id="login-box-registreren" style="display:none">
@@ -120,6 +131,15 @@
     <div class="field">
       <label>Telefoonnummer <span class="req">*</span></label>
       <input type="tel" id="reg-tel" placeholder="06-12345678"
+        onkeydown="if(event.key==='Enter')document.getElementById('reg-pass').focus()" />
+    </div>
+    <div class="field">
+      <label>Wachtwoord <span class="req">*</span></label>
+      <input type="password" id="reg-pass" placeholder="minstens 6 tekens" autocomplete="new-password" />
+    </div>
+    <div class="field">
+      <label>Herhaal wachtwoord <span class="req">*</span></label>
+      <input type="password" id="reg-pass2" placeholder="herhaal je wachtwoord" autocomplete="new-password"
         onkeydown="if(event.key==='Enter')registreerAccount()" />
     </div>
     <button class="btn btn-primary" onclick="registreerAccount()">Account aanmaken</button>
@@ -133,6 +153,39 @@
   <p style="color:var(--muted);font-size:.68rem;margin-top:14px;text-align:center">
     <span id="app-versie-login"></span> · Ontwerp & concept door Ruben Brinks
   </p>
+</div>
+
+<!-- ── WACHTWOORD AANMAKEN (eenmalig, voor bestaande monteurs) ── -->
+<div id="wachtwoord-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:18px;overflow-y:auto">
+  <div class="login-box" style="max-width:420px;width:100%;margin:auto">
+    <div class="login-logo">
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--green-dim);border:1px solid var(--green-border);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+        <svg width="26" height="26" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h2 style="margin-top:0">Maak je wachtwoord aan</h2>
+      <p>De manier van inloggen is veranderd. Maak hier je wachtwoord aan — je gebruikersnaam blijft hetzelfde.</p>
+    </div>
+    <div id="wm-status" style="display:none;border-radius:8px;padding:10px;margin-bottom:8px;font-size:.85rem"></div>
+    <div class="field">
+      <label>Gebruikersnaam</label>
+      <input type="text" id="wm-user" placeholder="je bestaande gebruikersnaam" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label>E-mailadres <span style="font-weight:400;color:var(--muted)">(ter controle)</span></label>
+      <input type="email" id="wm-email" placeholder="je bij ons bekende e-mailadres" autocomplete="email" />
+    </div>
+    <div class="field">
+      <label>Nieuw wachtwoord</label>
+      <input type="password" id="wm-pass" placeholder="minstens 6 tekens" autocomplete="new-password" />
+    </div>
+    <div class="field">
+      <label>Herhaal wachtwoord</label>
+      <input type="password" id="wm-pass2" placeholder="herhaal je wachtwoord" autocomplete="new-password"
+        onkeydown="if(event.key==='Enter')maakWachtwoordAan()" />
+    </div>
+    <button class="btn btn-primary" id="wm-btn" onclick="maakWachtwoordAan()">Wachtwoord aanmaken</button>
+    <button class="btn btn-secondary" onclick="ikHebAlWachtwoord()" style="margin-bottom:0">Ik heb al een wachtwoord → inloggen</button>
+  </div>
 </div>
 
 <header>
@@ -641,20 +694,35 @@
       <div class="field"><label>Artikelnummer <span class="req">*</span></label><input type="text" id="admin-code" placeholder="bijv. KT-0099" /></div>
       <div class="field"><label>Naam <span class="req">*</span></label><input type="text" id="admin-naam" placeholder="Artikelnaam" /></div>
       <div class="field-2">
-        <div class="field"><label>Categorie</label><input type="text" id="admin-cat" placeholder="bijv. Koeltechniek" /></div>
-        <div class="field"><label>Subcategorie</label><input type="text" id="admin-subcat" placeholder="bijv. Koperfittingen" /></div>
+        <div class="field"><label>Categorie</label><input type="text" id="admin-cat" list="dl-cat" placeholder="kies of typ nieuw" /></div>
+        <div class="field"><label>Subcategorie</label><input type="text" id="admin-subcat" list="dl-subcat" placeholder="kies of typ nieuw" /></div>
       </div>
       <div class="field-2">
-        <div class="field"><label>Eenheid</label><input type="text" id="admin-eenheid" placeholder="stuk / meter / 100 stuks" /></div>
-        <div class="field"><label>Leverancier</label><input type="text" id="admin-leverancier" placeholder="bijv. Reftec BV" /></div>
+        <div class="field"><label>Eenheid</label><input type="text" id="admin-eenheid" list="dl-eenheid" placeholder="stuk / meter / 100 stuks" /></div>
+        <div class="field"><label>Leverancier</label><input type="text" id="admin-leverancier" list="dl-leverancier" placeholder="kies of typ nieuw" /></div>
       </div>
       <div class="field-2">
-        <div class="field"><label>Link (URL)</label><input type="url" id="admin-link" placeholder="https://..." /></div>
-        <div class="field"><label>Verpakking</label><input type="text" id="admin-verpakking" placeholder="bijv. doos à 100 stuks" /></div>
+        <div class="field"><label>Link (URL) <span style="font-weight:400;color:var(--muted)">(leeg = automatisch)</span></label><input type="url" id="admin-link" placeholder="leeglaten voor automatische link" /></div>
+        <div class="field"><label>Verpakking</label><input type="text" id="admin-verpakking" list="dl-verpakking" placeholder="bijv. doos à 100 stuks" /></div>
+      </div>
+      <div class="field">
+        <label>Gekoppelde artikelen</label>
+        <div id="admin-koppel-chips" class="koppel-chips"></div>
+        <input type="text" id="admin-koppel-zoek" class="koppel-zoek" placeholder="🔍 zoek artikel op naam of code..." oninput="koppelZoek('admin')" autocomplete="off" />
+        <div id="admin-koppel-resultaten" class="koppel-resultaten"></div>
+        <input type="hidden" id="admin-linktoitems" />
       </div>
       <button class="btn btn-primary" onclick="adminArtikelOpslaan()" style="margin-bottom:0">Artikel opslaan</button>
       <div id="admin-status" style="font-size:.84rem;margin-top:8px;line-height:1.6"></div>
     </div>
+
+    <!-- Datalists: bekende waarden uit de database (voor de beheer-formulieren) -->
+    <datalist id="dl-cat"></datalist>
+    <datalist id="dl-subcat"></datalist>
+    <datalist id="dl-subsubcat"></datalist>
+    <datalist id="dl-eenheid"></datalist>
+    <datalist id="dl-leverancier"></datalist>
+    <datalist id="dl-verpakking"></datalist>
   </div>
 
   <!-- 4. Artikel bewerken / verwijderen -->
@@ -819,13 +887,16 @@
   <button onclick="document.getElementById('update-banner').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:0 2px;flex-shrink:0">×</button>
 </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+  <script src="js/supabase.js?v=4.0.0" defer></script>
   <script src="js/config.js?v=3.2.10" defer></script>
-  <script src="js/ui.js?v=3.3.5" defer></script>
-  <script src="js/auth.js?v=3.3.5" defer></script>
-  <script src="js/api.js?v=3.3.5" defer></script>
-  <script src="js/artikelen.js?v=3.2.10" defer></script>
-  <script src="js/cart.js?v=3.2.10" defer></script>
-  <script src="js/beheer.js?v=3.3.5" defer></script>
-  <script src="js/app.js?v=3.3.5" defer></script>
+  <script src="js/ui.js?v=4.0.0" defer></script>
+  <script src="js/auth.js?v=4.0.0" defer></script>
+  <script src="js/api.js?v=4.1.0" defer></script>
+  <script src="js/artikelen.js?v=4.0.2" defer></script>
+  <script src="js/cart.js?v=4.1.0" defer></script>
+  <script src="js/beheer.js?v=4.0.5" defer></script>
+  <script src="js/push.js?v=4.1.1" defer></script>
+  <script src="js/app.js?v=4.1.0" defer></script>
 </body>
 </html>

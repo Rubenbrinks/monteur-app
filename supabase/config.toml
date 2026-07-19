@@ -1,0 +1,6 @@
+# Supabase project-configuratie (voor de CLI).
+# De statusknop komt uit een e-mail (zonder login), dus JWT-controle uit.
+project_id = "monteur-app"
+
+[functions.bestelling-status]
+verify_jwt = false

@@ -19,14 +19,8 @@ window.onload = () => {
       }
     });
   }
-  // Controleer of al ingelogd (sessie nog actief)
-  if (isIngelogd()) {
-    document.getElementById('login-scherm').classList.add('verborgen');
-    initialiseerApp();
-  } else {
-    // Focus op gebruikersnaamveld
-    setTimeout(() => document.getElementById('login-user').focus(), 100);
-  }
+  // Sessie controleren via Supabase (async) — toont daarna app of login.
+  bootAuth();
 };
 
 function initialiseerApp() {
@@ -50,37 +44,14 @@ function initialiseerApp() {
   const beheerItem = document.getElementById('drawer-beheer');
   if (beheerItem) beheerItem.style.display = isAdmin() ? '' : 'none';
 
-  // Haal profielgegevens op uit database op basis van ingelogde gebruiker
+  // Meldingen: knop bijwerken + (indien al toegestaan) abonnement opslaan.
+  if (typeof updateMeldingKnop === 'function') updateMeldingKnop();
+  if (typeof syncPushAbonnement === 'function') syncPushAbonnement();
+
+  // Profielgegevens komen nu uit Supabase (al opgehaald bij het inloggen via
+  // _laadProfiel → emondt_persoon). loadInfo() heeft ze hierboven al ingevuld.
   if (sessie?.gebruiker) {
-    const url = getSheetsUrl();
-    const persoon = (() => { try { return JSON.parse(localStorage.getItem('emondt_persoon') || '{}'); } catch(e) { return {}; } })();
-
-    // Als een ander account is ingelogd dan de vorige keer — wis persoonsgegevens
-    const vorigeUser = localStorage.getItem('emondt_actieve_user');
-    if (vorigeUser && vorigeUser !== sessie.gebruiker) {
-      try { localStorage.removeItem('emondt_persoon'); } catch(e) {}
-    }
     try { localStorage.setItem('emondt_actieve_user', sessie.gebruiker); } catch(e) {}
-
-    if (url) {
-      fetch(`${url}?actie=profiel&gebruiker=${encodeURIComponent(sessie.gebruiker)}&t=${Date.now()}`)
-        .then(r => r.json())
-        .then(r => {
-          if (r.status === 'ok') {
-            const huidig = (() => { try { return JSON.parse(localStorage.getItem('emondt_persoon') || '{}'); } catch(e) { return {}; } })();
-            try {
-              localStorage.setItem('emondt_persoon', JSON.stringify({
-                naam:       r.naam       || huidig.naam      || r.gebruiker || '',
-                telefoon:   r.telefoon   || huidig.telefoon  || '',
-                ontvanger2: r.email      || huidig.ontvanger2 || '',
-                afdeling:   r.afdeling   || huidig.afdeling  || '',
-              }));
-            } catch(e) {}
-            loadInfo();
-          }
-        })
-        .catch(() => {});
-    }
   }
   document.getElementById('di-all')?.classList.add('active');
   showTab('welkom');
@@ -160,10 +131,9 @@ function formatTelefoon(input) {
   input.value = v;
 }
 
-function slaProfielOp() {
-  const url    = getSheetsUrl();
+async function slaProfielOp() {
   const sessie = getAuthSessie();
-  if (!url || !sessie) { showToast('❌ Niet ingelogd of geen koppeling.'); return; }
+  if (!sessie?.id) { showToast('❌ Niet ingelogd.'); return; }
 
   const naam     = (document.getElementById('naam')?.value     || '').trim();
   const telefoon = (document.getElementById('telefoon')?.value || '').trim();
@@ -173,29 +143,22 @@ function slaProfielOp() {
   const btn = document.getElementById('profiel-opslaan-btn');
   if (btn) { btn.textContent = '⏳ Opslaan...'; btn.disabled = true; }
 
-  const params = new URLSearchParams({
-    actie: 'profiel_opslaan', gebruiker: sessie.gebruiker,
-    naam, telefoon, afdeling, email, t: Date.now(),
-  });
-
-  fetch(`${url}?${params}`)
-    .then(r => r.json())
-    .then(r => {
-      if (btn) { btn.textContent = 'Opslaan'; btn.disabled = false; }
-      if (r.status === 'ok') {
-        try {
-          const p = JSON.parse(localStorage.getItem('emondt_persoon') || '{}');
-          localStorage.setItem('emondt_persoon', JSON.stringify({ ...p, naam, telefoon, afdeling, ontvanger2: email }));
-        } catch(e) {}
-        showToast('✓ Gegevens opgeslagen');
-      } else {
-        showToast('❌ ' + (r.message || 'Opslaan mislukt'));
-      }
-    })
-    .catch(() => {
-      if (btn) { btn.textContent = 'Opslaan'; btn.disabled = false; }
-      showToast('❌ Verbinding mislukt');
-    });
+  try {
+    const { error } = await sb
+      .from('profiles')
+      .update({ naam, telefoon, afdeling, email })
+      .eq('id', sessie.id);
+    if (btn) { btn.textContent = 'Opslaan'; btn.disabled = false; }
+    if (error) { showToast('❌ ' + (error.message || 'Opslaan mislukt')); return; }
+    try {
+      const p = JSON.parse(localStorage.getItem('emondt_persoon') || '{}');
+      localStorage.setItem('emondt_persoon', JSON.stringify({ ...p, naam, telefoon, afdeling, ontvanger2: email }));
+    } catch(e) {}
+    showToast('✓ Gegevens opgeslagen');
+  } catch(e) {
+    if (btn) { btn.textContent = 'Opslaan'; btn.disabled = false; }
+    showToast('❌ Verbinding mislukt');
+  }
 }
 
 // ── OPSLAAN / LADEN ───────────────────────────────────────────
@@ -243,18 +206,18 @@ function setBeheerStatus(html) {
   });
 }
 
-function testVerbinding() {
-  const url = getSheetsUrl();
-  if (!url) { setBeheerStatus('<span style="color:var(--danger)">❌ Geen Web App URL ingesteld. Sla eerst een URL op.</span>'); return; }
+async function testVerbinding() {
   setBeheerStatus('<span style="color:var(--muted)">⏳ Verbinding testen...</span>');
-  fetch(url + '?actie=lezen&t=' + Date.now())
-    .then(r => r.json())
-    .then(data => {
-      setBeheerStatus(data.status === 'ok'
-        ? `<span style="color:green">✅ Verbinding OK — ${data.count} artikelen gevonden.</span>`
-        : `<span style="color:var(--danger)">❌ Script fout: ${data.message || JSON.stringify(data)}</span>`);
-    })
-    .catch(err => setBeheerStatus(`<span style="color:var(--danger)">${corsErrorMsg(err)}</span>`));
+  try {
+    const { count, error } = await sb
+      .from('artikelen')
+      .select('*', { count: 'exact', head: true });
+    setBeheerStatus(!error
+      ? `<span style="color:green">✅ Verbinding met Supabase OK — ${count} artikelen gevonden.</span>`
+      : `<span style="color:var(--danger)">❌ Fout: ${error.message}</span>`);
+  } catch(err) {
+    setBeheerStatus(`<span style="color:var(--danger)">❌ Verbinding mislukt: ${err.message}</span>`);
+  }
 }
 
 function herlaadArtikelen() {

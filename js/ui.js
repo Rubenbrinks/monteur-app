@@ -171,12 +171,15 @@ function toonInloggen() {
   document.getElementById('login-box-inloggen').style.display = 'block';
 }
 
-function registreerAccount() {
+async function registreerAccount() {
   const naam  = document.getElementById('reg-naam').value.trim();
   const user  = document.getElementById('reg-user').value.trim().toLowerCase();
   const email = document.getElementById('reg-email').value.trim().toLowerCase();
   const tel   = document.getElementById('reg-tel').value.trim();
+  const pass  = document.getElementById('reg-pass')?.value  || '';
+  const pass2 = document.getElementById('reg-pass2')?.value || '';
   const fout  = document.getElementById('registreer-fout');
+  const btn   = document.querySelector('#login-box-registreren .btn-primary');
 
   const setFout = (tekst, ok=false) => {
     fout.style.cssText = `display:block;border-radius:8px;padding:10px;margin-bottom:8px;${ok ? 'background:#f0f7e6;color:green' : 'background:#fee2e2;color:var(--danger)'}`;
@@ -186,57 +189,48 @@ function registreerAccount() {
   fout.style.display = 'none';
   if (!naam || !user || !email || !tel) { setFout('❌ Vul alle velden in'); return; }
   if (!email.includes('@'))             { setFout('❌ Ongeldig e-mailadres'); return; }
+  if (pass.length < 6)                  { setFout('❌ Kies een wachtwoord van minstens 6 tekens'); return; }
+  if (pass !== pass2)                   { setFout('❌ De wachtwoorden zijn niet gelijk'); return; }
 
-  const url = getSheetsUrl();
-  if (!url) { setFout('❌ Geen databasekoppeling. Vraag een beheerder.'); return; }
+  btn.textContent = '⏳ Account aanmaken...';
+  btn.disabled = true;
+  const herstel = () => { btn.textContent = 'Account aanmaken'; btn.disabled = false; };
 
-  setFout('⏳ Account aanmaken...', true);
-
-  const params = new URLSearchParams({
-    actie:      'registreer',
-    gebruiker:  user,
-    naam:       naam,
-    email:      email,
-    telefoon:   tel,
-    rol:        'monteur',
-    t:          Date.now(),
-  });
-
-  fetch(`${url}?${params.toString()}`)
-    .then(r => r.json())
-    .then(r => {
-      if (r.status === 'ok') {
-        slaAuthOp(user, 'monteur');
-        try {
-          localStorage.setItem('emondt_persoon', JSON.stringify({
-            naam: naam, telefoon: tel, ontvanger2: email, afdeling: ''
-          }));
-          localStorage.setItem('emondt_actieve_user', user);
-        } catch(e) {}
-        document.getElementById('login-scherm').classList.add('verborgen');
-        initialiseerApp();
-        setTimeout(() => {
-          const nEl = document.getElementById('naam');
-          const tEl = document.getElementById('telefoon');
-          const eEl = document.getElementById('ontvanger2');
-          if (nEl) nEl.value = naam;
-          if (tEl) tEl.value = tel;
-          if (eEl) eEl.value = email;
-          saveInfo();
-        }, 500);
-      } else if (r.status === 'bestaat_al') {
-        setFout('❌ Gebruikersnaam al in gebruik, kies een andere.');
-      } else {
-        setFout('❌ ' + (r.message || 'Onbekende fout. Controleer de databasekoppeling.'));
-      }
-    })
-    .catch(err => {
-      if (err.message?.includes('NetworkError') || err.message?.includes('fetch')) {
-        setFout('❌ CORS-fout: werkt alleen op de gedeployde omgeving (niet lokaal).');
-      } else {
-        setFout('❌ Verbindingsfout: ' + err.message);
-      }
+  try {
+    const { data, error } = await sb.auth.signUp({
+      email,
+      password: pass,
+      options: { data: { naam, telefoon: tel, afdeling: '', gebruikersnaam: user, rol: 'monteur' } },
     });
+
+    if (error) {
+      herstel();
+      if (/already|registered|exists/i.test(error.message || '')) {
+        setFout('❌ Dit e-mailadres of deze gebruikersnaam is al in gebruik.');
+      } else {
+        setFout('❌ ' + (error.message || 'Kon account niet aanmaken.'));
+      }
+      return;
+    }
+
+    try { localStorage.setItem('emondt_ww_aangemaakt', '1'); } catch(e) {}
+
+    if (data.session) {
+      // Direct ingelogd (e-mailbevestiging staat uit).
+      await _laadProfiel();
+      herstel();
+      document.getElementById('login-scherm').classList.add('verborgen');
+      initialiseerApp();
+    } else {
+      // E-mailbevestiging staat aan — vraag de monteur zijn mail te checken.
+      herstel();
+      toonInloggen();
+      setFout('✅ Account aangemaakt. Log in met je gebruikersnaam en wachtwoord.', true);
+    }
+  } catch(e) {
+    herstel();
+    setFout('❌ Verbinding mislukt. Controleer je internetverbinding.');
+  }
 }
 
 
