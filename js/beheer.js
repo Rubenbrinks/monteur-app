@@ -3,52 +3,52 @@
  */
 
 // ── BESTELLINGENOVERZICHT (ADMIN) ─────────────────────────────
-function laadBestellingenOverzicht() {
-  const url = getSheetsUrl();
+async function laadBestellingenOverzicht() {
   const statusEl = document.getElementById('bestellingen-status');
   const lijstEl  = document.getElementById('bestellingen-lijst');
-  if (!url) { statusEl.innerHTML = '<span style="color:var(--danger)">❌ Geen Web App URL ingesteld.</span>'; return; }
 
   statusEl.innerHTML = '<span style="color:var(--muted)">⏳ Bestellingen ophalen...</span>';
   lijstEl.innerHTML = '';
 
-  fetch(`${url}?actie=lezen&blad=Bestellingen&t=${Date.now()}`)
-    .then(r => r.json())
-    .then(data => {
-      if (data.status !== 'ok' || !data.artikelen?.length) {
-        statusEl.innerHTML = '<span style="color:var(--muted)">Geen bestellingen gevonden.</span>';
-        return;
-      }
+  let bestellingen;
+  try {
+    const { data, error } = await sb
+      .from('bestellingen')
+      .select('*')
+      .order('aangemaakt_op', { ascending: false });
+    if (error) throw error;
+    bestellingen = data || [];
+  } catch(err) {
+    statusEl.innerHTML = `<span style="color:var(--danger)">❌ ${err.message}</span>`;
+    return;
+  }
 
-      const bestellingen = [...data.artikelen].reverse();
-      statusEl.innerHTML = `<span style="color:green">✅ ${bestellingen.length} bestelling${bestellingen.length !== 1 ? 'en' : ''} gevonden.</span>`;
+  if (!bestellingen.length) {
+    statusEl.innerHTML = '<span style="color:var(--muted)">Geen bestellingen gevonden.</span>';
+    return;
+  }
+  statusEl.innerHTML = `<span style="color:green">✅ ${bestellingen.length} bestelling${bestellingen.length !== 1 ? 'en' : ''} gevonden.</span>`;
 
-      const fmtDatum = (raw) => {
-        if (!raw) return '—';
-        const d = new Date(raw);
-        if (isNaN(d)) {
-          const m = String(raw).match(/(\d{1,2})[\-\/](\d{1,2})[\-\/](\d{2,4})/);
-          if (m) return `${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}-${m[3].slice(-2)}`;
-          return String(raw).substring(0, 10);
-        }
-        return `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getFullYear()).slice(-2)}`;
-      };
+  const fmtDatum = (raw) => {
+    if (!raw) return '—';
+    const d = new Date(raw);
+    if (isNaN(d)) return String(raw).substring(0, 10);
+    return `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getFullYear()).slice(-2)}`;
+  };
+  const fmtLever = (raw) => (!raw || raw === 'zsm') ? 'z.s.m.' : fmtDatum(raw);
 
-      lijstEl.innerHTML = bestellingen.map((b, i) => {
-        const naam        = b.monteur      || b.naam        || '—';
+  lijstEl.innerHTML = bestellingen.map((b, i) => {
+        const naam        = b.monteur_naam || '—';
         const afdeling    = b.afdeling     || '';
         const projectnaam = b.projectnaam  || '';
-        const locatie     = b.afleveradres || b.locatie     || '—';
+        const locatie     = b.afleveradres || '—';
         const opmerkingen = b.opmerkingen  || '';
-        const besteldatum = fmtDatum(b.datum);
-        const leverdatum  = fmtDatum(b.leverdatum);
+        const besteldatum = fmtDatum(b.aangemaakt_op);
+        const leverdatum  = fmtLever(b.leverdatum);
 
         const titel = [naam, projectnaam].filter(Boolean).join(' – ');
 
-        // Gebruik machine-leesbare ArtikelenData als die beschikbaar is, anders fallback op leesbare tekst
-        const artikelItems = b.artikelendata
-          ? _parseArtikelenData(b.artikelendata)
-          : _parseArtikelenTekst(b.artikelen || '');
+        const artikelItems = Array.isArray(b.artikelen) ? b.artikelen : [];
 
         let artikelRegels = '';
         if (artikelItems.length) {
@@ -57,9 +57,6 @@ function laadBestellingenOverzicht() {
               <span class="best-artikel-qty">${a.qty}×</span>
               <span style="flex:1;font-size:.82rem;color:var(--text)">${a.naam || a.code || '—'}${a.code ? ' (' + a.code + ')' : ''} per ${a.eenheid || 'stuk'}${a.leverancier ? ' – ' + a.leverancier : ''}</span>
             </div>`).join('');
-        } else if (b.artikelen) {
-          artikelRegels = (b.artikelen).split('\n').filter(Boolean)
-            .map(r => `<div style="font-size:.8rem;padding:3px 0;color:var(--text-secondary)">${r}</div>`).join('');
         }
 
         return `
@@ -79,11 +76,7 @@ function laadBestellingenOverzicht() {
             <div class="best-artikelen-wrap">${artikelRegels || '<span style="color:var(--muted);font-size:.8rem;padding:8px 0;display:block">Geen artikeldetails beschikbaar</span>'}</div>
           </div>
         </div>`;
-      }).join('');
-    })
-    .catch(err => {
-      statusEl.innerHTML = `<span style="color:var(--danger)">❌ ${corsErrorMsg(err)}</span>`;
-    });
+  }).join('');
 }
 
 function toggleBestOverzicht(i) {
@@ -119,11 +112,9 @@ function _parseBestelDatum(raw) {
   return isNaN(d.getTime()) ? null : d;
 }
 
-function exporteerBesteldeArtikelen() {
-  const url = getSheetsUrl();
+async function exporteerBesteldeArtikelen() {
   const statusEl = document.getElementById('export-status');
   const setStatus = (html) => { if (statusEl) statusEl.innerHTML = html; };
-  if (!url) { setStatus('<span style="color:var(--danger)">❌ Geen Web App URL ingesteld.</span>'); return; }
 
   const vanRaw = document.getElementById('export-van')?.value || '';
   const totRaw = document.getElementById('export-tot')?.value || '';
@@ -141,38 +132,47 @@ function exporteerBesteldeArtikelen() {
 
   setStatus('<span style="color:var(--muted)">⏳ Bestellingen ophalen...</span>');
 
-  fetch(`${url}?actie=lezen&blad=Bestellingen&t=${Date.now()}`)
-    .then(r => r.json())
-    .then(data => {
-      if (!data || data.status !== 'ok' || !Array.isArray(data.artikelen) || !data.artikelen.length) {
-        setStatus('<span style="color:var(--muted)">Geen bestellingen gevonden.</span>');
-        return;
-      }
+  let bestellingen;
+  try {
+    const { data, error } = await sb
+      .from('bestellingen')
+      .select('*')
+      .order('aangemaakt_op', { ascending: false });
+    if (error) throw error;
+    bestellingen = data || [];
+  } catch(err) {
+    setStatus(`<span style="color:var(--danger)">❌ ${err.message}</span>`);
+    return;
+  }
 
+  if (!bestellingen.length) {
+    setStatus('<span style="color:var(--muted)">Geen bestellingen gevonden.</span>');
+    return;
+  }
+
+  {
       let aantalBestellingen = 0;
       let overgeslagenZonderDatum = 0;
       // Sleutel = artikelcode + eenheid, zodat hetzelfde artikel in
       // verschillende eenheden (bv. "stuk" vs "meter") niet vermengd wordt.
       const totalen = {};
 
-      data.artikelen.forEach(b => {
+      bestellingen.forEach(b => {
         // Bij een actief datumfilter tellen alleen bestellingen met een
         // leesbare datum die binnen het bereik valt. Zonder filter tellen alle.
         if (vanD || totD) {
-          const d = _parseBestelDatum(b.datum);
+          const d = _parseBestelDatum(b.aangemaakt_op);
           if (!d) { overgeslagenZonderDatum++; return; }
           if (vanD && d < vanD) return;
           if (totD && d > totD) return;
         }
         aantalBestellingen++;
 
-        const items = b.artikelendata
-          ? _parseArtikelenData(b.artikelendata)
-          : _parseArtikelenTekst(b.artikelen || '');
+        const items = Array.isArray(b.artikelen) ? b.artikelen : [];
 
         items.forEach(a => {
           const eenheid = (a.eenheid || 'stuk').trim() || 'stuk';
-          const key = (a.code || a.naam || '—') + ' ' + eenheid;
+          const key = (a.code || a.naam || '—') + '\u0000' + eenheid;
           if (!totalen[key]) {
             totalen[key] = { code: a.code || '', naam: a.naam || '', eenheid, leverancier: a.leverancier || '', qty: 0 };
           }
@@ -236,10 +236,7 @@ function exporteerBesteldeArtikelen() {
         ? ` <span style="color:var(--muted)">(${overgeslagenZonderDatum} bestelling${overgeslagenZonderDatum !== 1 ? 'en' : ''} zonder leesbare datum overgeslagen)</span>`
         : '';
       setStatus(`<span style="color:green">✅ ${rijen.length} artikel${rijen.length !== 1 ? 'en' : ''} uit ${aantalBestellingen} bestelling${aantalBestellingen !== 1 ? 'en' : ''} geëxporteerd.</span>${waarschuwing}`);
-    })
-    .catch(err => {
-      setStatus(`<span style="color:var(--danger)">❌ ${corsErrorMsg(err)}</span>`);
-    });
+  }
 }
 
 // Beheer blijft na één geslaagde wachtwoordcontrole ontgrendeld voor de
@@ -250,35 +247,14 @@ function beheerUnlocked() {
 }
 
 function openBeheerLogin() {
-  // Alleen admins zien de beheerknop, maar we controleren de rol hier nogmaals.
+  // Toegang loopt nu via de echte admin-rol in Supabase — geen apart
+  // beheerwachtwoord meer nodig.
   if (!isAdmin()) {
     showToast('⛔ Geen toegang — alleen beschikbaar voor admins. Vraag Ruben Brinks voor toegang.');
     return;
   }
-  // Al ontgrendeld in deze sessie? → direct openen, geen wachtwoord vragen.
-  if (beheerUnlocked()) { showTab('beheer-panel'); return; }
-
-  const url = getSheetsUrl();
-  if (!url) { showToast('❌ Geen databasekoppeling.'); return; }
-
-  const pw = prompt('Voer het beheerwachtwoord in:');
-  if (pw === null) return;                 // geannuleerd
-  if (!pw.trim()) { showToast('❌ Geen wachtwoord ingevoerd.'); return; }
-
-  showToast('⏳ Wachtwoord controleren...');
-  fetch(`${url}?actie=beheer_login&wachtwoord=${encodeURIComponent(pw)}&t=${Date.now()}`)
-    .then(r => r.json())
-    .then(r => {
-      if (r.status === 'ok') {
-        sessionStorage.setItem('beheer_auth', '1');
-        showTab('beheer-panel');
-      } else if (r.status === 'niet_ingesteld') {
-        showToast('⚠️ Er is nog geen beheerwachtwoord ingesteld in de Instellingen-tab.');
-      } else {
-        showToast('❌ Onjuist beheerwachtwoord.');
-      }
-    })
-    .catch(err => showToast(corsErrorMsg(err)));
+  sessionStorage.setItem('beheer_auth', '1');
+  showTab('beheer-panel');
 }
 
 // ── BEHEERDERSPANEEL ──────────────────────────────────────────
@@ -287,6 +263,119 @@ function corsErrorMsg(err) {
     return '❌ CORS-fout: de app mag de Sheets API niet bereiken vanuit deze omgeving. Deploy de app op GitHub Pages of een webserver.';
   }
   return '❌ Verbindingsfout: ' + err.message;
+}
+
+// ── AUTOMATISERINGEN (voorheen Google Sheet-formules) ─────────
+// Bouwt automatisch de webshop-link op basis van leverancier + code.
+function _genereerArtikelLink(code, leverancier) {
+  const c = (code || '').trim();
+  if (!c) return '';
+  const ec = encodeURIComponent(c);
+  switch ((leverancier || '').trim().toLowerCase()) {
+    case 'mupro':            return `https://www.muepro.nl/index.php?lang=2&cl=search&searchparam=${ec}`;
+    case 'technische unie':  return `https://www.technischeunie.nl/zoeken?Q=${ec}`;
+    case 'coolmark':         return `https://www.coolmark.nl/nl/artnr/${ec}`;
+    case 'wasco':            return `https://www.wasco.nl/artikel/${ec}`;
+    default:                 return '';
+  }
+}
+
+// Past de automatiseringen toe op een artikel-object vóór opslaan:
+//  - lege link → automatisch invullen uit leverancier + code
+//  - eenheid "meter" met lege warning → '*' (bestel per meter)
+function _pasArtikelAutomatiseringenToe(artikel, code) {
+  const c = code || artikel.code || '';
+  if (!artikel.link) {
+    const auto = _genereerArtikelLink(c, artikel.leverancier);
+    if (auto) artikel.link = auto;
+  }
+  if ((artikel.eenheid || '').trim().toLowerCase() === 'meter' && !artikel.warning) {
+    artikel.warning = '*';
+  }
+  return artikel;
+}
+
+// ── DROPDOWN-SUGGESTIES (datalists uit bestaande database) ────
+function _distinctVeld(veld) {
+  // Hoofdletter-ongevoelig ontdubbelen; behoud de meest voorkomende schrijfwijze
+  // (zodat bv. "Mupro" en "mupro" één optie worden).
+  const groepen = new Map(); // kleine letters → Map(origineel → aantal)
+  ARTIKELEN.forEach(a => {
+    const raw = (a[veld] || '').trim();
+    if (!raw) return;
+    const k = raw.toLowerCase();
+    if (!groepen.has(k)) groepen.set(k, new Map());
+    const m = groepen.get(k);
+    m.set(raw, (m.get(raw) || 0) + 1);
+  });
+  const resultaat = [];
+  groepen.forEach(m => {
+    let best = '', bestN = -1;
+    m.forEach((n, orig) => { if (n > bestN) { best = orig; bestN = n; } });
+    resultaat.push(best);
+  });
+  return resultaat.sort((x, y) => x.localeCompare(y, 'nl'));
+}
+function _vulDatalist(id, waarden) {
+  const dl = document.getElementById(id);
+  if (!dl) return;
+  dl.innerHTML = waarden.map(w => `<option value="${w.replace(/"/g, '&quot;')}"></option>`).join('');
+}
+function vulBeheerDatalists() {
+  _vulDatalist('dl-cat',         _distinctVeld('cat'));
+  _vulDatalist('dl-subcat',      _distinctVeld('subcat'));
+  _vulDatalist('dl-subsubcat',   _distinctVeld('subsubcat'));
+  _vulDatalist('dl-eenheid',     _distinctVeld('eenheid'));
+  _vulDatalist('dl-leverancier', _distinctVeld('leverancier'));
+  _vulDatalist('dl-verpakking',  _distinctVeld('verpakking'));
+}
+
+// ── GEKOPPELDE ARTIKELEN — zoek & selecteer ──────────────────
+const _koppelState = { admin: [], bewerk: [] };
+let _koppelEigenCode = ''; // code van het bewerkte artikel (niet aan zichzelf koppelen)
+
+function koppelInit(prefix, codesStr, eigenCode) {
+  _koppelState[prefix] = String(codesStr || '').split(/[\/,]/).map(c => c.trim()).filter(Boolean);
+  if (prefix === 'bewerk') _koppelEigenCode = eigenCode || '';
+  const zoek = document.getElementById(prefix + '-koppel-zoek'); if (zoek) zoek.value = '';
+  const res  = document.getElementById(prefix + '-koppel-resultaten'); if (res) res.innerHTML = '';
+  _koppelRender(prefix);
+}
+function _koppelRender(prefix) {
+  const hidden = document.getElementById(prefix + '-linktoitems');
+  if (hidden) hidden.value = _koppelState[prefix].join(' / ');
+  const chips = document.getElementById(prefix + '-koppel-chips');
+  if (!chips) return;
+  chips.innerHTML = _koppelState[prefix].length
+    ? _koppelState[prefix].map(code => {
+        const a = ARTIKELEN.find(x => x.code === code);
+        return `<span class="koppel-chip">${a ? a.naam : code} <span style="opacity:.55">(${code})</span><button type="button" onclick="koppelVerwijder('${prefix}','${code}')">×</button></span>`;
+      }).join('')
+    : '<span style="color:var(--muted);font-size:.8rem">Nog geen gekoppelde artikelen.</span>';
+}
+function koppelZoek(prefix) {
+  const q = (document.getElementById(prefix + '-koppel-zoek').value || '').toLowerCase().trim();
+  const res = document.getElementById(prefix + '-koppel-resultaten');
+  if (!res) return;
+  if (!q) { res.innerHTML = ''; return; }
+  const gekozen = new Set(_koppelState[prefix]);
+  const gevonden = ARTIKELEN.filter(a =>
+    a.code !== _koppelEigenCode && !gekozen.has(a.code) &&
+    (a.naam.toLowerCase().includes(q) || a.code.toLowerCase().includes(q))
+  ).slice(0, 8);
+  res.innerHTML = gevonden.length
+    ? gevonden.map(a => `<div class="koppel-resultaat" onclick="koppelVoegToe('${prefix}','${a.code}')"><span>${a.naam}</span><span class="koppel-resultaat-code">${a.code}</span></div>`).join('')
+    : '<div style="padding:8px;color:var(--muted);font-size:.8rem">Geen artikelen gevonden.</div>';
+}
+function koppelVoegToe(prefix, code) {
+  if (!_koppelState[prefix].includes(code)) _koppelState[prefix].push(code);
+  const zoek = document.getElementById(prefix + '-koppel-zoek'); if (zoek) zoek.value = '';
+  const res  = document.getElementById(prefix + '-koppel-resultaten'); if (res) res.innerHTML = '';
+  _koppelRender(prefix);
+}
+function koppelVerwijder(prefix, code) {
+  _koppelState[prefix] = _koppelState[prefix].filter(c => c !== code);
+  _koppelRender(prefix);
 }
 
 function adminArtikelOpslaan() {
@@ -303,31 +392,26 @@ function adminArtikelOpslaan() {
     leverancier: document.getElementById('admin-leverancier').value.trim(),
     link:        document.getElementById('admin-link').value.trim(),
     verpakking:  document.getElementById('admin-verpakking').value.trim(),
+    linktoitems: document.getElementById('admin-linktoitems')?.value.trim() || '',
   };
-
-  const url = getSheetsUrl();
-  if (!url) { status.innerHTML = '<span style="color:var(--danger)">Geen Web App URL ingesteld.</span>'; return; }
+  _pasArtikelAutomatiseringenToe(artikel, code);
 
   status.innerHTML = '<span style="color:var(--muted)">⏳ Opslaan...</span>';
-  const params = new URLSearchParams({ actie: 'toevoegen', ...artikel, t: Date.now() });
-  fetch(`${url}?${params.toString()}`)
-  .then(r => r.json())
-  .then(r => {
-    if (r.status === 'ok') {
+  sb.from('artikelen').upsert(artikel, { onConflict: 'code' })
+  .then(({ error }) => {
+    if (!error) {
       status.innerHTML = '<span style="color:var(--green-dark)">✅ Artikel opgeslagen!</span>';
-      ['admin-code','admin-naam','admin-cat','admin-subcat','admin-eenheid','admin-leverancier','admin-link','admin-verpakking'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+      ['admin-code','admin-naam','admin-cat','admin-subcat','admin-eenheid','admin-leverancier','admin-link','admin-verpakking','admin-linktoitems'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+      koppelInit('admin', '');
       herlaadArtikelen();
     } else {
-      status.innerHTML = `<span style="color:var(--danger)">❌ Fout: ${r.message || JSON.stringify(r)}</span>`;
+      status.innerHTML = `<span style="color:var(--danger)">❌ Fout: ${error.message}</span>`;
     }
-  })
-  .catch(err => { status.innerHTML = `<span style="color:var(--danger)">${corsErrorMsg(err)}</span>`; });
+  });
 }
 
 function adminOpslaanBewerking(code) {
-  const url = getSheetsUrl();
   const statusEl = document.getElementById('bewerk-status');
-  if (!url) { statusEl.innerHTML = '<span style="color:var(--danger)">❌ Geen URL ingesteld.</span>'; return; }
 
   const artikel = {
     naam:        document.getElementById('bewerk-naam').value.trim(),
@@ -339,44 +423,38 @@ function adminOpslaanBewerking(code) {
     verpakking:  document.getElementById('bewerk-verpakking').value.trim(),
     link:        document.getElementById('bewerk-link').value.trim(),
     warning:     document.getElementById('bewerk-warning').value.trim(),
+    linktoitems: document.getElementById('bewerk-linktoitems')?.value.trim() || '',
   };
+  _pasArtikelAutomatiseringenToe(artikel, code);
 
   if (!artikel.naam) { statusEl.innerHTML = '<span style="color:var(--danger)">❌ Naam is verplicht.</span>'; return; }
   statusEl.innerHTML = '<span style="color:var(--muted)">⏳ Opslaan...</span>';
 
-  const params = new URLSearchParams({ actie: 'bijwerken', code, ...artikel, t: Date.now() });
-  fetch(`${url}?${params.toString()}`)
-  .then(r => r.json())
-  .then(r => {
-    if (r.status === 'ok') {
+  sb.from('artikelen').update(artikel).eq('code', code)
+  .then(({ error }) => {
+    if (!error) {
       statusEl.innerHTML = '<span style="color:green">✅ Opgeslagen!</span>';
       herlaadArtikelen();
       setTimeout(() => document.getElementById('admin-bewerk-form')?.remove(), 1500);
     } else {
-      statusEl.innerHTML = `<span style="color:var(--danger)">❌ ${r.message || JSON.stringify(r)}</span>`;
+      statusEl.innerHTML = `<span style="color:var(--danger)">❌ ${error.message}</span>`;
     }
-  })
-  .catch(err => { statusEl.innerHTML = `<span style="color:var(--danger)">${corsErrorMsg(err)}</span>`; });
+  });
 }
 
 function adminVerwijder(code) {
   if (!confirm(`Artikel "${code}" verwijderen uit de database?`)) return;
-  const url = getSheetsUrl();
-  if (!url) { showToast('❌ Geen URL ingesteld'); return; }
-  const params = new URLSearchParams({ actie: 'verwijderen', code, t: Date.now() });
-  fetch(`${url}?${params.toString()}`)
-  .then(r => r.json())
-  .then(r => {
-    if (r.status === 'ok') {
+  sb.from('artikelen').delete().eq('code', code)
+  .then(({ error }) => {
+    if (!error) {
       showToast('🗑 Artikel verwijderd');
       document.getElementById('admin-zoek').value = '';
       document.getElementById('admin-zoek-resultaten').innerHTML = '';
       herlaadArtikelen();
     } else {
-      showToast('❌ Fout: ' + (r.message || 'onbekend'));
+      showToast('❌ Fout: ' + error.message);
     }
-  })
-  .catch(err => showToast(corsErrorMsg(err).substring(0, 60)));
+  });
 }
 
 function adminZoek() {
@@ -420,20 +498,27 @@ function adminBewerk(code) {
     </div>
     <div class="field"><label>Naam</label><input type="text" id="bewerk-naam" value="${a.naam || ''}" /></div>
     <div class="field-2">
-      <div class="field"><label>Categorie</label><input type="text" id="bewerk-cat" value="${a.cat || ''}" /></div>
-      <div class="field"><label>Subcategorie</label><input type="text" id="bewerk-subcat" value="${a.subcat || ''}" /></div>
+      <div class="field"><label>Categorie</label><input type="text" id="bewerk-cat" list="dl-cat" value="${a.cat || ''}" /></div>
+      <div class="field"><label>Subcategorie</label><input type="text" id="bewerk-subcat" list="dl-subcat" value="${a.subcat || ''}" /></div>
     </div>
     <div class="field-2">
-      <div class="field"><label>Subsubcategorie</label><input type="text" id="bewerk-subsubcat" value="${a.subsubcat || ''}" /></div>
-      <div class="field"><label>Eenheid</label><input type="text" id="bewerk-eenheid" value="${a.eenheid || ''}" /></div>
+      <div class="field"><label>Subsubcategorie</label><input type="text" id="bewerk-subsubcat" list="dl-subsubcat" value="${a.subsubcat || ''}" /></div>
+      <div class="field"><label>Eenheid</label><input type="text" id="bewerk-eenheid" list="dl-eenheid" value="${a.eenheid || ''}" /></div>
     </div>
     <div class="field-2">
-      <div class="field"><label>Leverancier</label><input type="text" id="bewerk-leverancier" value="${a.leverancier || ''}" /></div>
-      <div class="field"><label>Verpakking</label><input type="text" id="bewerk-verpakking" value="${a.verpakking || ''}" /></div>
+      <div class="field"><label>Leverancier</label><input type="text" id="bewerk-leverancier" list="dl-leverancier" value="${a.leverancier || ''}" /></div>
+      <div class="field"><label>Verpakking</label><input type="text" id="bewerk-verpakking" list="dl-verpakking" value="${a.verpakking || ''}" /></div>
     </div>
     <div class="field-2">
-      <div class="field"><label>Link (URL)</label><input type="url" id="bewerk-link" value="${a.link || ''}" /></div>
+      <div class="field"><label>Link (URL) <span style="font-weight:400;color:var(--muted)">(leeg = automatisch)</span></label><input type="url" id="bewerk-link" value="${a.link || ''}" /></div>
       <div class="field"><label>Warning (* = per meter)</label><input type="text" id="bewerk-warning" value="${a.warning || ''}" /></div>
+    </div>
+    <div class="field">
+      <label>Gekoppelde artikelen</label>
+      <div id="bewerk-koppel-chips" class="koppel-chips"></div>
+      <input type="text" id="bewerk-koppel-zoek" class="koppel-zoek" placeholder="🔍 zoek artikel op naam of code..." oninput="koppelZoek('bewerk')" autocomplete="off" />
+      <div id="bewerk-koppel-resultaten" class="koppel-resultaten"></div>
+      <input type="hidden" id="bewerk-linktoitems" value="${a.linktoitems || ''}" />
     </div>
     <div id="bewerk-status" style="font-size:.82rem;margin-bottom:8px;min-height:20px"></div>
     <div style="display:flex;gap:8px">
@@ -442,58 +527,12 @@ function adminBewerk(code) {
     </div>`;
 
   document.getElementById('admin-zoek-resultaten').appendChild(form);
+  vulBeheerDatalists();
+  koppelInit('bewerk', a.linktoitems || '', code);
   form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 
-
-// ── TREFWOORDEN GENEREREN ─────────────────────────────────────
-const _STOPWOORDEN = new Set([
-  'de','het','een','en','in','op','voor','van','met','uit','bij','aan','per','te','of',
-  'mm','cm','dm','m','stuks','stuk','set','paar','rol','bus','doos','zak',
-]);
-
-function startTrefwoordenGenereren() {
-  const url      = getSheetsUrl();
-  const statusEl = document.getElementById('trefwoorden-status');
-  if (!url) { statusEl.innerHTML = '<span style="color:var(--danger)">❌ Geen Web App URL ingesteld.</span>'; return; }
-  if (!ARTIKELEN.length) { statusEl.innerHTML = '<span style="color:var(--muted)">⚠️ Artikelen nog niet geladen — open eerst de artikelenpagina.</span>'; return; }
-
-  const teVerwerken = ARTIKELEN.filter(a => !a.trefwoorden);
-  if (!teVerwerken.length) { statusEl.innerHTML = '<span style="color:var(--green-dark)">✅ Alle artikelen hebben al trefwoorden.</span>'; return; }
-
-  statusEl.innerHTML = `<span style="color:var(--muted)">⏳ 0/${teVerwerken.length} verwerkt...</span>`;
-  let gedaan = 0, fouten = 0;
-
-  const volgende = (index) => {
-    if (index >= teVerwerken.length) {
-      statusEl.innerHTML = `<span style="color:var(--green-dark)">✅ ${gedaan} trefwoorden opgeslagen${fouten ? `, ${fouten} mislukt` : ''}.</span>`;
-      return;
-    }
-    const a = teVerwerken[index];
-    const bronTekst = [a.naam, a.cat, a.subcat, a.subsubcat].join(' ');
-    const woorden = bronTekst
-      .toLowerCase()
-      .replace(/[\/\-–]/g, ' ')
-      .split(/[\s,.()\[\]]+/)
-      .map(w => w.replace(/[^a-z0-9]/g, ''))
-      .filter(w => w.length > 2 && !_STOPWOORDEN.has(w) && !/^\d+$/.test(w));
-    const trefwoorden = [...new Set(woorden)].join(', ');
-
-    if (!trefwoorden) { volgende(index + 1); return; }
-
-    const params = new URLSearchParams({ actie: 'bijwerken', code: a.code, trefwoorden, t: Date.now() + index });
-    fetch(`${url}?${params.toString()}`)
-      .then(r => r.json())
-      .then(r => {
-        if (r.status === 'ok') { gedaan++; a.trefwoorden = trefwoorden; } else fouten++;
-        statusEl.innerHTML = `<span style="color:var(--muted)">⏳ ${index + 1}/${teVerwerken.length} verwerkt...</span>`;
-        volgende(index + 1);
-      })
-      .catch(() => { fouten++; volgende(index + 1); });
-  };
-  volgende(0);
-}
 
 // ── BEHEER UITVOUWBARE KAARTEN ────────────────────────────────
 function toggleAdminKaart(id, btn) {
@@ -522,31 +561,29 @@ function voegOntvangerToe(waarde) {
   lijst.appendChild(rij);
 }
 
-function laadEmailontvangers() {
+async function laadEmailontvangers() {
   const statusEl = document.getElementById('email-status');
+  const lijst = document.getElementById('email-ontvangers-lijst');
   statusEl.innerHTML = '<span style="color:var(--muted)">⏳ Laden...</span>';
-  sheetsRequest({ actie: 'instellingen_lezen' })
-    .then(r => {
-      if (r.status === 'ok' && r.instellingen) {
-        const lijst = document.getElementById('email-ontvangers-lijst');
-        lijst.innerHTML = '';
-        const inst = r.instellingen;
-        const adressen = Object.keys(inst)
-          .filter(k => k.startsWith('vastontvanger'))
-          .sort()
-          .map(k => inst[k])
-          .filter(Boolean);
-        if (adressen.length) { adressen.forEach(a => voegOntvangerToe(a)); }
-        else { voegOntvangerToe(); }
-        statusEl.innerHTML = '<span style="color:var(--green-dark)">✅ Geladen</span>';
-      } else {
-        statusEl.innerHTML = '<span style="color:var(--danger)">❌ Kon instellingen niet laden.</span>';
-      }
-    })
-    .catch(err => { statusEl.innerHTML = `<span style="color:var(--danger)">${corsErrorMsg(err)}</span>`; });
+  try {
+    const { data, error } = await sb
+      .from('instellingen')
+      .select('waarde')
+      .eq('sleutel', 'mail_ontvangers')
+      .maybeSingle();
+    if (error) throw error;
+    lijst.innerHTML = '';
+    const adressen = (data?.waarde || '')
+      .split(/[,;]/).map(a => a.trim()).filter(Boolean);
+    if (adressen.length) { adressen.forEach(a => voegOntvangerToe(a)); }
+    else { voegOntvangerToe(); }
+    statusEl.innerHTML = '<span style="color:var(--green-dark)">✅ Geladen</span>';
+  } catch(err) {
+    statusEl.innerHTML = `<span style="color:var(--danger)">❌ ${err.message}</span>`;
+  }
 }
 
-function slaEmailontvangerOp() {
+async function slaEmailontvangerOp() {
   const statusEl = document.getElementById('email-status');
   const adressen = [...document.querySelectorAll('.email-ontvanger-input')]
     .map(i => i.value.trim()).filter(a => a && a.includes('@'));
@@ -554,16 +591,14 @@ function slaEmailontvangerOp() {
     statusEl.innerHTML = '<span style="color:var(--danger)">❌ Voer minimaal één geldig e-mailadres in.</span>';
     return;
   }
-  const params = { actie: 'instellingen_opslaan', _aantalontvangers: adressen.length };
-  adressen.forEach((a, i) => { params[`vastontvanger${i + 1}`] = a; });
   statusEl.innerHTML = '<span style="color:var(--muted)">⏳ Opslaan...</span>';
-  sheetsRequest(params)
-    .then(r => {
-      if (r.status === 'ok') {
-        statusEl.innerHTML = '<span style="color:var(--green-dark)">✅ Opgeslagen!</span>';
-      } else {
-        statusEl.innerHTML = `<span style="color:var(--danger)">❌ ${r.message || 'Onbekende fout'}</span>`;
-      }
-    })
-    .catch(err => { statusEl.innerHTML = `<span style="color:var(--danger)">${corsErrorMsg(err)}</span>`; });
+  try {
+    const { error } = await sb
+      .from('instellingen')
+      .upsert({ sleutel: 'mail_ontvangers', waarde: adressen.join(', ') }, { onConflict: 'sleutel' });
+    if (error) throw error;
+    statusEl.innerHTML = '<span style="color:var(--green-dark)">✅ Opgeslagen!</span>';
+  } catch(err) {
+    statusEl.innerHTML = `<span style="color:var(--danger)">❌ ${err.message}</span>`;
+  }
 }
