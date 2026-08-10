@@ -106,8 +106,8 @@
         onkeydown="if(event.key==='Enter')checkLogin()" />
     </div>
     <button class="btn btn-primary" onclick="checkLogin()">Inloggen</button>
-    <button class="btn btn-secondary" onclick="openWachtwoordPopup('')" style="margin-bottom:8px">Nog geen wachtwoord? Maak er één aan</button>
-    <button class="btn btn-secondary" onclick="toonRegistreren()" style="margin-bottom:0">Nieuw account aanmaken</button>
+    <button class="btn btn-secondary" onclick="toonRegistreren()" style="margin-bottom:8px">Account aanmaken</button>
+    <button onclick="openVergetenPopup()" style="display:block;width:100%;background:none;border:none;padding:4px 0 0;cursor:pointer;font-family:'Inter','DM Sans',sans-serif;font-size:.82rem;font-weight:600;color:var(--muted);text-decoration:underline;text-underline-offset:2px">Wachtwoord vergeten?</button>
   </div>
 
   <div class="login-box" id="login-box-registreren" style="display:none">
@@ -163,7 +163,7 @@
         <svg width="26" height="26" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       </div>
       <h2 style="margin-top:0">Maak je wachtwoord aan</h2>
-      <p>De manier van inloggen is veranderd. Maak hier je wachtwoord aan — je gebruikersnaam blijft hetzelfde.</p>
+      <p>Je gebruikersnaam blijft hetzelfde. Vul ter controle je bij ons bekende e-mailadres in.</p>
     </div>
     <div id="wm-status" style="display:none;border-radius:8px;padding:10px;margin-bottom:8px;font-size:.85rem"></div>
     <div class="field">
@@ -184,7 +184,52 @@
         onkeydown="if(event.key==='Enter')maakWachtwoordAan()" />
     </div>
     <button class="btn btn-primary" id="wm-btn" onclick="maakWachtwoordAan()">Wachtwoord aanmaken</button>
-    <button class="btn btn-secondary" onclick="ikHebAlWachtwoord()" style="margin-bottom:0">Ik heb al een wachtwoord → inloggen</button>
+    <button class="btn btn-secondary" onclick="terugNaarInloggen()" style="margin-bottom:0">← Terug naar inloggen</button>
+  </div>
+</div>
+
+<!-- ── WACHTWOORD VERGETEN (herstelmail aanvragen) ────────────── -->
+<div id="vergeten-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:18px;overflow-y:auto">
+  <div class="login-box" style="max-width:420px;width:100%;margin:auto">
+    <div class="login-logo">
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--green-dim);border:1px solid var(--green-border);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+        <svg width="26" height="26" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </div>
+      <h2 style="margin-top:0">Wachtwoord vergeten</h2>
+      <p>Vul je gebruikersnaam in. We sturen een herstellink naar het e-mailadres dat bij je account hoort.</p>
+    </div>
+    <div id="vw-status" style="display:none;border-radius:8px;padding:10px;margin-bottom:8px;font-size:.85rem"></div>
+    <div class="field">
+      <label>Gebruikersnaam</label>
+      <input type="text" id="vw-user" placeholder="je gebruikersnaam" autocomplete="username"
+        onkeydown="if(event.key==='Enter')vraagHerstelmailAan()" />
+    </div>
+    <button class="btn btn-primary" id="vw-btn" onclick="vraagHerstelmailAan()">Stuur herstellink</button>
+    <button class="btn btn-secondary" onclick="sluitVergetenPopup()" style="margin-bottom:0">← Terug naar inloggen</button>
+  </div>
+</div>
+
+<!-- ── NIEUW WACHTWOORD INSTELLEN (na klik op herstellink) ────── -->
+<div id="nieuwww-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:18px;overflow-y:auto">
+  <div class="login-box" style="max-width:420px;width:100%;margin:auto">
+    <div class="login-logo">
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--green-dim);border:1px solid var(--green-border);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+        <svg width="26" height="26" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h2 style="margin-top:0">Kies een nieuw wachtwoord</h2>
+      <p>Je herstellink is geldig. Kies hieronder je nieuwe wachtwoord.</p>
+    </div>
+    <div id="nw-status" style="display:none;border-radius:8px;padding:10px;margin-bottom:8px;font-size:.85rem"></div>
+    <div class="field">
+      <label>Nieuw wachtwoord</label>
+      <input type="password" id="nw-pass" placeholder="minstens 6 tekens" autocomplete="new-password" />
+    </div>
+    <div class="field">
+      <label>Herhaal wachtwoord</label>
+      <input type="password" id="nw-pass2" placeholder="herhaal je wachtwoord" autocomplete="new-password"
+        onkeydown="if(event.key==='Enter')slaNieuwWachtwoordOp()" />
+    </div>
+    <button class="btn btn-primary" id="nw-btn" onclick="slaNieuwWachtwoordOp()">Wachtwoord opslaan</button>
   </div>
 </div>
 
@@ -890,8 +935,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
   <script src="js/supabase.js?v=4.0.0" defer></script>
   <script src="js/config.js?v=3.2.10" defer></script>
-  <script src="js/ui.js?v=4.0.0" defer></script>
-  <script src="js/auth.js?v=4.0.0" defer></script>
+  <script src="js/ui.js?v=4.1.4" defer></script>
+  <script src="js/auth.js?v=4.1.5" defer></script>
   <script src="js/api.js?v=4.1.1" defer></script>
   <script src="js/artikelen.js?v=4.0.2" defer></script>
   <script src="js/cart.js?v=4.1.0" defer></script>

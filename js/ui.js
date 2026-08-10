@@ -213,8 +213,6 @@ async function registreerAccount() {
       return;
     }
 
-    try { localStorage.setItem('emondt_ww_aangemaakt', '1'); } catch(e) {}
-
     if (data.session) {
       // Direct ingelogd (e-mailbevestiging staat uit).
       await _laadProfiel();
