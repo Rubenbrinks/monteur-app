@@ -117,7 +117,7 @@ async function checkLogin() {
     setTimeout(() => { fout.style.display = 'none'; }, 5000);
   };
 
-  if (!user) { toonFout('❌ Vul je gebruikersnaam in'); return; }
+  if (!user) { toonFout('❌ Vul je gebruikersnaam of e-mailadres in'); return; }
 
   btn.textContent = '⏳ Inloggen...';
   btn.disabled = true;
@@ -130,7 +130,7 @@ async function checkLogin() {
     // wachtwoord bestaat. Pas daarna heeft het zin om er één te vragen.
     const { data: info, error: rpcErr } = await sb.rpc('email_voor_login', { p_gebruikersnaam: user });
     if (rpcErr) { herstel(); toonFout('❌ Verbindingsfout. Probeer opnieuw.'); return; }
-    if (!info || info.status === 'onbekend') { herstel(); toonFout('❌ Onbekende gebruikersnaam'); return; }
+    if (!info || info.status === 'onbekend') { herstel(); toonFout('❌ Onbekende gebruikersnaam of e-mailadres'); return; }
 
     if (!info.wachtwoord_ingesteld) {
       herstel();
@@ -283,7 +283,7 @@ async function vraagHerstelmailAan() {
     status.style.background = ok ? 'var(--green-dim, #f0f7e6)' : '#fee2e2';
   };
 
-  if (!user) { toonStatus('❌ Vul je gebruikersnaam in'); return; }
+  if (!user) { toonStatus('❌ Vul je gebruikersnaam of e-mailadres in'); return; }
 
   btn.textContent = '⏳ Bezig...';
   btn.disabled = true;
@@ -293,7 +293,7 @@ async function vraagHerstelmailAan() {
     // Gebruikersnaam → e-mail, net als bij inloggen. Het adres tonen we niet.
     const { data: info, error } = await sb.rpc('email_voor_login', { p_gebruikersnaam: user });
     if (error) { herstel(); toonStatus('❌ Verbindingsfout. Probeer opnieuw.'); return; }
-    if (!info || info.status === 'onbekend') { herstel(); toonStatus('❌ Onbekende gebruikersnaam'); return; }
+    if (!info || info.status === 'onbekend') { herstel(); toonStatus('❌ Onbekende gebruikersnaam of e-mailadres'); return; }
 
     // Nog nooit een wachtwoord gehad? Dan is herstellen zinloos — stuur door
     // naar het aanmaakscherm.

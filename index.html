@@ -94,10 +94,10 @@
       <h2>Emondt Materiaalapp</h2>
       <p>Log in om verder te gaan</p>
     </div>
-    <div class="login-fout" id="login-fout" style="display:none">Onbekende gebruikersnaam</div>
+    <div class="login-fout" id="login-fout" style="display:none">Onbekende gebruikersnaam of e-mailadres</div>
     <div class="field">
-      <label>Gebruikersnaam</label>
-      <input type="text" id="login-user" placeholder="gebruikersnaam" autocomplete="username"
+      <label>Gebruikersnaam of e-mailadres</label>
+      <input type="text" id="login-user" placeholder="gebruikersnaam of e-mailadres" autocomplete="username"
         onkeydown="if(event.key==='Enter')document.getElementById('login-pass').focus()" />
     </div>
     <div class="field">
@@ -196,12 +196,12 @@
         <svg width="26" height="26" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
       </div>
       <h2 style="margin-top:0">Wachtwoord vergeten</h2>
-      <p>Vul je gebruikersnaam in. We sturen een herstellink naar het e-mailadres dat bij je account hoort.</p>
+      <p>Vul je gebruikersnaam of e-mailadres in. We sturen een herstellink naar het e-mailadres dat bij je account hoort.</p>
     </div>
     <div id="vw-status" style="display:none;border-radius:8px;padding:10px;margin-bottom:8px;font-size:.85rem"></div>
     <div class="field">
-      <label>Gebruikersnaam</label>
-      <input type="text" id="vw-user" placeholder="je gebruikersnaam" autocomplete="username"
+      <label>Gebruikersnaam of e-mailadres</label>
+      <input type="text" id="vw-user" placeholder="gebruikersnaam of e-mailadres" autocomplete="username"
         onkeydown="if(event.key==='Enter')vraagHerstelmailAan()" />
     </div>
     <button class="btn btn-primary" id="vw-btn" onclick="vraagHerstelmailAan()">Stuur herstellink</button>
@@ -964,7 +964,7 @@
   <script src="js/supabase.js?v=4.0.0" defer></script>
   <script src="js/config.js?v=3.2.10" defer></script>
   <script src="js/ui.js?v=4.1.4" defer></script>
-  <script src="js/auth.js?v=4.1.7" defer></script>
+  <script src="js/auth.js?v=4.1.9" defer></script>
   <script src="js/api.js?v=4.1.7" defer></script>
   <script src="js/artikelen.js?v=4.1.7" defer></script>
   <script src="js/cart.js?v=4.1.0" defer></script>
