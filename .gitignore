@@ -1,3 +1,9 @@
 # Lokale bestanden die niet naar GitHub / de gedeploybare app horen
 .ignore/
 .claude/
+
+# Werkkopie van het Google Apps Script. Hoort niet in een publieke repo:
+# het legt het volledige API-oppervlak bloot (acties, tabbladen, parameters).
+# De echte versie leeft in script.google.com.
+Apps script.js
+

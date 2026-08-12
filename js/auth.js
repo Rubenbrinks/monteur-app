@@ -97,7 +97,6 @@ async function uitloggen() {
   try { await sb.auth.signOut(); } catch(e) {}
   try {
     localStorage.removeItem('emondt_sessie');
-    sessionStorage.removeItem('beheer_auth');
   } catch(e) {}
   location.reload();
 }

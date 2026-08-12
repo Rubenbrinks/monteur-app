@@ -242,20 +242,8 @@ async function exporteerBesteldeArtikelen() {
 // Beheer blijft na één geslaagde wachtwoordcontrole ontgrendeld voor de
 // rest van de sessie (tot herladen/uitloggen). sessionStorage overleeft
 // een navigatie, maar niet het sluiten van de app.
-function beheerUnlocked() {
-  return sessionStorage.getItem('beheer_auth') === '1';
-}
-
-function openBeheerLogin() {
-  // Toegang loopt nu via de echte admin-rol in Supabase — geen apart
-  // beheerwachtwoord meer nodig.
-  if (!isAdmin()) {
-    showToast('⛔ Geen toegang — alleen beschikbaar voor admins. Vraag Ruben Brinks voor toegang.');
-    return;
-  }
-  sessionStorage.setItem('beheer_auth', '1');
-  showTab('beheer-panel');
-}
+// Toegang tot het beheerpaneel loopt via de rol 'admin' in Supabase.
+// Er is geen apart beheerwachtwoord meer; showTab() controleert isAdmin().
 
 // ── BEHEERDERSPANEEL ──────────────────────────────────────────
 function corsErrorMsg(err) {
@@ -378,7 +366,7 @@ function koppelVerwijder(prefix, code) {
   _koppelRender(prefix);
 }
 
-function adminArtikelOpslaan() {
+async function adminArtikelOpslaan() {
   const code = document.getElementById('admin-code').value.trim();
   const naam = document.getElementById('admin-naam').value.trim();
   const status = document.getElementById('admin-status');
@@ -392,26 +380,96 @@ function adminArtikelOpslaan() {
     leverancier: document.getElementById('admin-leverancier').value.trim(),
     link:        document.getElementById('admin-link').value.trim(),
     verpakking:  document.getElementById('admin-verpakking').value.trim(),
+    trefwoorden: document.getElementById('admin-trefwoorden')?.value.trim() || '',
     linktoitems: document.getElementById('admin-linktoitems')?.value.trim() || '',
   };
   _pasArtikelAutomatiseringenToe(artikel, code);
 
+  // Tegenkant van de koppelingen bepalen vóór het opslaan. Bij een bestaand
+  // artikelnummer (upsert) telt wat er nu al gekoppeld staat als oude stand.
+  const mutaties = _berekenKoppelMutaties(
+    code, code,
+    _splitKoppel(ARTIKELEN.find(x => x.code === code)?.linktoitems),
+    _splitKoppel(artikel.linktoitems),
+  );
+
   status.innerHTML = '<span style="color:var(--muted)">⏳ Opslaan...</span>';
-  sb.from('artikelen').upsert(artikel, { onConflict: 'code' })
-  .then(({ error }) => {
-    if (!error) {
-      status.innerHTML = '<span style="color:var(--green-dark)">✅ Artikel opgeslagen!</span>';
-      ['admin-code','admin-naam','admin-cat','admin-subcat','admin-eenheid','admin-leverancier','admin-link','admin-verpakking','admin-linktoitems'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
-      koppelInit('admin', '');
-      herlaadArtikelen();
-    } else {
-      status.innerHTML = `<span style="color:var(--danger)">❌ Fout: ${error.message}</span>`;
-    }
-  });
+
+  const { error } = await sb.from('artikelen').upsert(artikel, { onConflict: 'code' });
+  if (error) {
+    status.innerHTML = `<span style="color:var(--danger)">❌ Fout: ${error.message}</span>`;
+    return;
+  }
+
+  const koppelFout = await _pasKoppelMutatiesToe(mutaties);
+  if (koppelFout) {
+    status.innerHTML = `<span style="color:var(--danger)">⚠️ Artikel opgeslagen, maar ${koppelFout}</span>`;
+    return;
+  }
+
+  status.innerHTML = '<span style="color:var(--green-dark)">✅ Artikel opgeslagen!</span>';
+  ['admin-code','admin-naam','admin-cat','admin-subcat','admin-eenheid','admin-leverancier','admin-link','admin-verpakking','admin-trefwoorden','admin-linktoitems'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  koppelInit('admin', '');
+  herlaadArtikelen();
 }
 
-function adminOpslaanBewerking(code) {
-  const statusEl = document.getElementById('bewerk-status');
+function _splitKoppel(s) {
+  return String(s || '').split(/[\/,]/).map(c => c.trim()).filter(Boolean);
+}
+
+// Artikelen die in hun linktoitems naar deze code verwijzen.
+function _verwijzingenNaar(code) {
+  return ARTIKELEN.filter(x => x.code !== code && _splitKoppel(x.linktoitems).includes(code));
+}
+
+// Koppelingen zijn wederzijds: koppel je A aan B, dan hoort B ook A te kennen.
+// Bepaalt per geraakt artikel de nieuwe linktoitems — één schrijfactie per artikel.
+//
+// Alleen artikelen die in dit formulier zijn toegevoegd of weggehaald worden
+// aangepast. Een bestaande eenzijdige koppeling van een ander artikel naar dit
+// artikel blijft staan; die is ooit bewust zo gemaakt en wissen we niet stilletjes.
+function _berekenKoppelMutaties(oudeCode, nieuweCode, oudeLijst, nieuweLijst) {
+  const oud   = new Set(oudeLijst);
+  const nieuw = new Set(nieuweLijst);
+  const mutaties = [];
+
+  for (const doelCode of new Set([...oud, ...nieuw])) {
+    if (doelCode === oudeCode || doelCode === nieuweCode) continue;
+    const doel = ARTIKELEN.find(a => a.code === doelCode);
+    if (!doel) continue;
+    const lijst = _splitKoppel(doel.linktoitems).filter(c => c !== oudeCode && c !== nieuweCode);
+    if (nieuw.has(doelCode)) lijst.push(nieuweCode);
+    const str = lijst.join(' / ');
+    if (str !== String(doel.linktoitems || '')) mutaties.push({ code: doelCode, linktoitems: str });
+  }
+
+  // Bij een hernoeming ook de artikelen meenemen die naar ons verwijzen zonder
+  // dat wij ze in onze eigen lijst hebben staan — daar alleen het nummer omzetten.
+  if (nieuweCode !== oudeCode) {
+    for (const ref of _verwijzingenNaar(oudeCode)) {
+      if (oud.has(ref.code) || nieuw.has(ref.code)) continue;
+      const str = _splitKoppel(ref.linktoitems)
+        .map(c => (c === oudeCode ? nieuweCode : c)).join(' / ');
+      if (str !== String(ref.linktoitems || '')) mutaties.push({ code: ref.code, linktoitems: str });
+    }
+  }
+
+  return mutaties;
+}
+
+async function _pasKoppelMutatiesToe(mutaties) {
+  for (const m of mutaties) {
+    const { error } = await sb.from('artikelen')
+      .update({ linktoitems: m.linktoitems }).eq('code', m.code);
+    if (error) return `koppeling in "${m.code}" bijwerken mislukte: ${error.message}`;
+  }
+  return null;
+}
+
+async function adminOpslaanBewerking(oudeCode) {
+  const statusEl   = document.getElementById('bewerk-status');
+  const nieuweCode = document.getElementById('bewerk-code').value.trim();
+  const fout = (tekst) => { statusEl.innerHTML = `<span style="color:var(--danger)">${tekst}</span>`; };
 
   const artikel = {
     naam:        document.getElementById('bewerk-naam').value.trim(),
@@ -423,23 +481,53 @@ function adminOpslaanBewerking(code) {
     verpakking:  document.getElementById('bewerk-verpakking').value.trim(),
     link:        document.getElementById('bewerk-link').value.trim(),
     warning:     document.getElementById('bewerk-warning').value.trim(),
+    trefwoorden: document.getElementById('bewerk-trefwoorden')?.value.trim() || '',
     linktoitems: document.getElementById('bewerk-linktoitems')?.value.trim() || '',
   };
-  _pasArtikelAutomatiseringenToe(artikel, code);
+  _pasArtikelAutomatiseringenToe(artikel, nieuweCode || oudeCode);
 
-  if (!artikel.naam) { statusEl.innerHTML = '<span style="color:var(--danger)">❌ Naam is verplicht.</span>'; return; }
+  if (!artikel.naam) { fout('❌ Naam is verplicht.');          return; }
+  if (!nieuweCode)   { fout('❌ Artikelnummer is verplicht.'); return; }
+
+  // Het artikelnummer is de sleutel waar alles aan hangt. Wijzigen mag,
+  // maar alleen bewust en met de gevolgen op tafel.
+  const hernoemen = nieuweCode !== oudeCode;
+  if (hernoemen) {
+    if (ARTIKELEN.some(x => x.code === nieuweCode)) {
+      fout(`❌ Artikelnummer "${nieuweCode}" is al in gebruik.`);
+      return;
+    }
+    const geraakt = _verwijzingenNaar(oudeCode).length;
+    const extra = geraakt
+      ? `\n\n${geraakt} artikel(en) die hieraan gekoppeld zijn, worden automatisch bijgewerkt.`
+      : '';
+    const akkoord = confirm(
+      `Artikelnummer wijzigen van "${oudeCode}" naar "${nieuweCode}"?\n\n` +
+      `De bestelhistorie blijft het oude nummer tonen, en het artikel verdwijnt ` +
+      `uit winkelwagens en favorieten van monteurs.${extra}`
+    );
+    if (!akkoord) { statusEl.innerHTML = ''; return; }
+    artikel.code = nieuweCode;
+  }
+
+  // Bereken de tegenkant vóór het opslaan, zolang ARTIKELEN nog de oude stand heeft.
+  const mutaties = _berekenKoppelMutaties(
+    oudeCode, nieuweCode,
+    _splitKoppel(ARTIKELEN.find(x => x.code === oudeCode)?.linktoitems),
+    _splitKoppel(artikel.linktoitems),
+  );
+
   statusEl.innerHTML = '<span style="color:var(--muted)">⏳ Opslaan...</span>';
 
-  sb.from('artikelen').update(artikel).eq('code', code)
-  .then(({ error }) => {
-    if (!error) {
-      statusEl.innerHTML = '<span style="color:green">✅ Opgeslagen!</span>';
-      herlaadArtikelen();
-      setTimeout(() => document.getElementById('admin-bewerk-form')?.remove(), 1500);
-    } else {
-      statusEl.innerHTML = `<span style="color:var(--danger)">❌ ${error.message}</span>`;
-    }
-  });
+  const { error } = await sb.from('artikelen').update(artikel).eq('code', oudeCode);
+  if (error) { fout(`❌ ${error.message}`); return; }
+
+  const koppelFout = await _pasKoppelMutatiesToe(mutaties);
+  if (koppelFout) { fout(`⚠️ Artikel opgeslagen, maar ${koppelFout}`); return; }
+
+  statusEl.innerHTML = '<span style="color:green">✅ Opgeslagen!</span>';
+  herlaadArtikelen();
+  setTimeout(() => document.getElementById('admin-bewerk-form')?.remove(), 1500);
 }
 
 function adminVerwijder(code) {
@@ -496,6 +584,7 @@ function adminBewerk(code) {
     <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--green);margin-bottom:12px">
       Bewerken: ${a.naam}
     </div>
+    <div class="field"><label>Artikelnummer <span style="font-weight:400;color:var(--muted)">(wijzigen = hernoemen)</span></label><input type="text" id="bewerk-code" value="${a.code || ''}" /></div>
     <div class="field"><label>Naam</label><input type="text" id="bewerk-naam" value="${a.naam || ''}" /></div>
     <div class="field-2">
       <div class="field"><label>Categorie</label><input type="text" id="bewerk-cat" list="dl-cat" value="${a.cat || ''}" /></div>
@@ -512,6 +601,10 @@ function adminBewerk(code) {
     <div class="field-2">
       <div class="field"><label>Link (URL) <span style="font-weight:400;color:var(--muted)">(leeg = automatisch)</span></label><input type="url" id="bewerk-link" value="${a.link || ''}" /></div>
       <div class="field"><label>Warning (* = per meter)</label><input type="text" id="bewerk-warning" value="${a.warning || ''}" /></div>
+    </div>
+    <div class="field">
+      <label>Trefwoorden <span style="font-weight:400;color:var(--muted)">(extra zoekwoorden, gescheiden door komma's)</span></label>
+      <input type="text" id="bewerk-trefwoorden" value="${a.trefwoorden || ''}" />
     </div>
     <div class="field">
       <label>Gekoppelde artikelen</label>

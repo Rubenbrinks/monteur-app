@@ -411,6 +411,8 @@ async function _verstuurBestelMail(data, bestelling) {
     status_url:    statusUrl,
     gebruiker:     getAuthSessie()?.gebruiker || '',
     artikelen:     mailArtikelStr,
+    // regels = aantal bestelregels, totaal = opgetelde aantallen
+    regels:        (data.items || []).length,
     totaal:        (data.items || []).reduce((s, i) => s + (parseInt(i.qty)||0), 0),
     t:             Date.now(),
   });

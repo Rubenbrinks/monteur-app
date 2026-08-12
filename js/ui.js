@@ -200,7 +200,9 @@ async function registreerAccount() {
     const { data, error } = await sb.auth.signUp({
       email,
       password: pass,
-      options: { data: { naam, telefoon: tel, afdeling: '', gebruikersnaam: user, rol: 'monteur' } },
+      // Geen rol meesturen: de database zet die zelf hard op 'monteur'.
+      // Metadata komt van de client en is dus geen bron van waarheid.
+      options: { data: { naam, telefoon: tel, afdeling: '', gebruikersnaam: user } },
     });
 
     if (error) {

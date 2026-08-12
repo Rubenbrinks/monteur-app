@@ -349,9 +349,10 @@ function zoekOpSuggestie(naam) {
 
 // ── TABS ──────────────────────────────────────────────────────
 function showTab(name) {
-  // Beheerpaneel vereist wachtwoord
-  if (name === 'beheer-panel' && !beheerUnlocked()) {
-    openBeheerLogin();
+  // Beheerpaneel is alleen voor gebruikers met de rol 'admin' in Supabase.
+  // Bij elke navigatie opnieuw controleren, niet eenmalig onthouden.
+  if (name === 'beheer-panel' && !isAdmin()) {
+    showToast('⛔ Geen toegang — het beheerpaneel is alleen voor beheerders.');
     return;
   }
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
