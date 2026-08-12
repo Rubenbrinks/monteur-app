@@ -233,6 +233,23 @@
   </div>
 </div>
 
+<!-- ── RICHTING VAN EEN ARTIKELKOPPELING (beheer) ─────────────── -->
+<div id="koppel-keuze-overlay" style="display:none;position:fixed;inset:0;z-index:3200;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:18px;overflow-y:auto">
+  <div class="login-box" style="max-width:430px;width:100%;margin:auto">
+    <div class="login-logo">
+      <h2 style="margin-top:0">Hoe koppelen?</h2>
+      <p id="koppel-keuze-tekst">—</p>
+    </div>
+    <button class="btn btn-primary" onclick="koppelKeuzeAntwoord(true)" style="margin-bottom:8px">
+      ⇄ Beide artikelen aan elkaar koppelen
+    </button>
+    <button class="btn btn-secondary" onclick="koppelKeuzeAntwoord(false)" style="margin-bottom:8px">
+      → Alleen bij dit artikel
+    </button>
+    <button onclick="koppelKeuzeAntwoord(null)" style="display:block;width:100%;background:none;border:none;padding:4px 0 0;cursor:pointer;font-family:'Inter','DM Sans',sans-serif;font-size:.82rem;font-weight:600;color:var(--muted)">Annuleren</button>
+  </div>
+</div>
+
 <header>
   <div class="h-left">
     <button class="menu-btn" id="hamburger" onclick="toggleDrawer()">
@@ -951,7 +968,7 @@
   <script src="js/api.js?v=4.1.7" defer></script>
   <script src="js/artikelen.js?v=4.1.7" defer></script>
   <script src="js/cart.js?v=4.1.0" defer></script>
-  <script src="js/beheer.js?v=4.1.7" defer></script>
+  <script src="js/beheer.js?v=4.1.8" defer></script>
   <script src="js/push.js?v=4.1.1" defer></script>
   <script src="js/app.js?v=4.1.0" defer></script>
 </body>

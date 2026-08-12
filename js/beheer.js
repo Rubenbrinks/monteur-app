@@ -319,50 +319,120 @@ function vulBeheerDatalists() {
 }
 
 // ── GEKOPPELDE ARTIKELEN — zoek & selecteer ──────────────────
+// Elke koppeling onthoudt zijn eigen richting:
+//   wederzijds: true  → het andere artikel krijgt dit artikel er ook bij
+//   wederzijds: false → alleen dit artikel verwijst naar het andere
 const _koppelState = { admin: [], bewerk: [] };
 let _koppelEigenCode = ''; // code van het bewerkte artikel (niet aan zichzelf koppelen)
 
+function _eigenCodeVoor(prefix) {
+  return prefix === 'bewerk'
+    ? _koppelEigenCode
+    : (document.getElementById('admin-code')?.value.trim() || '');
+}
+
 function koppelInit(prefix, codesStr, eigenCode) {
-  _koppelState[prefix] = String(codesStr || '').split(/[\/,]/).map(c => c.trim()).filter(Boolean);
   if (prefix === 'bewerk') _koppelEigenCode = eigenCode || '';
+  const eigen = _eigenCodeVoor(prefix);
+  // Bestaande koppelingen: wederzijds als het andere artikel nu al terugwijst.
+  _koppelState[prefix] = _splitKoppel(codesStr).map(code => {
+    const doel = ARTIKELEN.find(a => a.code === code);
+    return {
+      code,
+      wederzijds: !!(eigen && doel && _splitKoppel(doel.linktoitems).includes(eigen)),
+    };
+  });
   const zoek = document.getElementById(prefix + '-koppel-zoek'); if (zoek) zoek.value = '';
   const res  = document.getElementById(prefix + '-koppel-resultaten'); if (res) res.innerHTML = '';
   _koppelRender(prefix);
 }
+
 function _koppelRender(prefix) {
   const hidden = document.getElementById(prefix + '-linktoitems');
-  if (hidden) hidden.value = _koppelState[prefix].join(' / ');
+  if (hidden) hidden.value = _koppelState[prefix].map(k => k.code).join(' / ');
   const chips = document.getElementById(prefix + '-koppel-chips');
   if (!chips) return;
   chips.innerHTML = _koppelState[prefix].length
-    ? _koppelState[prefix].map(code => {
-        const a = ARTIKELEN.find(x => x.code === code);
-        return `<span class="koppel-chip">${a ? a.naam : code} <span style="opacity:.55">(${code})</span><button type="button" onclick="koppelVerwijder('${prefix}','${code}')">×</button></span>`;
+    ? _koppelState[prefix].map(k => {
+        const a = ARTIKELEN.find(x => x.code === k.code);
+        const pijl  = k.wederzijds ? '⇄' : '→';
+        const titel = k.wederzijds
+          ? 'Beide artikelen verwijzen naar elkaar — klik om te wisselen'
+          : 'Alleen dit artikel verwijst naar het andere — klik om te wisselen';
+        return `<span class="koppel-chip"><button type="button" title="${titel}"
+            onclick="koppelRichtingWissel('${prefix}','${k.code}')"
+            style="background:none;border:none;padding:0 4px 0 0;cursor:pointer;color:inherit;font:inherit;opacity:.75">${pijl}</button>${a ? a.naam : k.code} <span style="opacity:.55">(${k.code})</span><button type="button" onclick="koppelVerwijder('${prefix}','${k.code}')">×</button></span>`;
       }).join('')
     : '<span style="color:var(--muted);font-size:.8rem">Nog geen gekoppelde artikelen.</span>';
 }
+
 function koppelZoek(prefix) {
   const q = (document.getElementById(prefix + '-koppel-zoek').value || '').toLowerCase().trim();
   const res = document.getElementById(prefix + '-koppel-resultaten');
   if (!res) return;
   if (!q) { res.innerHTML = ''; return; }
-  const gekozen = new Set(_koppelState[prefix]);
+  const eigen   = _eigenCodeVoor(prefix);
+  const gekozen = new Set(_koppelState[prefix].map(k => k.code));
   const gevonden = ARTIKELEN.filter(a =>
-    a.code !== _koppelEigenCode && !gekozen.has(a.code) &&
+    a.code !== eigen && !gekozen.has(a.code) &&
     (a.naam.toLowerCase().includes(q) || a.code.toLowerCase().includes(q))
   ).slice(0, 8);
   res.innerHTML = gevonden.length
     ? gevonden.map(a => `<div class="koppel-resultaat" onclick="koppelVoegToe('${prefix}','${a.code}')"><span>${a.naam}</span><span class="koppel-resultaat-code">${a.code}</span></div>`).join('')
     : '<div style="padding:8px;color:var(--muted);font-size:.8rem">Geen artikelen gevonden.</div>';
 }
-function koppelVoegToe(prefix, code) {
-  if (!_koppelState[prefix].includes(code)) _koppelState[prefix].push(code);
+
+// ── Keuzepopup: eenrichtings- of wederzijdse koppeling ────────
+let _koppelKeuzeResolve = null;
+
+function _vraagKoppelRichting(doelNaam, eigenNaam) {
+  const overlay = document.getElementById('koppel-keuze-overlay');
+  const tekst   = document.getElementById('koppel-keuze-tekst');
+  if (!overlay) return Promise.resolve(true); // popup ontbreekt → oude gedrag
+  if (tekst) {
+    tekst.textContent = eigenNaam
+      ? `Je koppelt "${doelNaam}" aan "${eigenNaam}". Moet "${doelNaam}" straks ook naar dit artikel verwijzen?`
+      : `Je koppelt "${doelNaam}". Moet "${doelNaam}" straks ook terugverwijzen naar dit artikel?`;
+  }
+  overlay.style.display = 'flex';
+  return new Promise(resolve => { _koppelKeuzeResolve = resolve; });
+}
+
+function koppelKeuzeAntwoord(wederzijds) {
+  const overlay = document.getElementById('koppel-keuze-overlay');
+  if (overlay) overlay.style.display = 'none';
+  const klaar = _koppelKeuzeResolve;
+  _koppelKeuzeResolve = null;
+  if (klaar) klaar(wederzijds);
+}
+
+async function koppelVoegToe(prefix, code) {
+  if (_koppelState[prefix].some(k => k.code === code)) return;
+
+  const doelNaam  = ARTIKELEN.find(a => a.code === code)?.naam || code;
+  const eigen     = _eigenCodeVoor(prefix);
+  const eigenNaam = prefix === 'bewerk'
+    ? (ARTIKELEN.find(a => a.code === eigen)?.naam || '')
+    : (document.getElementById('admin-naam')?.value.trim() || '');
+
+  const wederzijds = await _vraagKoppelRichting(doelNaam, eigenNaam);
+  if (wederzijds === null) return; // geannuleerd
+
+  _koppelState[prefix].push({ code, wederzijds });
   const zoek = document.getElementById(prefix + '-koppel-zoek'); if (zoek) zoek.value = '';
   const res  = document.getElementById(prefix + '-koppel-resultaten'); if (res) res.innerHTML = '';
   _koppelRender(prefix);
 }
+
+function koppelRichtingWissel(prefix, code) {
+  const k = _koppelState[prefix].find(x => x.code === code);
+  if (!k) return;
+  k.wederzijds = !k.wederzijds;
+  _koppelRender(prefix);
+}
+
 function koppelVerwijder(prefix, code) {
-  _koppelState[prefix] = _koppelState[prefix].filter(c => c !== code);
+  _koppelState[prefix] = _koppelState[prefix].filter(k => k.code !== code);
   _koppelRender(prefix);
 }
 
@@ -390,7 +460,7 @@ async function adminArtikelOpslaan() {
   const mutaties = _berekenKoppelMutaties(
     code, code,
     _splitKoppel(ARTIKELEN.find(x => x.code === code)?.linktoitems),
-    _splitKoppel(artikel.linktoitems),
+    _koppelState.admin,
   );
 
   status.innerHTML = '<span style="color:var(--muted)">⏳ Opslaan...</span>';
@@ -422,35 +492,54 @@ function _verwijzingenNaar(code) {
   return ARTIKELEN.filter(x => x.code !== code && _splitKoppel(x.linktoitems).includes(code));
 }
 
-// Koppelingen zijn wederzijds: koppel je A aan B, dan hoort B ook A te kennen.
-// Bepaalt per geraakt artikel de nieuwe linktoitems — één schrijfactie per artikel.
+// Bepaalt per geraakt artikel de nieuwe linktoitems — één schrijfactie per
+// artikel. `nieuweState` is _koppelState[prefix]: per koppeling de code plus
+// of hij wederzijds moet zijn.
 //
 // Alleen artikelen die in dit formulier zijn toegevoegd of weggehaald worden
 // aangepast. Een bestaande eenzijdige koppeling van een ander artikel naar dit
 // artikel blijft staan; die is ooit bewust zo gemaakt en wissen we niet stilletjes.
-function _berekenKoppelMutaties(oudeCode, nieuweCode, oudeLijst, nieuweLijst) {
-  const oud   = new Set(oudeLijst);
-  const nieuw = new Set(nieuweLijst);
-  const mutaties = [];
+function _berekenKoppelMutaties(oudeCode, nieuweCode, oudeLijst, nieuweState) {
+  const oud        = new Set(oudeLijst);
+  const nieuw      = new Set(nieuweState.map(k => k.code));
+  const wederzijds = new Set(nieuweState.filter(k => k.wederzijds).map(k => k.code));
+  const hernoemen  = nieuweCode !== oudeCode;
+  const mutaties   = [];
+
+  const noteer = (doelCode, nieuweStr, huidig) => {
+    if (nieuweStr !== String(huidig || '')) mutaties.push({ code: doelCode, linktoitems: nieuweStr });
+  };
 
   for (const doelCode of new Set([...oud, ...nieuw])) {
     if (doelCode === oudeCode || doelCode === nieuweCode) continue;
     const doel = ARTIKELEN.find(a => a.code === doelCode);
     if (!doel) continue;
+
+    // Eenrichtingskoppeling: het andere artikel bewust ongemoeid laten. Alleen
+    // bij een hernoeming moet een bestaande verwijzing wél mee, anders wijst
+    // die naar een artikelnummer dat niet meer bestaat.
+    if (nieuw.has(doelCode) && !wederzijds.has(doelCode)) {
+      if (hernoemen) {
+        const str = _splitKoppel(doel.linktoitems)
+          .map(c => (c === oudeCode ? nieuweCode : c)).join(' / ');
+        noteer(doelCode, str, doel.linktoitems);
+      }
+      continue;
+    }
+
     const lijst = _splitKoppel(doel.linktoitems).filter(c => c !== oudeCode && c !== nieuweCode);
-    if (nieuw.has(doelCode)) lijst.push(nieuweCode);
-    const str = lijst.join(' / ');
-    if (str !== String(doel.linktoitems || '')) mutaties.push({ code: doelCode, linktoitems: str });
+    if (wederzijds.has(doelCode)) lijst.push(nieuweCode);
+    noteer(doelCode, lijst.join(' / '), doel.linktoitems);
   }
 
   // Bij een hernoeming ook de artikelen meenemen die naar ons verwijzen zonder
   // dat wij ze in onze eigen lijst hebben staan — daar alleen het nummer omzetten.
-  if (nieuweCode !== oudeCode) {
+  if (hernoemen) {
     for (const ref of _verwijzingenNaar(oudeCode)) {
       if (oud.has(ref.code) || nieuw.has(ref.code)) continue;
       const str = _splitKoppel(ref.linktoitems)
         .map(c => (c === oudeCode ? nieuweCode : c)).join(' / ');
-      if (str !== String(ref.linktoitems || '')) mutaties.push({ code: ref.code, linktoitems: str });
+      noteer(ref.code, str, ref.linktoitems);
     }
   }
 
@@ -514,7 +603,7 @@ async function adminOpslaanBewerking(oudeCode) {
   const mutaties = _berekenKoppelMutaties(
     oudeCode, nieuweCode,
     _splitKoppel(ARTIKELEN.find(x => x.code === oudeCode)?.linktoitems),
-    _splitKoppel(artikel.linktoitems),
+    _koppelState.bewerk,
   );
 
   statusEl.innerHTML = '<span style="color:var(--muted)">⏳ Opslaan...</span>';
