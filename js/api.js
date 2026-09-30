@@ -270,17 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function getSheetsUrl() {
   return SHEETS_API_URL;
 }
-
-// Alle schrijfacties via GET (geen POST — werkt altijd cross-origin)
-function sheetsRequest(params) {
-  const url = getSheetsUrl();
-  if (!url) return Promise.resolve({ status: 'geen_url' });
-  const qs = Object.entries(params)
-    .map(([k, v]) => `${k}=${encodeURIComponent(typeof v === 'object' ? JSON.stringify(v) : v)}`)
-    .join('&');
-  return fetch(`${url}?${qs}&t=${Date.now()}`).then(r => r.json());
-}
-
 // Bestelling loggen — compact GET request
 async function logBestellingSheets(data) {
   const sessie = getAuthSessie();

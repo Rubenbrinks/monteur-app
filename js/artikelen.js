@@ -370,8 +370,6 @@ function showTab(name) {
   if (name === 'beheer-panel') {
     if (typeof vulBeheerDatalists === 'function') vulBeheerDatalists();
     if (typeof koppelInit === 'function') koppelInit('admin', '');
-    const urlEl = document.getElementById('admin-sheets-url');
-    if (urlEl) urlEl.value = getSheetsUrl() || '';
     // Toon waarschuwing als lokale omgeving
     const isLokaal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
     const warn = document.getElementById('beheer-omgeving-waarschuwing');
