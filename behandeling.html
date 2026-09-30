@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Bestelling in behandeling nemen — Emondt</title>
+<title>Bestelling afgerond — Emondt</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -19,6 +19,19 @@
   .emoji { font-size: 58px; line-height: 1; margin-bottom: 6px; }
   h1 { color: #AEC336; font-size: 22px; margin: 10px 0 8px; }
   p { color: #cfd8e6; font-size: 15px; line-height: 1.55; margin: 6px 0; }
+  .veld { text-align: left; margin-top: 20px; }
+  .veld label {
+    display: block; font-size: 13px; font-weight: bold; color: #AEC336;
+    margin-bottom: 6px;
+  }
+  .veld input {
+    width: 100%; font-family: inherit; font-size: 15px; padding: 12px 14px;
+    border-radius: 10px; border: 1px solid #1c3a6b; background: #041c42;
+    color: #fff;
+  }
+  .veld input::placeholder { color: #5a6e91; }
+  .veld input:focus { outline: 2px solid #AEC336; outline-offset: 1px; border-color: #AEC336; }
+  .veld .hint { font-size: 12px; color: #7a8aa0; margin-top: 5px; }
   .knop {
     display: inline-block; background: #639922; color: #fff; border: none;
     font-weight: bold; font-size: 16px; padding: 15px 30px; border-radius: 10px;
@@ -31,10 +44,18 @@
 </head>
 <body>
   <div class="kaart" id="kaart">
-    <div class="emoji">🔧</div>
-    <h1>Bestelling in behandeling nemen?</h1>
-    <p id="sub">Je zet deze bestelling op “in behandeling”. De monteur krijgt hiervan een melding.</p>
-    <button class="knop" id="btn" onclick="neemInBehandeling()">✅ Ja, in behandeling nemen</button>
+    <div class="emoji">📦</div>
+    <h1>Bestelling afgerond?</h1>
+    <p id="sub">Je zet deze bestelling op afgerond. De monteur krijgt hiervan een melding.</p>
+
+    <div class="veld" id="veld-besteld-door">
+      <label for="besteld-door">Besteld door</label>
+      <input type="text" id="besteld-door" placeholder="je naam" autocomplete="name"
+        onkeydown="if(event.key==='Enter')rondBestellingAf()" />
+      <div class="hint">Optioneel — de monteur ziet deze naam in de app.</div>
+    </div>
+
+    <button class="knop" id="btn" onclick="rondBestellingAf()">✅ Bestelling afgerond</button>
     <div class="klein">Emondt Materiaalapp</div>
   </div>
 
@@ -49,30 +70,35 @@
     document.querySelector('h1').textContent = titel;
     document.getElementById('sub').innerHTML = tekst;
     document.getElementById('btn').style.display = knop ? 'inline-block' : 'none';
+    // Het invulveld hoort alleen bij de vraag, niet bij het antwoord.
+    const veld = document.getElementById('veld-besteld-door');
+    if (veld) veld.style.display = knop ? 'block' : 'none';
   }
 
   if (!id || !token) {
     toon('⚠️', 'Ongeldige link', 'Deze link is niet compleet.', false);
   }
 
-  async function neemInBehandeling() {
+  async function rondBestellingAf() {
     const btn = document.getElementById('btn');
+    const bestelder = (document.getElementById('besteld-door')?.value || '').trim();
     btn.disabled = true; btn.textContent = '⏳ Bezig...';
+    const herstel = () => { btn.disabled = false; btn.textContent = '✅ Bestelling afgerond'; };
     try {
       const res = await fetch(
-        `${SUPABASE_URL}/functions/v1/bestelling-status?id=${encodeURIComponent(id)}&token=${encodeURIComponent(token)}&status=in_behandeling`,
+        `${SUPABASE_URL}/functions/v1/bestelling-status?id=${encodeURIComponent(id)}&token=${encodeURIComponent(token)}&status=in_behandeling&besteld_door=${encodeURIComponent(bestelder)}`,
         { method: 'POST' }
       );
       const data = await res.json().catch(() => ({}));
       switch (data.status) {
         case 'ok':
           toon('✅', 'Gelukt!',
-            `De bestelling${data.projectnaam ? ' voor <b>' + data.projectnaam + '</b>' : ''} staat nu op “in behandeling”.` +
+            `De bestelling${data.projectnaam ? ' voor <b>' + data.projectnaam + '</b>' : ''} staat nu op afgerond.` +
             (data.verstuurd ? ' De monteur is met een melding op de hoogte gebracht.' : ' De monteur ziet de status in de app.'),
             false);
           break;
         case 'al_bijgewerkt':
-          toon('ℹ️', 'Al in behandeling', 'Deze bestelling was al in behandeling genomen.', false);
+          toon('ℹ️', 'Al afgerond', 'Deze bestelling was al afgerond.', false);
           break;
         case 'ongeldige_code':
           toon('⛔', 'Ongeldige code', 'De beveiligingscode klopt niet.', false);
@@ -82,11 +108,11 @@
           break;
         default:
           toon('⚠️', 'Er ging iets mis', 'Probeer het later opnieuw.', true);
-          btn.disabled = false; btn.textContent = '✅ Ja, in behandeling nemen';
+          herstel();
       }
     } catch (e) {
       toon('⚠️', 'Verbinding mislukt', 'Controleer je internet en probeer opnieuw.', true);
-      btn.disabled = false; btn.textContent = '✅ Ja, in behandeling nemen';
+      herstel();
     }
   }
 </script>

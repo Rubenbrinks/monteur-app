@@ -374,7 +374,7 @@ async function _verstuurBestelMail(data, bestelling) {
     ontvangers = inst?.waarde || '';
   } catch(e) {}
 
-  // Link voor de "In behandeling nemen"-knop in de mail → bevestigingspagina
+  // Link voor de "Bestelling afgerond"-knop in de mail → bevestigingspagina
   // op de eigen site (die roept daarna de Supabase-functie aan).
   let statusUrl = '';
   if (bestelling?.id && bestelling?.status_token) {

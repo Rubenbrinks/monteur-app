@@ -45,6 +45,9 @@ Deno.serve(async (req) => {
   const id     = url.searchParams.get('id');
   const token  = url.searchParams.get('token');
   const status = url.searchParams.get('status') || 'in_behandeling';
+  // Naam van degene die de bestelling daadwerkelijk geplaatst heeft.
+  // Optioneel: blijft het veld leeg, dan slaan we niets op.
+  const besteldDoor = (url.searchParams.get('besteld_door') || '').trim().slice(0, 100);
 
   // Alleen POST voert de actie uit (GET/prefetch doet niets).
   if (req.method !== 'POST') return json({ status: 'gebruik_de_knop' }, 405);
@@ -60,17 +63,21 @@ Deno.serve(async (req) => {
   if (String(best.status_token) !== String(token)) return json({ status: 'ongeldige_code' }, 403);
   if (best.status === status) return json({ status: 'al_bijgewerkt', projectnaam: best.projectnaam });
 
-  await sb.from('bestellingen')
-    .update({ status, status_bijgewerkt_op: new Date().toISOString() })
-    .eq('id', id);
+  const wijziging: Record<string, unknown> = {
+    status,
+    status_bijgewerkt_op: new Date().toISOString(),
+  };
+  if (besteldDoor) wijziging.besteld_door = besteldDoor;
+
+  await sb.from('bestellingen').update(wijziging).eq('id', id);
 
   // Pushmelding naar de monteur (alle toestellen).
   let verstuurd = 0;
   if (best.user_id) {
     const { data: abos } = await sb.from('push_abonnementen').select('*').eq('user_id', best.user_id);
     const payload = JSON.stringify({
-      titel: 'Bestelling in behandeling',
-      body:  `Je bestelling${best.projectnaam ? ' voor ' + best.projectnaam : ''} is in behandeling genomen.`,
+      titel: 'Bestelling afgerond',
+      body:  `Je bestelling${best.projectnaam ? ' voor ' + best.projectnaam : ''} is besteld${besteldDoor ? ' door ' + besteldDoor : ''}.`,
       url:   './index.html#historie',
       tag:   'status-' + id,
     });
@@ -89,5 +96,5 @@ Deno.serve(async (req) => {
     }
   }
 
-  return json({ status: 'ok', verstuurd, projectnaam: best.projectnaam });
+  return json({ status: 'ok', verstuurd, projectnaam: best.projectnaam, besteld_door: besteldDoor });
 });

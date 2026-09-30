@@ -442,7 +442,7 @@ function _renderHistorieLijst(hist) {
     const totaal = artikelen.reduce((s, a) => s + (a.qty || 0), 0);
     const kanHerbestellen = artikelen.length > 0;
     const statusBadge = b.status === 'in_behandeling'
-      ? '<span style="display:inline-block;background:var(--green-dim);color:var(--green);border:1px solid var(--green-border);border-radius:12px;padding:2px 10px;font-size:.72rem;font-weight:700">🔧 In behandeling</span>'
+      ? '<span style="display:inline-block;background:var(--green-dim);color:var(--green);border:1px solid var(--green-border);border-radius:12px;padding:2px 10px;font-size:.72rem;font-weight:700">✅ Bestelling afgerond</span>'
       : '<span style="display:inline-block;background:var(--surface2);color:var(--muted);border:1px solid var(--border-strong);border-radius:12px;padding:2px 10px;font-size:.72rem;font-weight:600">🕓 Ontvangen</span>';
 
     return `
@@ -458,6 +458,7 @@ function _renderHistorieLijst(hist) {
         <div style="display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:.82rem;margin-bottom:12px">
           <span style="color:var(--muted)">Monteur</span><span style="font-weight:600">${b.naam || '—'}</span>
           <span style="color:var(--muted)">Afdeling</span><span>${b.afdeling || '—'}</span>
+          ${b.besteldDoor ? `<span style="color:var(--muted)">Besteld door</span><span style="font-weight:600">${b.besteldDoor}</span>` : ''}
           <span style="color:var(--muted)">Afleveradres</span><span>${b.locatie || '—'}</span>
           <span style="color:var(--muted)">Leverdatum</span><span style="font-weight:600;color:var(--green)">${leverdatumTxt}</span>
           ${b.opmerkingen ? `<span style="color:var(--muted)">Opmerkingen</span><span style="font-style:italic">${b.opmerkingen}</span>` : ''}
@@ -510,6 +511,7 @@ async function renderHistorie() {
       leverdatum:    r.leverdatum || '',
       opmerkingen:   r.opmerkingen || '',
       status:        r.status || 'nieuw',
+      besteldDoor:   r.besteld_door || '',
       _artikelen:    Array.isArray(r.artikelen) ? r.artikelen : [],
     }));
     _renderHistorieLijst(_historieData);
