@@ -441,8 +441,17 @@ function _renderHistorieLijst(hist) {
       : new Date(b.leverdatum + 'T12:00:00').toLocaleDateString('nl-NL', {day:'2-digit', month:'long', year:'numeric'});
     const totaal = artikelen.reduce((s, a) => s + (a.qty || 0), 0);
     const kanHerbestellen = artikelen.length > 0;
+    // Bij een afgeronde bestelling is de naam van de besteller nuttiger dan
+    // het woord "afgerond". Die naam komt van de bevestigingspagina, dus via
+    // een URL-parameter -- als enige veld hier niet door een ingelogde
+    // gebruiker ingevuld. Vandaar de escape.
+    const besteldDoorTxt = String(b.besteldDoor || '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const afgerondLabel = besteldDoorTxt
+      ? 'Besteld door: ' + besteldDoorTxt
+      : 'Bestelling afgerond';
     const statusBadge = b.status === 'in_behandeling'
-      ? '<span style="display:inline-block;background:var(--green-dim);color:var(--green);border:1px solid var(--green-border);border-radius:12px;padding:2px 10px;font-size:.72rem;font-weight:700">✅ Bestelling afgerond</span>'
+      ? `<span style="display:inline-block;background:var(--green-dim);color:var(--green);border:1px solid var(--green-border);border-radius:12px;padding:2px 10px;font-size:.72rem;font-weight:700">✅ ${afgerondLabel}</span>`
       : '<span style="display:inline-block;background:var(--surface2);color:var(--muted);border:1px solid var(--border-strong);border-radius:12px;padding:2px 10px;font-size:.72rem;font-weight:600">🕓 Ontvangen</span>';
 
     return `
