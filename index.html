@@ -884,6 +884,19 @@
     </div>
   </div>
 
+  <!-- 6d. Gebruikers (rollen) -->
+  <div class="admin-card">
+    <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-gebruikers',this);if(!this.classList.contains('was-opened')){this.classList.add('was-opened');laadGebruikers()}">
+      <span>Gebruikers</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+    </button>
+    <div id="kaart-gebruikers" class="admin-kaart-body" style="display:none">
+      <p style="font-size:.84rem;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Bepaal wie Monteur, ZZP / Ingeleend of Admin is. Dit bepaalt welke mededelingen en agenda-items iemand ziet.</p>
+      <div class="field"><input type="text" id="gebruikers-zoek" placeholder="Zoek op naam, gebruikersnaam of afdeling..." oninput="toonGebruikers()" /></div>
+      <div id="gebruikers-status" style="font-size:.84rem;min-height:18px;margin-bottom:6px"></div>
+      <div id="gebruikers-lijst"></div>
+    </div>
+  </div>
+
   <!-- 7. Emailadressen beheren -->
   <div class="admin-card">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-email',this);if(!this.classList.contains('was-opened')){this.classList.add('was-opened');laadEmailontvangers()}">
@@ -1002,6 +1015,7 @@
   <script src="js/artikelen.js?v=4.2.1" defer></script>
   <script src="js/cart.js?v=4.2.4" defer></script>
   <script src="js/beheer.js?v=4.2.8" defer></script>
+  <script src="js/beheer-algemeen.js?v=4.3.0" defer></script>
   <script src="js/push.js?v=4.2.9" defer></script>
   <script src="js/app.js?v=4.2.6" defer></script>
 </body>
