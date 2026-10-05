@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="css/layout.css?v=3.3.2">
   <link rel="stylesheet" href="css/components.css?v=4.3.3">
   <link rel="stylesheet" href="css/artikelen.css?v=3.3.2">
-  <link rel="stylesheet" href="css/pages.css?v=4.3.4">
+  <link rel="stylesheet" href="css/pages.css?v=4.3.5">
 </head>
 <body>
 
@@ -340,13 +340,18 @@
   </div>
 
   <!-- Feedback -->
-  <div class="gids-card" id="feedback-card">
-    <div class="gids-titel" style="display:flex;align-items:center;gap:7px">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      Jouw mening telt
+  <div class="gids-card inklapbaar" id="feedback-card">
+    <button class="inklapbaar-header" onclick="toggleInklapbaar('feedback-card')" aria-expanded="false">
+      <span class="gids-titel" style="margin-bottom:0;display:flex;align-items:center;gap:7px">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Jouw mening telt
+      </span>
+      <svg class="inklapbaar-arrow" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+    <div class="inklapbaar-body">
+      <p style="font-size:.84rem;color:var(--text-secondary);line-height:1.5;margin:14px 0">Wat vind je van de materiaalapp? Beantwoord een paar korte vragen (ongeveer 2 minuten), dan maken we de app nog beter.</p>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSd37_8kPLDBl1Zeb-hY6kPFL5gIH8KjUItCjTdtfGgrBy5Cqw/viewform" target="_blank" rel="noopener" class="btn btn-primary" style="margin-bottom:0;text-decoration:none">Feedback geven</a>
     </div>
-    <p style="font-size:.84rem;color:var(--text-secondary);line-height:1.5;margin:0 0 14px">Wat vind je van de materiaalapp? Beantwoord een paar korte vragen (ongeveer 2 minuten), dan maken we de app nog beter.</p>
-    <a href="https://docs.google.com/forms/d/e/1FAIpQLSd37_8kPLDBl1Zeb-hY6kPFL5gIH8KjUItCjTdtfGgrBy5Cqw/viewform" target="_blank" rel="noopener" class="btn btn-primary" style="margin-bottom:0;text-decoration:none">Feedback geven</a>
   </div>
 
 </div>
@@ -1025,7 +1030,7 @@
   <script src="js/cart.js?v=4.2.4" defer></script>
   <script src="js/beheer.js?v=4.3.3" defer></script>
   <script src="js/beheer-algemeen.js?v=4.3.2" defer></script>
-  <script src="js/home.js?v=4.3.2" defer></script>
+  <script src="js/home.js?v=4.3.5" defer></script>
   <script src="js/push.js?v=4.2.9" defer></script>
   <script src="js/app.js?v=4.3.2" defer></script>
 </body>
