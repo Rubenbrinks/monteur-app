@@ -242,6 +242,7 @@ function changeCartQty(code, delta, directValue) {
 
 function removeItem(code) {
   delete cart[code];
+  saveCart();
   const qEl = document.getElementById('qty-' + code);
   const cEl = document.getElementById('card-' + code);
   if (qEl) qEl.value = 0;
@@ -252,7 +253,7 @@ function removeItem(code) {
 function leegMaken() {
   if (!confirm('Hele bestelling wissen?')) return;
   cart = {};
-  try { localStorage.removeItem('emondt_cart'); } catch(e){}
+  saveCart();
   document.querySelectorAll('.qty-val').forEach(el => el.value = 0);
   document.querySelectorAll('.artikel-card').forEach(el => el.classList.remove('selected'));
   updateBadge(); renderCart();

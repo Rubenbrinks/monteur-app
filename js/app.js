@@ -183,12 +183,17 @@ function customArtikelToevoegen() {
   const code = document.getElementById('custom-code').value.trim();
   const qty  = parseInt(document.getElementById('custom-qty').value)||1;
   if (!naam) { alert('Vul een omschrijving in.'); return; }
-  customTeller++;
-  const customCode = code || ('CUSTOM-'+customTeller);
+  // Teller wordt na elke herstart nul; zoek dus een code die nog vrij is.
+  let customCode = code;
+  if (!customCode) {
+    do { customTeller++; customCode = 'CUSTOM-' + customTeller; }
+    while (ARTIKELEN.some(a => a.code === customCode) || cart[customCode]);
+  }
   if (!ARTIKELEN.find(a=>a.code===customCode)) {
     ARTIKELEN.push({code:customCode,naam,cat:'Diversen',eenheid:'stuk',icon:'📦',custom:true});
   }
   cart[customCode] = qty;
+  saveCart();
   updateBadge();
   document.getElementById('custom-naam').value = '';
   document.getElementById('custom-code').value = '';

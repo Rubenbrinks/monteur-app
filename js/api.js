@@ -12,6 +12,7 @@ function laadArtikelenUitSheets() {
 
     if (cacheGeldig) {
       ARTIKELEN = JSON.parse(cached);
+      herstelCustomArtikelen();
       renderArtikelen(ARTIKELEN);
       _naArtikelenGeladen();
       return; // Klaar — geen fetch
@@ -57,10 +58,12 @@ async function fetchSheets() {
       icon:         ICONS[a.cat] || ICON_DEFAULTS[a.cat] || '📦',
     })).filter(a => a.code && a.naam);
 
+    // Cache zonder custom artikelen; die bewaren we apart.
     try {
       localStorage.setItem('emondt_artikelen_cache', JSON.stringify(ARTIKELEN));
       localStorage.setItem('emondt_artikelen_ts', Date.now().toString());
     } catch(e) {}
+    herstelCustomArtikelen();
 
     renderArtikelen(ARTIKELEN);
     _naArtikelenGeladen();
@@ -75,6 +78,7 @@ function laadUitCache() {
     const cached = localStorage.getItem('emondt_artikelen_cache');
     if (cached) {
       ARTIKELEN = JSON.parse(cached);
+      herstelCustomArtikelen();
       renderArtikelen(ARTIKELEN);
       _naArtikelenGeladen();
       const ts = localStorage.getItem('emondt_artikelen_ts');

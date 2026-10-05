@@ -29,6 +29,30 @@ let cart = {};
 
 function saveCart() {
   try { localStorage.setItem('emondt_cart', JSON.stringify(cart)); } catch(e) {}
+  bewaarCustomArtikelen();
+}
+
+// Custom (vrije) artikelen staan niet in de database, dus ook niet in
+// ARTIKELEN na een herlaad of verversing. Ze worden apart bewaard (alleen die
+// in de winkelmand zitten) en na elke ARTIKELEN-load teruggezet.
+function bewaarCustomArtikelen() {
+  try {
+    const custom = ARTIKELEN.filter(a => a.custom && cart[a.code]);
+    // Nog niet teruggezette custom artikelen niet wissen zolang ze in de mand zitten
+    const bestaand = JSON.parse(localStorage.getItem('emondt_custom') || '[]');
+    bestaand.forEach(a => {
+      if (cart[a.code] && !custom.some(c => c.code === a.code)) custom.push(a);
+    });
+    localStorage.setItem('emondt_custom', JSON.stringify(custom));
+  } catch(e) {}
+}
+function herstelCustomArtikelen() {
+  try {
+    const custom = JSON.parse(localStorage.getItem('emondt_custom') || '[]');
+    custom.forEach(a => {
+      if (a && a.code && !ARTIKELEN.some(x => x.code === a.code)) ARTIKELEN.push(a);
+    });
+  } catch(e) {}
 }
 function loadCart() {
   try {
