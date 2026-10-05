@@ -329,6 +329,7 @@ async function logBestellingSheets(data) {
     <div class="s-row total"><span>Totaal</span><span>${totaalStuks} stuks · ${bestelItems.length} artikel${bestelItems.length !== 1 ? 'en' : ''}</span></div>`;
 
   document.getElementById('bevestiging-overlay').style.display = 'flex';
+  if (typeof toonMeldingenTipBijBevestiging === 'function') toonMeldingenTipBijBevestiging();
 
   // Winkelwagen legen.
   cart = {};

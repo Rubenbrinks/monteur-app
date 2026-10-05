@@ -84,6 +84,7 @@ async function zetMeldingenUit() {
 }
 
 async function updateMeldingKnop() {
+  renderMeldingenKaart();
   const el = document.getElementById('drawer-meldingen');
   if (!el) return;
   if (!pushOndersteund()) { el.style.display = 'none'; return; }
@@ -103,4 +104,61 @@ async function updateMeldingKnop() {
   if (label)  label.textContent = aan ? 'Meldingen staan aan' : 'Meldingen staan uit';
   if (toggle) toggle.classList.toggle('aan', aan);
   el.onclick = aan ? zetMeldingenUit : zetMeldingenAan;
+}
+
+
+// ── ZICHTBAARHEID: hoe komen monteurs aan hun meldingen? ───────
+// Toestand van meldingen op dit toestel:
+//   aan | uit | geblokkeerd | ios-installeren | niet-ondersteund
+async function meldingenStatus() {
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (isIOS && !standalone) return 'ios-installeren';
+  if (!pushOndersteund()) return 'niet-ondersteund';
+  if (Notification.permission === 'denied') return 'geblokkeerd';
+  if (Notification.permission === 'granted') {
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      if (await reg.pushManager.getSubscription()) return 'aan';
+    } catch(e) {}
+  }
+  return 'uit';
+}
+
+// Kaart op de homepage: alleen zichtbaar zolang meldingen nog niet aan staan.
+async function renderMeldingenKaart() {
+  const kaart = document.getElementById('meldingen-card');
+  if (!kaart) return;
+  const status = await meldingenStatus();
+  const tekst = document.getElementById('meldingen-card-tekst');
+  const knop  = document.getElementById('meldingen-card-knop');
+  if (status === 'aan' || status === 'niet-ondersteund') { kaart.style.display = 'none'; return; }
+  kaart.style.display = '';
+  const teksten = {
+    'uit': 'Krijg direct een melding zodra je bestelling is afgerond. Zo hoef je niet te wachten of te bellen.',
+    'ios-installeren': 'Op een iPhone werkt dit alleen als de app op je beginscherm staat. Tik in Safari op Delen en kies "Zet op beginscherm". Open de app daarna vanaf je beginscherm en zet meldingen aan.',
+    'geblokkeerd': 'Meldingen zijn geblokkeerd in de instellingen van je browser of telefoon. Zet ze daar aan voor deze app en kom dan terug.',
+  };
+  tekst.textContent = teksten[status];
+  knop.style.display = status === 'uit' ? '' : 'none';
+}
+
+// Op het bevestigingsscherm na een bestelling: het moment waarop de meerwaarde
+// duidelijk is. Maximaal 3 keer tonen, zodat het niet gaat irriteren.
+async function toonMeldingenTipBijBevestiging() {
+  const blok = document.getElementById('bevestiging-meldingen');
+  if (!blok) return;
+  blok.style.display = 'none';
+  let keren = 0;
+  try { keren = parseInt(localStorage.getItem('emondt_meldingen_tip') || '0'); } catch(e) {}
+  if (keren >= 3) return;
+  if (await meldingenStatus() !== 'uit') return;
+  try { localStorage.setItem('emondt_meldingen_tip', String(keren + 1)); } catch(e) {}
+  blok.style.display = 'block';
+}
+
+async function meldingenTipAanzetten() {
+  await zetMeldingenAan();
+  const blok = document.getElementById('bevestiging-meldingen');
+  if (blok && await meldingenStatus() === 'aan') blok.style.display = 'none';
 }
