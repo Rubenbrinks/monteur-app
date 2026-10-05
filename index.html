@@ -13,7 +13,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png" />
   <meta name="description" content="Emondt Materiaalapp – Artikelen selecteren en bestellen voor monteurs." />
-  <title>Emondt – Materiaal bestellen</title>
+  <title>Emondt – Monteur-app</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="css/variables.css?v=3.3.2">
   <script>
@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="css/layout.css?v=3.3.2">
   <link rel="stylesheet" href="css/components.css?v=4.3.3">
   <link rel="stylesheet" href="css/artikelen.css?v=3.3.2">
-  <link rel="stylesheet" href="css/pages.css?v=4.3.5">
+  <link rel="stylesheet" href="css/pages.css?v=4.3.7">
 </head>
 <body>
 
@@ -39,7 +39,7 @@
     <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyMy4wLjMsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCIgWw0KCTwhRU5USVRZIG5zX2V4dGVuZCAiaHR0cDovL25zLmFkb2JlLmNvbS9FeHRlbnNpYmlsaXR5LzEuMC8iPg0KCTwhRU5USVRZIG5zX2FpICJodHRwOi8vbnMuYWRvYmUuY29tL0Fkb2JlSWxsdXN0cmF0b3IvMTAuMC8iPg0KCTwhRU5USVRZIG5zX2dyYXBocyAiaHR0cDovL25zLmFkb2JlLmNvbS9HcmFwaHMvMS4wLyI+DQoJPCFFTlRJVFkgbnNfdmFycyAiaHR0cDovL25zLmFkb2JlLmNvbS9WYXJpYWJsZXMvMS4wLyI+DQoJPCFFTlRJVFkgbnNfaW1yZXAgImh0dHA6Ly9ucy5hZG9iZS5jb20vSW1hZ2VSZXBsYWNlbWVudC8xLjAvIj4NCgk8IUVOVElUWSBuc19zZncgImh0dHA6Ly9ucy5hZG9iZS5jb20vU2F2ZUZvcldlYi8xLjAvIj4NCgk8IUVOVElUWSBuc19jdXN0b20gImh0dHA6Ly9ucy5hZG9iZS5jb20vR2VuZXJpY0N1c3RvbU5hbWVzcGFjZS8xLjAvIj4NCgk8IUVOVElUWSBuc19hZG9iZV94cGF0aCAiaHR0cDovL25zLmFkb2JlLmNvbS9YUGF0aC8xLjAvIj4NCl0+DQo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zOng9IiZuc19leHRlbmQ7IiB4bWxuczppPSImbnNfYWk7IiB4bWxuczpncmFwaD0iJm5zX2dyYXBoczsiDQoJIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgMjgzNSAyODM1Ig0KCSBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAyODM1IDI4MzU7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLnN0MXtjbGlwLXBhdGg6dXJsKCNTVkdJRF8yXyk7fQ0KCS5zdDJ7Y2xpcC1wYXRoOnVybCgjU1ZHSURfNF8pO2ZpbGw6I0EyQzQ0Qzt9DQo8L3N0eWxlPg0KPG1ldGFkYXRhPg0KCTxzZncgIHhtbG5zPSImbnNfc2Z3OyI+DQoJCTxzbGljZXM+PC9zbGljZXM+DQoJCTxzbGljZVNvdXJjZUJvdW5kcyAgYm90dG9tTGVmdE9yaWdpbj0idHJ1ZSIgaGVpZ2h0PSI0NjQ5LjczIiB3aWR0aD0iNTM2MSIgeD0iLTEzOTciIHk9Ii0zNjY4LjczIj48L3NsaWNlU291cmNlQm91bmRzPg0KCTwvc2Z3Pg0KPC9tZXRhZGF0YT4NCjxnPg0KCTxnPg0KCQk8ZGVmcz4NCgkJCTxyZWN0IGlkPSJTVkdJRF8xXyIgeD0iLTEzOTciIHk9Ii05ODEiIHdpZHRoPSI1MzYxIiBoZWlnaHQ9IjQ2NDkuNzMiLz4NCgkJPC9kZWZzPg0KCQk8Y2xpcFBhdGggaWQ9IlNWR0lEXzJfIj4NCgkJCTx1c2UgeGxpbms6aHJlZj0iI1NWR0lEXzFfIiAgc3R5bGU9Im92ZXJmbG93OnZpc2libGU7Ii8+DQoJCTwvY2xpcFBhdGg+DQoJCTxnIGNsYXNzPSJzdDEiPg0KCQkJPGRlZnM+DQoJCQkJPHJlY3QgaWQ9IlNWR0lEXzNfIiB4PSItMTM5NyIgeT0iLTk4MSIgd2lkdGg9IjUzNjEiIGhlaWdodD0iNDY0OS43MyIvPg0KCQkJPC9kZWZzPg0KCQkJPGNsaXBQYXRoIGlkPSJTVkdJRF80XyI+DQoJCQkJPHVzZSB4bGluazpocmVmPSIjU1ZHSURfM18iICBzdHlsZT0ib3ZlcmZsb3c6dmlzaWJsZTsiLz4NCgkJCTwvY2xpcFBhdGg+DQoJCQk8cGF0aCBjbGFzcz0ic3QyIiBkPSJNNjgxLjc1LDE0ODMuNDFjMjQwLjkxLDIxMS4wNSw1MjMuMTMsMzc0LjEzLDEwMDQuMjMsNDk4Ljk0YzM4OS43MywxMDEuMSw3NjEuNzEsNDQuMDMsNzYxLjcxLDQ0LjAzDQoJCQkJbDI0LjU5LDM2My4yNWMwLDAtNDg0LjUxLDY0LjkyLTkzOS43OS03MS4xNWMtNDU1LjI4LTEzNi4wNS04MjUuMDMtMzM2LjEzLTEwMDcuNDMtNDg1LjI5TDY4MS43NSwxNDgzLjQxeiIvPg0KCQkJPHBhdGggY2xhc3M9InN0MiIgZD0iTTQyMy44MSwxMDIzLjkyYzE0MC44MywxNTUuMjEsMzg3Ljk3LDM4OC4zOCw3NTcuNyw1NjcuMDNjMzE2LjQ1LDE1Mi44OCw2MDQuNjEsMjA4Ljc5LDc5OS41LDIzMC44Ng0KCQkJCWw1Ny43Mi0xMDU1LjYyYzAsMC00MDIuNjItOTUuNTMtODI4LjgtNDgzLjU3bC0yNDAuMzksNTMwLjZjMCwwLDE0NSwxNDUuMTEsMzExLjI4LDIyNS4zN2w2MC4yMS0xOTUuMzgNCgkJCQljMCwwLDE3OC4yOCwxMDkuODMsMzIzLjYzLDE3MS45bC02My4zOSwzNTQuODFjMCwwLTUzMS44OS0xMzguMDEtOTc5LjQ3LTY3My44M0w0MjMuODEsMTAyMy45MnoiLz4NCgkJPC9nPg0KCTwvZz4NCjwvZz4NCjwvc3ZnPg0K" alt="Emondt" />
     <div class="drawer-head-text">
       <div class="t1">emondt</div>
-      <div class="t2">Materiaal bestellen</div>
+      <div class="t2">Monteur-app</div>
     </div>
   </div>
   <div class="drawer-scroll">
@@ -258,7 +258,7 @@
     <div class="h-logo">
       <div class="h-brand">
         <div class="h-name">emondt</div>
-        <div class="h-sub">Materiaal bestellen</div>
+        <div class="h-sub">Monteur-app</div>
       </div>
     </div>
   </div>
@@ -271,8 +271,7 @@
 <!-- SCREENS -->
 <div class="screen active" id="tab-welkom">
   <div class="home-kop">
-    <img id="home-logo" alt="Emondt" />
-    <h1 class="home-titel">Monteur-app</h1>
+    <h1 class="home-titel" id="home-groet">Hoi</h1>
   </div>
 
   <!-- Meldingen -->
@@ -1030,8 +1029,8 @@
   <script src="js/cart.js?v=4.2.4" defer></script>
   <script src="js/beheer.js?v=4.3.3" defer></script>
   <script src="js/beheer-algemeen.js?v=4.3.2" defer></script>
-  <script src="js/home.js?v=4.3.6" defer></script>
+  <script src="js/home.js?v=4.3.7" defer></script>
   <script src="js/push.js?v=4.2.9" defer></script>
-  <script src="js/app.js?v=4.3.2" defer></script>
+  <script src="js/app.js?v=4.3.7" defer></script>
 </body>
 </html>

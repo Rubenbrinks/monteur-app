@@ -54,7 +54,7 @@ function initialiseerApp() {
     try { localStorage.setItem('emondt_actieve_user', sessie.gebruiker); } catch(e) {}
   }
   document.getElementById('di-all')?.classList.add('active');
-  zetHomeLogo();
+  zetHomeGroet();
   showTab('welkom');
   toonFeedbackEenmalig();
   laadArtikelenUitSheets();

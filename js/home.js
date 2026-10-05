@@ -103,9 +103,12 @@ async function laadHome(forceer) {
   }
 }
 
-// Het logo staat al (als data-URI) in het zijmenu; hergebruiken scheelt een tweede kopie.
-function zetHomeLogo() {
-  const bron = document.querySelector('.drawer-head img');
-  const doel = document.getElementById('home-logo');
-  if (bron && doel && !doel.src) doel.src = bron.src;
+// "Hoi <voornaam>": de eerste naam uit het profiel, anders de gebruikersnaam.
+function zetHomeGroet() {
+  const el = document.getElementById('home-groet');
+  if (!el) return;
+  const sessie = getAuthSessie();
+  const bron = (sessie?.naam || sessie?.gebruiker || '').trim();
+  const voornaam = bron.split(/[\s.]+/)[0] || '';
+  el.textContent = voornaam ? 'Hoi ' + voornaam.charAt(0).toUpperCase() + voornaam.slice(1) : 'Hoi';
 }

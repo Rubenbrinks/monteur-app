@@ -319,7 +319,6 @@ footer a:hover { color: var(--text-secondary); }
 
 /* ═══ HOMEPAGE: mededelingen en agenda ═══════════════════════ */
 .home-kop { display: flex; align-items: center; gap: 14px; padding: 18px 0 20px; }
-.home-kop img { width: 44px; height: 44px; object-fit: contain; flex-shrink: 0; }
 .home-titel { font-size: 1.6rem; font-weight: 800; color: var(--white); line-height: 1.1; margin: 0; letter-spacing: -.01em; }
 
 .home-sectie { margin-bottom: 22px; }
