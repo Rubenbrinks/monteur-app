@@ -125,6 +125,14 @@ Deno.serve(async (req) => {
       if (!ids.length) return json({ fout: 'geen gebruikers in afdeling ' + afd }, 400);
       vraag = vraag.in('user_id', ids);
       doelgroep = 'afdeling ' + afd;
+    } else if (body.rol === 'personeel' || body.rol === 'zzp') {
+      // Wie de mededeling kan zien: beheerders zien altijd alles.
+      const rollen = body.rol === 'zzp' ? ['zzp', 'admin'] : ['monteur', 'admin'];
+      const { data: leden } = await sb.from('profiles').select('id').in('rol', rollen);
+      const ids = (leden || []).map((l) => l.id);
+      if (!ids.length) return json({ fout: 'geen gebruikers met deze rol' }, 400);
+      vraag = vraag.in('user_id', ids);
+      doelgroep = body.rol === 'zzp' ? 'ZZP / Ingeleend' : 'eigen personeel';
     } else if (Array.isArray(body.userIds)) {
       const ids = body.userIds.filter((x: unknown) => typeof x === 'string' && /^[0-9a-f-]{36}$/i.test(x as string));
       if (!ids.length || ids.length !== body.userIds.length) return json({ fout: 'ongeldige of lege selectie' }, 400);

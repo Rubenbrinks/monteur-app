@@ -189,6 +189,8 @@ function resetMededelingForm() {
   ['med-id', 'med-titel', 'med-tekst', 'med-vervalt'].forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('med-doelgroep').value = 'iedereen';
   document.getElementById('med-vast').checked = false;
+  document.getElementById('med-push').checked = false;
+  document.getElementById('med-push-rij').style.display = '';
   document.getElementById('med-opslaan-btn').textContent = 'Plaatsen';
   document.getElementById('med-annuleer-btn').style.display = 'none';
 }
@@ -202,6 +204,7 @@ function bewerkMededeling(id) {
   document.getElementById('med-doelgroep').value = m.doelgroep;
   document.getElementById('med-vervalt').value = m.vervalt_op || '';
   document.getElementById('med-vast').checked = !!m.vastgezet;
+  document.getElementById('med-push-rij').style.display = 'none';
   document.getElementById('med-opslaan-btn').textContent = 'Opslaan';
   document.getElementById('med-annuleer-btn').style.display = '';
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -223,7 +226,9 @@ async function slaMededelingOp() {
     ? await sb.from('mededelingen').update(rij).eq('id', id)
     : await sb.from('mededelingen').insert({ ...rij, aangemaakt_door: getAuthSessie()?.id || null });
   if (error) { status.innerHTML = '<span style="color:var(--danger)">❌ ' + _escA(error.message) + '</span>'; return; }
-  status.innerHTML = '<span style="color:green">✅ ' + (id ? 'Opgeslagen.' : 'Geplaatst.') + '</span>';
+  let pushTekst = '';
+  if (!id && document.getElementById('med-push').checked) pushTekst = await _stuurMededelingPush(rij);
+  status.innerHTML = '<span style="color:green">✅ ' + (id ? 'Opgeslagen.' : 'Geplaatst.') + '</span>' + pushTekst;
   resetMededelingForm();
   laadMededelingenBeheer();
 }
@@ -316,4 +321,17 @@ async function verwijderAgenda(id) {
   const { error } = await sb.from('agenda').delete().eq('id', id);
   if (error) { document.getElementById('ag-status').innerHTML = '<span style="color:var(--danger)">❌ ' + _escA(error.message) + '</span>'; return; }
   laadAgendaBeheer();
+}
+
+// Pushmelding naar dezelfde doelgroep als de mededeling (alleen bij nieuw plaatsen).
+async function _stuurMededelingPush(rij) {
+  try {
+    const body = { actie: 'versturen', titel: rij.titel, tekst: rij.tekst.slice(0, 170), test: false };
+    if (rij.doelgroep !== 'iedereen') body.rol = rij.doelgroep;
+    const { data, error } = await sb.functions.invoke('meldingen-beheer', { body });
+    if (error || data?.status !== 'ok') throw new Error(data?.fout || error?.message || 'onbekende fout');
+    return ' <span style="color:green">Pushmelding naar ' + data.verstuurd + ' van ' + data.geprobeerd + ' apparaten.</span>';
+  } catch(e) {
+    return ' <span style="color:var(--danger)">Pushmelding mislukt: ' + _escA(e.message) + '</span>';
+  }
 }

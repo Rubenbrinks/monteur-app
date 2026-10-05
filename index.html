@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="css/layout.css?v=3.3.2">
   <link rel="stylesheet" href="css/components.css?v=4.3.1">
   <link rel="stylesheet" href="css/artikelen.css?v=3.3.2">
-  <link rel="stylesheet" href="css/pages.css?v=4.2.6">
+  <link rel="stylesheet" href="css/pages.css?v=4.3.2">
 </head>
 <body>
 
@@ -270,48 +270,19 @@
 
 <!-- SCREENS -->
 <div class="screen active" id="tab-welkom">
-  <div class="welkom-header">
-    <div class="welkom-badge">Emondt Groep</div>
-    <h1 class="welkom-title">Materiaal<br>bestellen</h1>
-    <p class="welkom-desc">Selecteer artikelen en verstuur direct naar de werkvoorbereiding.</p>
+  <div class="home-kop">
+    <img id="home-logo" alt="Emondt" />
+    <h1 class="home-titel">Monteur-app</h1>
   </div>
 
-  <div class="bento-grid">
-    <!-- Primaire actie: catalogus -->
-    <div class="bento-primary" onclick="showTab('artikelen')">
-      <div class="bento-primary-content">
-        <div class="bento-primary-icon">
-          <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        </div>
-        <div>
-          <div class="bento-primary-label">Artikelcatalogus</div>
-          <div class="bento-primary-sub">Zoeken, filteren en toevoegen</div>
-        </div>
-      </div>
-      <svg class="bento-primary-arrow" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-    </div>
+  <div class="home-sectie">
+    <div class="home-sectie-titel">Mededelingen</div>
+    <div id="home-mededelingen"><div class="home-leeg">⏳ Laden...</div></div>
+  </div>
 
-    <div class="bento-2col">
-      <div class="bento-tile" onclick="showTab('favorieten');closeDrawer()">
-        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <span>Favorieten</span>
-      </div>
-      <div class="bento-tile" onclick="showTab('historie');closeDrawer()">
-        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span>Bestelhistorie</span>
-      </div>
-    </div>
-
-    <div class="bento-2col">
-      <div class="bento-tile" onclick="showTab('telefoonlijst')">
-        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12.6a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        <span>Telefoonlijst</span>
-      </div>
-      <div class="bento-tile" onclick="openVrijArtikel()">
-        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        <span>Vrij artikel</span>
-      </div>
-    </div>
+  <div class="home-sectie">
+    <div class="home-sectie-titel">Agenda</div>
+    <div id="home-agenda"><div class="home-leeg">⏳ Laden...</div></div>
   </div>
 
   <!-- Meldingen -->
@@ -916,6 +887,7 @@
         <div class="field"><label>Vervalt op <span style="font-weight:400;color:var(--muted)">(optioneel)</span></label><input type="date" id="med-vervalt" /></div>
       </div>
       <label class="beheer-vink"><input type="checkbox" id="med-vast"> Bovenaan vastzetten</label>
+      <label class="beheer-vink" id="med-push-rij"><input type="checkbox" id="med-push"> Stuur ook een pushmelding naar de ontvangers</label>
       <div style="display:flex;gap:8px;margin-top:6px">
         <button class="btn btn-primary" id="med-opslaan-btn" onclick="slaMededelingOp()" style="margin-bottom:0;flex:1">Plaatsen</button>
         <button class="btn btn-secondary" id="med-annuleer-btn" onclick="resetMededelingForm()" style="margin-bottom:0;display:none">Annuleren</button>
@@ -1049,11 +1021,12 @@
   <script src="js/ui.js?v=4.2.6" defer></script>
   <script src="js/auth.js?v=4.1.9" defer></script>
   <script src="js/api.js?v=4.2.9" defer></script>
-  <script src="js/artikelen.js?v=4.3.1" defer></script>
+  <script src="js/artikelen.js?v=4.3.2" defer></script>
   <script src="js/cart.js?v=4.2.4" defer></script>
   <script src="js/beheer.js?v=4.2.8" defer></script>
-  <script src="js/beheer-algemeen.js?v=4.3.1" defer></script>
+  <script src="js/beheer-algemeen.js?v=4.3.2" defer></script>
+  <script src="js/home.js?v=4.3.2" defer></script>
   <script src="js/push.js?v=4.2.9" defer></script>
-  <script src="js/app.js?v=4.2.6" defer></script>
+  <script src="js/app.js?v=4.3.2" defer></script>
 </body>
 </html>

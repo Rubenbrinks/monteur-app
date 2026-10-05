@@ -828,7 +828,7 @@ function _vulDoelgroepen(data) {
   _meldingPersonen = (data.personen || []).filter(p => p.bereikbaar);
   const afd = Object.entries(data.afdelingen || {}).sort((a, b) => a[0].localeCompare(b[0], 'nl'))
     .map(([naam, r]) => `<option value="afd:${_escMeld(naam)}">Afdeling ${_escMeld(naam)} (${r.bereikbaar} van ${r.totaal} bereikbaar)</option>`).join('');
-  sel.innerHTML = '<option value="">Iedereen</option>' + afd + '<option value="personen">Kies personen...</option>';
+  sel.innerHTML = '<option value="">Iedereen</option><option value="rol:personeel">Alleen eigen personeel</option><option value="rol:zzp">Alleen ZZP / Ingeleend</option>' + afd + '<option value="personen">Kies personen...</option>';
   if ([...sel.options].some(o => o.value === huidig)) sel.value = huidig;
   const lijst = document.getElementById('melding-personen');
   lijst.innerHTML = _meldingPersonen.length
@@ -851,6 +851,7 @@ async function verstuurMelding(test) {
   const ontvangers = { actie: 'versturen', titel, tekst, test };
   let wie = 'ALLE monteurs';
   if (keuze.startsWith('afd:')) { ontvangers.afdeling = keuze.slice(4); wie = 'afdeling ' + keuze.slice(4); }
+  else if (keuze.startsWith('rol:')) { ontvangers.rol = keuze.slice(4); wie = keuze === 'rol:zzp' ? 'alle ZZP / Ingeleend' : 'al het eigen personeel'; }
   else if (keuze === 'personen') {
     ontvangers.userIds = [...document.querySelectorAll('#melding-personen input:checked')].map(c => c.value);
     if (!ontvangers.userIds.length && !test) { status.innerHTML = '<span style="color:var(--danger)">⚠️ Kies minstens één persoon.</span>'; return; }

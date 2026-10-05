@@ -361,6 +361,7 @@ function showTab(name) {
   const navBtn = document.getElementById('nav-' + name);
   if (navBtn) navBtn.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'instant' });
+  if (name === 'welkom' && typeof laadHome === 'function') laadHome();
   if (name === 'winkelwagen') renderCart();
   if (name === 'telefoonlijst') laadTelefoonlijst();
   if (name === 'favorieten') renderFavorieten();
