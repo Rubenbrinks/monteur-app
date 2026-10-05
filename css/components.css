@@ -230,3 +230,39 @@ input[type="date"] {
 }
 .toggle-switch.aan { background:var(--green); }
 .toggle-switch.aan::after { transform:translateX(18px); }
+
+
+/* ═══ BEHEERMENU (hoofdmenu → submenu → onderdeel) ═══════════ */
+.beheer-sectie { display: none; }
+.beheer-sectie.actief { display: block; }
+.beheer-sectie.actief > .admin-kaart-header { display: none; }
+.beheer-sectie.actief > .admin-kaart-body { display: block !important; border-top: none; }
+
+.beheer-menu-item {
+  display: flex; align-items: center; gap: 14px; width: 100%;
+  padding: 16px 18px; margin-bottom: 10px; text-align: left;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--elev-2);
+  font-family: 'Inter', 'DM Sans', sans-serif; color: var(--text); cursor: pointer;
+  transition: background .15s;
+}
+.beheer-menu-item:active { background: var(--surface2); }
+.beheer-menu-item > svg { color: var(--muted); flex-shrink: 0; }
+.beheer-menu-icoon { font-size: 1.4rem; flex-shrink: 0; }
+.beheer-menu-tekst { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.beheer-menu-tekst strong { font-size: .95rem; font-weight: 700; }
+.beheer-menu-tekst span { font-size: .76rem; color: var(--muted); line-height: 1.4; }
+
+.beheer-uitleg { font-size: .84rem; color: var(--text-secondary); line-height: 1.5; margin: 0 0 14px; }
+.beheer-vink { display: flex; align-items: center; gap: 8px; font-size: .88rem; margin: 4px 0 10px; cursor: pointer; }
+.beheer-vink input { width: auto; margin: 0; }
+.beheer-rij { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.beheer-rij.verlopen { opacity: .5; }
+.beheer-rij-titel { font-size: .88rem; font-weight: 600; color: var(--text); }
+.beheer-rij-sub { font-size: .74rem; color: var(--muted); }
+.beheer-rij-knop {
+  flex-shrink: 0; padding: 6px 10px; border-radius: 8px; cursor: pointer;
+  background: var(--surface2); border: 1px solid var(--border-strong); color: var(--text-secondary);
+  font-family: inherit; font-size: .76rem; font-weight: 600;
+}
+.beheer-rij-knop.gevaar { color: var(--danger); }

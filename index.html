@@ -24,7 +24,7 @@
     })();
   </script>
   <link rel="stylesheet" href="css/layout.css?v=3.3.2">
-  <link rel="stylesheet" href="css/components.css?v=4.1.0">
+  <link rel="stylesheet" href="css/components.css?v=4.3.1">
   <link rel="stylesheet" href="css/artikelen.css?v=3.3.2">
   <link rel="stylesheet" href="css/pages.css?v=4.2.6">
 </head>
@@ -713,16 +713,19 @@
 <!-- BEHEERDERSPANEEL -->
 <div class="screen" id="tab-beheer-panel">
   <div class="page-header">
-    <button class="page-back-btn" onclick="showTab('welkom')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <h2>Beheer</h2>
+    <button class="page-back-btn" onclick="beheerTerug()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2 id="beheer-titel">Beheer</h2>
   </div>
 
   <div id="beheer-omgeving-waarschuwing" style="display:none">
     ⚠️ <strong>Lokale testomgeving</strong> — schrijfacties werken niet vanuit <code>localhost</code> of <code>file://</code>. Deploy op GitHub Pages.
   </div>
 
+  <!-- Hoofdmenu en submenu's -->
+  <div id="beheer-menu"></div>
+
   <!-- 1. Koppeling -->
-  <div class="admin-card">
+  <div class="admin-card beheer-sectie" data-sectie="testfuncties">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-koppeling',this)">
       <span>Test Functies</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </button>
@@ -736,21 +739,8 @@
     </div>
   </div>
 
-  <!-- 2. Artikeldatabase -->
-  <div class="admin-card">
-    <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-database',this)">
-      <span>Artikeldatabase</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
-    </button>
-    <div id="kaart-database" class="admin-kaart-body" style="display:none">
-      <p style="font-size:.84rem;color:var(--text-secondary);margin-bottom:12px;line-height:1.6">Kolomtitels: <code style="background:var(--surface2);padding:1px 5px;border-radius:4px;font-size:.78rem;color:var(--green)">code · naam · cat · subcat · subsubcat · eenheid · leverancier · warning · verpakking · afbeelding · link · linktoitems</code></p>
-      <a href="https://docs.google.com/spreadsheets/d/1c7GeL9KG60aJDRGzoObfnDjOhTj-UKaGGIOSmGwiFvM/edit" target="_blank" style="text-decoration:none">
-        <button class="btn btn-primary" style="margin-bottom:0">Open Google Spreadsheet</button>
-      </a>
-    </div>
-  </div>
-
   <!-- 3. Artikel toevoegen -->
-  <div class="admin-card">
+  <div class="admin-card beheer-sectie" data-sectie="artikel-toevoegen">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-toevoegen',this)">
       <span>Artikel toevoegen</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </button>
@@ -794,7 +784,7 @@
   </div>
 
   <!-- 4. Artikel bewerken / verwijderen -->
-  <div class="admin-card">
+  <div class="admin-card beheer-sectie" data-sectie="artikel-bewerken">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-bewerken',this)">
       <span>Artikel bewerken / verwijderen</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </button>
@@ -808,7 +798,7 @@
   </div>
 
   <!-- 5. CSV importeren -->
-  <div class="admin-card">
+  <div class="admin-card beheer-sectie" data-sectie="csv">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-csv',this)">
       <span>CSV importeren — Technische Unie</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </button>
@@ -833,7 +823,7 @@
   </div>
 
   <!-- 6. Bestellingenoverzicht -->
-  <div class="admin-card">
+  <div class="admin-card beheer-sectie" data-sectie="historie">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-bestellingen',this);if(!this.classList.contains('was-opened')){this.classList.add('was-opened');laadBestellingenOverzicht()}">
       <span>Bestellingenoverzicht</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </button>
@@ -845,7 +835,7 @@
   </div>
 
   <!-- 6b. Artikelen exporteren -->
-  <div class="admin-card">
+  <div class="admin-card beheer-sectie" data-sectie="exporteren">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-export',this)">
       <span>Bestelde artikelen exporteren</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </button>
@@ -861,7 +851,7 @@
   </div>
 
   <!-- 6c. Pushmeldingen -->
-  <div class="admin-card">
+  <div class="admin-card beheer-sectie" data-sectie="meldingen">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-meldingen',this);if(!this.classList.contains('was-opened')){this.classList.add('was-opened');laadMeldingenStatistiek()}">
       <span>Pushmeldingen</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </button>
@@ -885,7 +875,7 @@
   </div>
 
   <!-- 6d. Gebruikers (rollen) -->
-  <div class="admin-card">
+  <div class="admin-card beheer-sectie" data-sectie="gebruikers">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-gebruikers',this);if(!this.classList.contains('was-opened')){this.classList.add('was-opened');laadGebruikers()}">
       <span>Gebruikers</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </button>
@@ -898,7 +888,7 @@
   </div>
 
   <!-- 7. Emailadressen beheren -->
-  <div class="admin-card">
+  <div class="admin-card beheer-sectie" data-sectie="email">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-email',this);if(!this.classList.contains('was-opened')){this.classList.add('was-opened');laadEmailontvangers()}">
       <span>Emailadressen beheren</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
     </button>
@@ -913,8 +903,55 @@
       </div>
     </div>
   </div>
+  <!-- Mededelingen -->
+  <div class="admin-card beheer-sectie" data-sectie="mededelingen">
+    <div id="kaart-mededelingen" class="admin-kaart-body">
+      <p class="beheer-uitleg">Mededelingen staan bovenaan de homepage als uitvouwbare regels. Kies per mededeling wie hem ziet.</p>
+      <input type="hidden" id="med-id" />
+      <div class="field"><label>Titel <span class="req">*</span></label><input type="text" id="med-titel" maxlength="100" placeholder="bijv. Nieuwe veiligheidsregels" /></div>
+      <div class="field"><label>Tekst</label><textarea id="med-tekst" rows="4" placeholder="De uitleg die zichtbaar wordt als de regel wordt uitgevouwen"></textarea></div>
+      <div class="field-2">
+        <div class="field"><label>Voor wie</label>
+          <select id="med-doelgroep"><option value="iedereen">Iedereen</option><option value="personeel">Eigen personeel</option><option value="zzp">ZZP / Ingeleend</option></select></div>
+        <div class="field"><label>Vervalt op <span style="font-weight:400;color:var(--muted)">(optioneel)</span></label><input type="date" id="med-vervalt" /></div>
+      </div>
+      <label class="beheer-vink"><input type="checkbox" id="med-vast"> Bovenaan vastzetten</label>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="btn btn-primary" id="med-opslaan-btn" onclick="slaMededelingOp()" style="margin-bottom:0;flex:1">Plaatsen</button>
+        <button class="btn btn-secondary" id="med-annuleer-btn" onclick="resetMededelingForm()" style="margin-bottom:0;display:none">Annuleren</button>
+      </div>
+      <div id="med-status" style="font-size:.84rem;margin-top:8px;line-height:1.6;min-height:18px"></div>
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin:14px 0 6px">Geplaatst</div>
+      <div id="med-lijst"></div>
+    </div>
+  </div>
 
-
+  <!-- Agenda -->
+  <div class="admin-card beheer-sectie" data-sectie="agenda">
+    <div id="kaart-agenda" class="admin-kaart-body">
+      <p class="beheer-uitleg">Agenda-items staan op de homepage, op datum. Een item verdwijnt de dag na afloop van het scherm van de monteurs; hier blijft het staan.</p>
+      <input type="hidden" id="ag-id" />
+      <div class="field"><label>Titel <span class="req">*</span></label><input type="text" id="ag-titel" maxlength="100" placeholder="bijv. Toolbox meeting" /></div>
+      <div class="field-2">
+        <div class="field"><label>Datum <span class="req">*</span></label><input type="date" id="ag-datum" /></div>
+        <div class="field"><label>Einddatum <span style="font-weight:400;color:var(--muted)">(meerdaags)</span></label><input type="date" id="ag-eind" /></div>
+      </div>
+      <div class="field-2">
+        <div class="field"><label>Tijd</label><input type="text" id="ag-tijd" maxlength="40" placeholder="bijv. 08:00 - 12:00" /></div>
+        <div class="field"><label>Locatie</label><input type="text" id="ag-locatie" maxlength="100" placeholder="bijv. Kantoor Enschede" /></div>
+      </div>
+      <div class="field"><label>Toelichting</label><textarea id="ag-toel" rows="3" placeholder="Extra uitleg, zichtbaar bij uitvouwen"></textarea></div>
+      <div class="field"><label>Voor wie</label>
+        <select id="ag-doelgroep"><option value="iedereen">Iedereen</option><option value="personeel">Eigen personeel</option><option value="zzp">ZZP / Ingeleend</option></select></div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="btn btn-primary" id="ag-opslaan-btn" onclick="slaAgendaOp()" style="margin-bottom:0;flex:1">Toevoegen</button>
+        <button class="btn btn-secondary" id="ag-annuleer-btn" onclick="resetAgendaForm()" style="margin-bottom:0;display:none">Annuleren</button>
+      </div>
+      <div id="ag-status" style="font-size:.84rem;margin-top:8px;line-height:1.6;min-height:18px"></div>
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin:14px 0 6px">Agenda</div>
+      <div id="ag-lijst"></div>
+    </div>
+  </div>
 </div>
 <!-- BESTELBEVESTIGING MODAL -->
 <div id="bevestiging-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:800;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)">
@@ -1012,10 +1049,10 @@
   <script src="js/ui.js?v=4.2.6" defer></script>
   <script src="js/auth.js?v=4.1.9" defer></script>
   <script src="js/api.js?v=4.2.9" defer></script>
-  <script src="js/artikelen.js?v=4.2.1" defer></script>
+  <script src="js/artikelen.js?v=4.3.1" defer></script>
   <script src="js/cart.js?v=4.2.4" defer></script>
   <script src="js/beheer.js?v=4.2.8" defer></script>
-  <script src="js/beheer-algemeen.js?v=4.3.0" defer></script>
+  <script src="js/beheer-algemeen.js?v=4.3.1" defer></script>
   <script src="js/push.js?v=4.2.9" defer></script>
   <script src="js/app.js?v=4.2.6" defer></script>
 </body>
