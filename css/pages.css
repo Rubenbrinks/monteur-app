@@ -318,8 +318,31 @@ footer a:hover { color: var(--text-secondary); }
 
 
 /* ═══ HOMEPAGE: mededelingen en agenda ═══════════════════════ */
-.home-kop { display: flex; align-items: center; gap: 14px; padding: 18px 0 20px; }
-.home-titel { font-size: 1.6rem; font-weight: 800; color: var(--white); line-height: 1.1; margin: 0; letter-spacing: -.01em; }
+/* Welkomstblok: zachte groene gloed met "rimpel"-lijnen, een knipoog naar koeling. */
+.home-hero {
+  position: relative; overflow: hidden; isolation: isolate;
+  margin: 14px 0 22px; padding: 22px 20px 24px;
+  border-radius: var(--radius-lg, var(--radius));
+  border: 1px solid var(--green-border);
+  background: linear-gradient(135deg, var(--green-dim) 0%, var(--surface) 65%);
+  animation: home-hero-in .5s ease-out both;
+}
+.home-hero::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: repeating-radial-gradient(circle at 100% 0, transparent 0 20px, var(--green-border) 20px 21px);
+  -webkit-mask-image: radial-gradient(circle at 100% 0, #000 0, transparent 70%);
+          mask-image: radial-gradient(circle at 100% 0, #000 0, transparent 70%);
+  opacity: .55;
+}
+.home-hero-datum {
+  font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .14em;
+  color: var(--green); margin-bottom: 8px;
+}
+.home-titel { margin: 0; font-size: 2rem; line-height: 1.1; letter-spacing: -.02em; color: var(--text); }
+.home-welkom { font-weight: 300; }
+.home-naam { font-weight: 800; color: var(--green); }
+@keyframes home-hero-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .home-hero { animation: none; } }
 
 .home-sectie { margin-bottom: 22px; }
 .home-sectie-titel {

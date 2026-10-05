@@ -103,12 +103,15 @@ async function laadHome(forceer) {
   }
 }
 
-// "Hoi <voornaam>": de eerste naam uit het profiel, anders de gebruikersnaam.
+// "Welkom <voornaam>": de eerste naam uit het profiel, anders de gebruikersnaam.
+// Erboven staat de datum van vandaag.
 function zetHomeGroet() {
-  const el = document.getElementById('home-groet');
-  if (!el) return;
   const sessie = getAuthSessie();
   const bron = (sessie?.naam || sessie?.gebruiker || '').trim();
   const voornaam = bron.split(/[\s.]+/)[0] || '';
-  el.textContent = voornaam ? 'Hoi ' + voornaam.charAt(0).toUpperCase() + voornaam.slice(1) : 'Hoi';
+  const naamEl = document.getElementById('home-naam');
+  if (naamEl) naamEl.textContent = voornaam ? voornaam.charAt(0).toUpperCase() + voornaam.slice(1) : '';
+  const datumEl = document.getElementById('home-datum');
+  if (datumEl) datumEl.textContent = new Date().toLocaleDateString('nl-NL',
+    { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Amsterdam' });
 }

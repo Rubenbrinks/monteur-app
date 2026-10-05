@@ -14,7 +14,7 @@ window.onload = () => {
       if (swCache) {
         ['app-versie-footer', 'app-versie-login'].forEach(id => {
           const el = document.getElementById(id);
-          if (el) el.textContent = swCache;
+          if (el) el.textContent = swCache.replace('emondt-materiaalapp-', '');
         });
       }
     });

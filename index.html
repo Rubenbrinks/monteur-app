@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="css/layout.css?v=3.3.2">
   <link rel="stylesheet" href="css/components.css?v=4.3.3">
   <link rel="stylesheet" href="css/artikelen.css?v=3.3.2">
-  <link rel="stylesheet" href="css/pages.css?v=4.3.7">
+  <link rel="stylesheet" href="css/pages.css?v=4.3.9">
 </head>
 <body>
 
@@ -151,7 +151,7 @@
     <span class="thema-toggle-label">Lichte modus</span>
   </button>
   <p style="color:var(--muted);font-size:.68rem;margin-top:14px;text-align:center">
-    <span id="app-versie-login"></span> · Ontwerp & concept door Ruben Brinks
+    <span id="app-versie-login"></span> - ©emondt-groep Ruben Brinks
   </p>
 </div>
 
@@ -270,8 +270,9 @@
 
 <!-- SCREENS -->
 <div class="screen active" id="tab-welkom">
-  <div class="home-kop">
-    <h1 class="home-titel" id="home-groet">Hoi</h1>
+  <div class="home-hero">
+    <div class="home-hero-datum" id="home-datum"></div>
+    <h1 class="home-titel"><span class="home-welkom">Welkom</span> <span class="home-naam" id="home-naam"></span></h1>
   </div>
 
   <!-- Meldingen -->
@@ -988,7 +989,7 @@
 <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 <!-- ── FOOTER ── -->
 <footer>
-  <span id="app-versie-footer"></span> · Ontwerp & concept door Ruben Brinks
+  <span id="app-versie-footer"></span> - ©emondt-groep Ruben Brinks
   <div style="display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:6px 14px;margin-top:10px">
     <a href="https://emondt.nl/privacy-statement-koeltechniek/" target="_blank" rel="noopener noreferrer"
       style="color:var(--muted);font-size:.72rem;text-decoration:underline;text-underline-offset:2px">Privacyverklaring</a>
@@ -1029,8 +1030,8 @@
   <script src="js/cart.js?v=4.2.4" defer></script>
   <script src="js/beheer.js?v=4.3.3" defer></script>
   <script src="js/beheer-algemeen.js?v=4.3.2" defer></script>
-  <script src="js/home.js?v=4.3.7" defer></script>
+  <script src="js/home.js?v=4.3.9" defer></script>
   <script src="js/push.js?v=4.2.9" defer></script>
-  <script src="js/app.js?v=4.3.7" defer></script>
+  <script src="js/app.js?v=4.3.9" defer></script>
 </body>
 </html>
