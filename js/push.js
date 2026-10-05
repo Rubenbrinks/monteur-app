@@ -136,7 +136,7 @@ async function renderMeldingenKaart() {
   kaart.style.display = '';
   const teksten = {
     'uit': 'Krijg direct een melding zodra je bestelling is afgerond. Zo hoef je niet te wachten of te bellen.',
-    'ios-installeren': 'Op een iPhone werkt dit alleen als de app op je beginscherm staat. Tik in Safari op Delen en kies "Zet op beginscherm". Open de app daarna vanaf je beginscherm en zet meldingen aan.',
+    'ios-installeren': 'Op een iPhone werkt dit alleen als de app op je beginscherm staat. Tik in Safari op Delen, kies "Zet op beginscherm" en tik op Voeg toe. Open de app daarna via het icoon op je beginscherm en zet meldingen aan.',
     'geblokkeerd': 'Meldingen zijn geblokkeerd in de instellingen van je browser of telefoon. Zet ze daar aan voor deze app en kom dan terug.',
   };
   tekst.textContent = teksten[status];
