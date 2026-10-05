@@ -92,7 +92,7 @@ async function laadHome(forceer) {
     if (ag.error) throw ag.error;
     // De database filtert al op doelgroep en datum voor monteurs/ZZP; beheerders
     // krijgen alles terug en moeten verlopen items hier alsnog kwijt.
-    _toonMededelingen((med.data || []).filter(m => !m.vervalt_op || m.vervalt_op >= vandaag));
+    _toonMededelingen((med.data || []).filter(m => m.zichtbaar !== false && (!m.vervalt_op || m.vervalt_op >= vandaag)));
     _toonAgenda((ag.data || []).filter(a => (a.einddatum || a.datum) >= vandaag));
   } catch(e) {
     _homeLaatstGeladen = 0;

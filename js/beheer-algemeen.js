@@ -174,11 +174,13 @@ async function laadMededelingenBeheer() {
   const vandaag = vandaagNL();
   lijst.innerHTML = _mededelingen.length ? _mededelingen.map(m => {
     const verlopen = m.vervalt_op && m.vervalt_op < vandaag;
-    return `<div class="beheer-rij${verlopen ? ' verlopen' : ''}">
+    const verborgen = m.zichtbaar === false;
+    return `<div class="beheer-rij${verlopen || verborgen ? ' verlopen' : ''}">
       <div style="flex:1;min-width:0">
         <div class="beheer-rij-titel">${m.vastgezet ? '📌 ' : ''}${_escA(m.titel)}</div>
-        <div class="beheer-rij-sub">${DOELGROEP_NAMEN[m.doelgroep]}${m.vervalt_op ? ' · ' + (verlopen ? 'verlopen op ' : 'tot ') + _datumTekst(m.vervalt_op, true) : ''}</div>
+        <div class="beheer-rij-sub">${DOELGROEP_NAMEN[m.doelgroep]}${m.vervalt_op ? ' · ' + (verlopen ? 'verlopen op ' : 'tot ') + _datumTekst(m.vervalt_op, true) : ''}${verborgen ? ' · verborgen' : ''}</div>
       </div>
+      <button class="beheer-rij-knop" onclick="wisselZichtbaar(${m.id})">${verborgen ? 'Toon' : 'Verberg'}</button>
       <button class="beheer-rij-knop" onclick="bewerkMededeling(${m.id})">Bewerk</button>
       <button class="beheer-rij-knop gevaar" onclick="verwijderMededeling(${m.id})">Wis</button>
     </div>`;
@@ -190,6 +192,7 @@ function resetMededelingForm() {
   document.getElementById('med-doelgroep').value = 'iedereen';
   document.getElementById('med-vast').checked = false;
   document.getElementById('med-push').checked = false;
+  document.getElementById('med-zichtbaar').checked = true;
   document.getElementById('med-push-rij').style.display = '';
   document.getElementById('med-opslaan-btn').textContent = 'Plaatsen';
   document.getElementById('med-annuleer-btn').style.display = 'none';
@@ -204,6 +207,7 @@ function bewerkMededeling(id) {
   document.getElementById('med-doelgroep').value = m.doelgroep;
   document.getElementById('med-vervalt').value = m.vervalt_op || '';
   document.getElementById('med-vast').checked = !!m.vastgezet;
+  document.getElementById('med-zichtbaar').checked = m.zichtbaar !== false;
   document.getElementById('med-push-rij').style.display = 'none';
   document.getElementById('med-opslaan-btn').textContent = 'Opslaan';
   document.getElementById('med-annuleer-btn').style.display = '';
@@ -219,6 +223,7 @@ async function slaMededelingOp() {
     doelgroep:  document.getElementById('med-doelgroep').value,
     vervalt_op: document.getElementById('med-vervalt').value || null,
     vastgezet:  document.getElementById('med-vast').checked,
+    zichtbaar:  document.getElementById('med-zichtbaar').checked,
   };
   if (!rij.titel) { status.innerHTML = '<span style="color:var(--danger)">⚠️ Vul een titel in.</span>'; return; }
   status.textContent = '⏳ Opslaan...';
@@ -227,7 +232,7 @@ async function slaMededelingOp() {
     : await sb.from('mededelingen').insert({ ...rij, aangemaakt_door: getAuthSessie()?.id || null });
   if (error) { status.innerHTML = '<span style="color:var(--danger)">❌ ' + _escA(error.message) + '</span>'; return; }
   let pushTekst = '';
-  if (!id && document.getElementById('med-push').checked) pushTekst = await _stuurMededelingPush(rij);
+  if (!id && rij.zichtbaar && document.getElementById('med-push').checked) pushTekst = await _stuurMededelingPush(rij);
   status.innerHTML = '<span style="color:green">✅ ' + (id ? 'Opgeslagen.' : 'Geplaatst.') + '</span>' + pushTekst;
   resetMededelingForm();
   laadMededelingenBeheer();
@@ -334,4 +339,13 @@ async function _stuurMededelingPush(rij) {
   } catch(e) {
     return ' <span style="color:var(--danger)">Pushmelding mislukt: ' + _escA(e.message) + '</span>';
   }
+}
+
+// Snel tonen/verbergen vanuit de lijst, zonder het formulier te openen.
+async function wisselZichtbaar(id) {
+  const m = _mededelingen.find(x => x.id === id);
+  if (!m) return;
+  const { error } = await sb.from('mededelingen').update({ zichtbaar: m.zichtbaar === false }).eq('id', id);
+  if (error) { document.getElementById('med-status').innerHTML = '<span style="color:var(--danger)">❌ ' + _escA(error.message) + '</span>'; return; }
+  laadMededelingenBeheer();
 }
