@@ -1,5 +1,5 @@
 // ── Emondt Materiaalapp – Service Worker ──────────────────────
-const CACHE_NAAM = 'emondt-materiaalapp-v4.4.2';
+const CACHE_NAAM = 'emondt-materiaalapp-v4.4.3';
 
 const TE_CACHEN = [
   './index.html',
@@ -92,7 +92,7 @@ self.addEventListener('push', event => {
   const opties = {
     body:  data.body || '',
     icon:  './icon-192.png',
-    badge: './icon-192.png',
+    badge: './badge-96.png',
     tag:   data.tag || 'emondt-melding',
     data:  { url: data.url || './index.html#historie' },
     vibrate: [80, 40, 80],
