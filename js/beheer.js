@@ -784,3 +784,99 @@ async function slaEmailontvangerOp() {
     statusEl.innerHTML = `<span style="color:var(--danger)">❌ ${err.message}</span>`;
   }
 }
+
+
+// ── PUSHMELDINGEN (beheer) ────────────────────────────────────
+// Praat met de serverfunctie 'meldingen-beheer'; die controleert zelf of je
+// beheerder bent. Een aantal "apparaten met meldingen" = abonnementen in de
+// database: wie meldingen uitzet in de app wordt direct verwijderd, maar wie
+// ze alleen in de telefooninstellingen blokkeert valt pas weg bij de eerstvolgende
+// verzending.
+function _escMeld(s) {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+async function laadMeldingenStatistiek() {
+  const el = document.getElementById('meldingen-stat');
+  if (!el) return;
+  el.innerHTML = '<span style="color:var(--muted);font-size:.84rem">⏳ Laden...</span>';
+  try {
+    const { data, error } = await sb.functions.invoke('meldingen-beheer', { body: { actie: 'statistiek' } });
+    if (error || data?.status !== 'ok') throw new Error(data?.fout || error?.message || 'onbekende fout');
+    const pct = data.gebruikers ? Math.round(data.bereikbaar / data.gebruikers * 100) : 0;
+    const soorten = Object.entries(data.perSoort || {}).sort((a, b) => b[1] - a[1])
+      .map(([s, n]) => `<div class="s-row"><span>${_escMeld(s)}</span><span>${n}</span></div>`).join('');
+    const zonder = (data.personen || []).filter(p => !p.bereikbaar).map(p => _escMeld(p.naam)).join(', ');
+    const aantalZonder = (data.personen || []).filter(p => !p.bereikbaar).length;
+    _vulDoelgroepen(data);
+    el.innerHTML = `
+      <div class="s-row total"><span>Gebruikers bereikbaar</span><span>${data.bereikbaar} van ${data.gebruikers} (${pct}%)</span></div>
+      <div class="s-row"><span>Apparaten met meldingen</span><span>${data.apparaten}</span></div>
+      ${soorten}
+      ${zonder ? `<details style="margin-top:8px;font-size:.82rem;color:var(--text-secondary)"><summary style="cursor:pointer">Nog geen meldingen aan (${aantalZonder})</summary><div style="margin-top:6px;line-height:1.6">${zonder}</div></details>` : ''}`;
+  } catch(e) {
+    el.innerHTML = '<span style="color:var(--danger);font-size:.84rem">❌ Kon de cijfers niet laden: ' + _escMeld(e.message) + '</span>';
+  }
+}
+
+// Vult de keuzelijst "Ontvangers" met afdelingen en de lijst met personen.
+let _meldingPersonen = [];
+function _vulDoelgroepen(data) {
+  const sel = document.getElementById('melding-doelgroep');
+  if (!sel) return;
+  const huidig = sel.value;
+  _meldingPersonen = (data.personen || []).filter(p => p.bereikbaar);
+  const afd = Object.entries(data.afdelingen || {}).sort((a, b) => a[0].localeCompare(b[0], 'nl'))
+    .map(([naam, r]) => `<option value="afd:${_escMeld(naam)}">Afdeling ${_escMeld(naam)} (${r.bereikbaar} van ${r.totaal} bereikbaar)</option>`).join('');
+  sel.innerHTML = '<option value="">Iedereen</option>' + afd + '<option value="personen">Kies personen...</option>';
+  if ([...sel.options].some(o => o.value === huidig)) sel.value = huidig;
+  const lijst = document.getElementById('melding-personen');
+  lijst.innerHTML = _meldingPersonen.length
+    ? _meldingPersonen.map(p => `<label style="display:flex;align-items:center;gap:8px;padding:4px 0"><input type="checkbox" value="${_escMeld(p.id)}" style="width:auto;margin:0"> ${_escMeld(p.naam)}${p.afdeling ? ' <span style="color:var(--muted)">· ' + _escMeld(p.afdeling) + '</span>' : ''}</label>`).join('')
+    : '<span style="color:var(--muted)">Niemand heeft meldingen aan.</span>';
+  meldingDoelgroepWissel();
+}
+function meldingDoelgroepWissel() {
+  const sel = document.getElementById('melding-doelgroep');
+  const lijst = document.getElementById('melding-personen');
+  if (sel && lijst) lijst.style.display = sel.value === 'personen' ? 'block' : 'none';
+}
+
+async function verstuurMelding(test) {
+  const titel = document.getElementById('melding-titel').value.trim();
+  const tekst = document.getElementById('melding-tekst').value.trim();
+  const status = document.getElementById('melding-status');
+  if (!titel) { status.innerHTML = '<span style="color:var(--danger)">⚠️ Vul een titel in.</span>'; return; }
+  const keuze = document.getElementById('melding-doelgroep').value;
+  const ontvangers = { actie: 'versturen', titel, tekst, test };
+  let wie = 'ALLE monteurs';
+  if (keuze.startsWith('afd:')) { ontvangers.afdeling = keuze.slice(4); wie = 'afdeling ' + keuze.slice(4); }
+  else if (keuze === 'personen') {
+    ontvangers.userIds = [...document.querySelectorAll('#melding-personen input:checked')].map(c => c.value);
+    if (!ontvangers.userIds.length && !test) { status.innerHTML = '<span style="color:var(--danger)">⚠️ Kies minstens één persoon.</span>'; return; }
+    wie = ontvangers.userIds.length + ' gekozen personen';
+  }
+  if (!test && !confirm(`Deze melding naar ${wie} sturen?
+
+${titel}
+${tekst}
+
+Dit kun je niet terughalen.`)) return;
+
+  status.innerHTML = '<span style="color:var(--muted)">⏳ Versturen...</span>';
+  try {
+    const { data, error } = await sb.functions.invoke('meldingen-beheer', { body: ontvangers });
+    if (error || data?.status !== 'ok') throw new Error(data?.fout || error?.message || 'onbekende fout');
+    if (!data.geprobeerd) {
+      status.innerHTML = '<span style="color:var(--danger)">⚠️ ' + _escMeld(data.reden) + '</span>';
+      return;
+    }
+    let tekstUit = `✅ Verstuurd naar ${data.verstuurd} van ${data.geprobeerd} apparaten${test ? ' (test)' : ''}.`;
+    if (data.opgeruimd) tekstUit += ` ${data.opgeruimd} verlopen apparaten opgeruimd.`;
+    if (data.fouten?.length) tekstUit += ' Fouten: ' + data.fouten.map(_escMeld).join('; ');
+    status.innerHTML = '<span style="color:green">' + tekstUit + '</span>';
+    if (!test) laadMeldingenStatistiek();
+  } catch(e) {
+    status.innerHTML = '<span style="color:var(--danger)">❌ ' + _escMeld(e.message) + '</span>';
+  }
+}

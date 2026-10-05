@@ -4,3 +4,7 @@ project_id = "monteur-app"
 
 [functions.bestelling-status]
 verify_jwt = false
+
+# Beheerpaneel: alleen ingelogde beheerders (de functie controleert de rol zelf).
+[functions.meldingen-beheer]
+verify_jwt = true
