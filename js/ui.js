@@ -160,6 +160,18 @@ function sluitVrijArtikel() {
 }
 
 
+// ── FEEDBACK POPUP (eenmalig) ────────────────────────────────
+function toonFeedbackEenmalig() {
+  try { if (localStorage.getItem('emondt_feedback_getoond')) return; } catch(e) { return; }
+  setTimeout(() => {
+    try { localStorage.setItem('emondt_feedback_getoond', '1'); } catch(e) {}
+    _sheetOpen('feedback-overlay');
+  }, 1500);
+}
+function sluitFeedbackPopup() {
+  _sheetSluit('feedback-overlay');
+}
+
 function toonRegistreren() {
   document.getElementById('login-box-inloggen').style.display = 'none';
   document.getElementById('login-box-registreren').style.display = 'block';

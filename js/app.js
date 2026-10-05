@@ -55,6 +55,7 @@ function initialiseerApp() {
   }
   document.getElementById('di-all')?.classList.add('active');
   showTab('welkom');
+  toonFeedbackEenmalig();
   laadArtikelenUitSheets();
   // Herstel weergavemodus
   setWeergave(weergaveModus);

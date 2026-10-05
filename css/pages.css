@@ -105,13 +105,13 @@
 .filter-sheet-footer .btn { margin-bottom: 0; }
 
 /* ═══ VRIJ ARTIKEL SHEET ═════════════════════════════════════ */
-#vrij-overlay {
+#vrij-overlay, #feedback-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,.72);
   z-index: 600; display: none;
   align-items: flex-end; justify-content: center;
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
 }
-#vrij-overlay.open { display: flex; }
+#vrij-overlay.open, #feedback-overlay.open { display: flex; }
 .vrij-sheet {
   background: var(--surface);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;

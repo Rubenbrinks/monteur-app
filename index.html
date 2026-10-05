@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="css/layout.css?v=3.3.2">
   <link rel="stylesheet" href="css/components.css?v=4.1.0">
   <link rel="stylesheet" href="css/artikelen.css?v=3.3.2">
-  <link rel="stylesheet" href="css/pages.css?v=3.3.2">
+  <link rel="stylesheet" href="css/pages.css?v=4.2.6">
 </head>
 <body>
 
@@ -314,33 +314,14 @@
     </div>
   </div>
 
-  <!-- Gebruiksaanwijzing -->
-  <div class="gids-card inklapbaar" id="gids-card">
-    <button class="inklapbaar-header" onclick="toggleInklapbaar('gids-card')" aria-expanded="false">
-      <span class="gids-titel" style="margin-bottom:0;display:flex;align-items:center;gap:7px">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        Zo werkt het
-      </span>
-      <svg class="inklapbaar-arrow" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-    </button>
-    <div class="inklapbaar-body">
-      <div class="gids-stap" style="margin-top:14px">
-        <div class="gids-num">1</div>
-        <div class="gids-tekst"><strong>Vul je gegevens in</strong><span>Vul je Naam, Telefoonnummer, Afdeling, Emailadres in het tabblad monteur. Deze staan standaard ingesteld.</span></div>
-      </div>
-      <div class="gids-stap">
-        <div class="gids-num">2</div>
-        <div class="gids-tekst"><strong>Zoek artikelen op</strong><span>Filter op categorie of zoek op naam/trefwoord in Artikelen</span></div>
-      </div>
-      <div class="gids-stap">
-        <div class="gids-num">3</div>
-        <div class="gids-tekst"><strong>Voeg toe aan bestelling</strong><span>Tik + om artikelen toe te voegen. Staat een artikelen er niet tussen? Vul deze in via <b>Vrij artikel</b> </span></div>
-      </div>
-      <div class="gids-stap">
-        <div class="gids-num">4</div>
-        <div class="gids-tekst"><strong>Verstuur de bestelling</strong><span>Controleer de winkelwagen en tik op <b>Bestelling versturen</b></span></div>
-      </div>
+  <!-- Feedback -->
+  <div class="gids-card" id="feedback-card">
+    <div class="gids-titel" style="display:flex;align-items:center;gap:7px">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Jouw mening telt
     </div>
+    <p style="font-size:.84rem;color:var(--text-secondary);line-height:1.5;margin:0 0 14px">Wat vind je van de materiaalapp? Beantwoord een paar korte vragen (ongeveer 2 minuten), dan maken we de app nog beter.</p>
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSd37_8kPLDBl1Zeb-hY6kPFL5gIH8KjUItCjTdtfGgrBy5Cqw/viewform" target="_blank" rel="noopener" class="btn btn-primary" style="margin-bottom:0;text-decoration:none">Feedback geven</a>
   </div>
 
   <!-- PWA Installatie uitleg -->
@@ -663,6 +644,17 @@
   </div>
 </div>
 
+<!-- FEEDBACK POPUP (eenmalig) -->
+<div id="feedback-overlay">
+  <div class="vrij-sheet">
+    <div class="vrij-handle"></div>
+    <div class="vrij-title">Help ons de app te verbeteren</div>
+    <div class="vrij-sub">Beantwoord een paar korte vragen over de materiaalapp. Het kost ongeveer 2 minuten.</div>
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSd37_8kPLDBl1Zeb-hY6kPFL5gIH8KjUItCjTdtfGgrBy5Cqw/viewform" target="_blank" rel="noopener" onclick="sluitFeedbackPopup()" class="btn btn-primary" style="margin-bottom:0;text-decoration:none">Feedback geven</a>
+    <button onclick="sluitFeedbackPopup()" class="btn btn-secondary" style="margin-bottom:0;margin-top:8px">Later</button>
+  </div>
+</div>
+
 <!-- VRIJ ARTIKEL -->
 <div id="vrij-overlay">
   <div class="vrij-sheet">
@@ -858,6 +850,30 @@
     </div>
   </div>
 
+  <!-- 6c. Pushmeldingen -->
+  <div class="admin-card">
+    <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-meldingen',this);if(!this.classList.contains('was-opened')){this.classList.add('was-opened');laadMeldingenStatistiek()}">
+      <span>Pushmeldingen</span><span class="admin-arrow"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span>
+    </button>
+    <div id="kaart-meldingen" class="admin-kaart-body" style="display:none">
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:8px">Wie heeft meldingen aan?</div>
+      <div id="meldingen-stat"></div>
+      <button class="btn btn-secondary" onclick="laadMeldingenStatistiek()" style="margin-top:8px;margin-bottom:16px">Vernieuwen</button>
+
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:8px">Melding versturen</div>
+      <div class="field"><label>Titel <span class="req">*</span> <span style="font-weight:400;color:var(--muted)">(max 60 tekens)</span></label><input type="text" id="melding-titel" maxlength="60" placeholder="bijv. Nieuwe versie van de app" /></div>
+      <div class="field"><label>Tekst <span style="font-weight:400;color:var(--muted)">(max 180 tekens)</span></label><textarea id="melding-tekst" maxlength="180" rows="3" placeholder="Wat wil je de monteurs laten weten?"></textarea></div>
+      <div class="field"><label>Ontvangers</label>
+        <select id="melding-doelgroep" onchange="meldingDoelgroepWissel()"><option value="">Iedereen</option></select>
+        <div id="melding-personen" style="display:none;margin-top:8px;max-height:200px;overflow-y:auto;background:var(--surface2);border-radius:8px;padding:8px;font-size:.84rem"></div>
+      </div>
+      <button class="btn btn-secondary" onclick="verstuurMelding(true)" style="margin-bottom:8px">Test: alleen naar mijn eigen apparaat</button>
+      <button class="btn btn-primary" onclick="verstuurMelding(false)" style="margin-bottom:0">Verstuur naar gekozen ontvangers</button>
+      <div id="melding-status" style="font-size:.84rem;margin-top:8px;line-height:1.6;min-height:18px"></div>
+      <p style="font-size:.76rem;color:var(--muted);line-height:1.5;margin-top:8px">Een verstuurde melding kun je niet terughalen. Stuur daarom eerst een test.</p>
+    </div>
+  </div>
+
   <!-- 7. Emailadressen beheren -->
   <div class="admin-card">
     <button class="admin-kaart-header" onclick="toggleAdminKaart('kaart-email',this);if(!this.classList.contains('was-opened')){this.classList.add('was-opened');laadEmailontvangers()}">
@@ -963,13 +979,13 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
   <script src="js/supabase.js?v=4.0.0" defer></script>
   <script src="js/config.js?v=4.2.4" defer></script>
-  <script src="js/ui.js?v=4.1.4" defer></script>
+  <script src="js/ui.js?v=4.2.6" defer></script>
   <script src="js/auth.js?v=4.1.9" defer></script>
   <script src="js/api.js?v=4.2.4" defer></script>
   <script src="js/artikelen.js?v=4.2.1" defer></script>
   <script src="js/cart.js?v=4.2.4" defer></script>
-  <script src="js/beheer.js?v=4.1.8" defer></script>
+  <script src="js/beheer.js?v=4.2.8" defer></script>
   <script src="js/push.js?v=4.1.1" defer></script>
-  <script src="js/app.js?v=4.2.4" defer></script>
+  <script src="js/app.js?v=4.2.6" defer></script>
 </body>
 </html>
