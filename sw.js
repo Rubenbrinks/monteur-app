@@ -1,5 +1,5 @@
 // ── Emondt Materiaalapp – Service Worker ──────────────────────
-const CACHE_NAAM = 'emondt-materiaalapp-v4.3.10';
+const CACHE_NAAM = 'emondt-materiaalapp-v4.4.0';
 
 const TE_CACHEN = [
   './index.html',
@@ -78,6 +78,8 @@ self.addEventListener('fetch', event => {
 
 self.addEventListener('message', event => {
   if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
+  // De pagina vraagt welke versie er echt draait (voor het versienummer in de footer).
+  if (event.data?.type === 'GET_VERSIE') event.source?.postMessage({ type: 'VERSIE', versie: CACHE_NAAM });
 });
 
 // ── PUSHMELDINGEN ─────────────────────────────────────────────

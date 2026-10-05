@@ -7,17 +7,31 @@ window.onload = () => {
   // Initialiseer thema-knop labels
   updateThemaKnop();
 
-  // Versienummer alvast tonen (ook op loginpagina)
+  // Versienummer alvast tonen (ook op loginpagina). De actieve service worker
+  // vertelt zelf welke versie hij is; zo zie je nooit een versie die nog klaarstaat
+  // maar niet draait.
   if ('serviceWorker' in navigator) {
-    caches.keys().then(keys => {
-      const swCache = keys.find(k => k.startsWith('emondt-materiaalapp-'));
-      if (swCache) {
-        ['app-versie-footer', 'app-versie-login'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.textContent = swCache.replace('emondt-materiaalapp-', '');
-        });
-      }
+    const toonVersie = (naam) => {
+      ['app-versie-footer', 'app-versie-login'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = String(naam).replace('emondt-materiaalapp-', '');
+      });
+    };
+    let versieBekend = false;
+    navigator.serviceWorker.addEventListener('message', e => {
+      if (e.data?.type === 'VERSIE') { versieBekend = true; toonVersie(e.data.versie); }
     });
+    const vraagVersie = () => navigator.serviceWorker.controller?.postMessage({ type: 'GET_VERSIE' });
+    vraagVersie();
+    navigator.serviceWorker.addEventListener('controllerchange', () => setTimeout(vraagVersie, 300));
+    // Een oudere service worker kent deze vraag nog niet: dan de cache-naam gebruiken.
+    setTimeout(() => {
+      if (versieBekend) return;
+      caches.keys().then(keys => {
+        const swCache = keys.find(k => k.startsWith('emondt-materiaalapp-'));
+        if (swCache) toonVersie(swCache);
+      });
+    }, 1000);
   }
   // Sessie controleren via Supabase (async) — toont daarna app of login.
   bootAuth();
@@ -66,6 +80,11 @@ function initialiseerApp() {
 
   // ── SERVICE WORKER: registratie + update-banner ─────────────
   if ('serviceWorker' in navigator) {
+    const geopendOp = Date.now();
+    // Vlak na het openen is bijwerken onschadelijk (er is nog niets ingevuld):
+    // dan gaat het vanzelf. Later in de sessie wachten we op een tik op de banner.
+    const nogVers = () => Date.now() - geopendOp < 20000;
+
     navigator.serviceWorker.register('./sw.js', {
       updateViaCache: 'none'
     }).then(reg => {
@@ -84,14 +103,14 @@ function initialiseerApp() {
         if (!nieuweSW) return;
         nieuweSW.addEventListener('statechange', () => {
           if (nieuweSW.state === 'installed' && navigator.serviceWorker.controller) {
-            toonUpdateBanner();
+            if (nogVers()) bevestigUpdate(); else toonUpdateBanner();
           }
         });
       });
 
       // Al een wachtende SW bij openen (bijv. tab was open tijdens update)
       if (reg.waiting && navigator.serviceWorker.controller) {
-        toonUpdateBanner();
+        bevestigUpdate();
       }
 
     }).catch(err => console.warn('[SW] Registratie mislukt:', err));
