@@ -37,7 +37,7 @@ function _toonMededelingen(lijst) {
     <details class="home-rij" ontoggle="homeMarkeerGelezen(this, ${m.id})">
       <summary>
         <span class="home-rij-tekst">
-          <span class="home-rij-titel">${m.vastgezet ? '📌 ' : ''}${_escH(m.titel)}</span>
+          <span class="home-rij-titel">${_escH(m.titel)}</span>
         </span>
         ${gelezen.includes(m.id) ? '' : '<span class="home-nieuw" title="Nieuw"></span>'}
         <svg class="home-pijl" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
