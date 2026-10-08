@@ -279,6 +279,7 @@ function verstuurEmail() {
   for (const v of verplicht) {
     if (!inf[v.id]||inf[v.id].trim()==='') {
       showTab(v.tab);
+      if (v.tab === 'info' && typeof infoOpenSectie === 'function') infoOpenSectie('profiel');
       if (v.kaart) openInklapbaar(v.kaart);
       showToast(`⚠️ Vul "${v.label}" in.`);
       return;

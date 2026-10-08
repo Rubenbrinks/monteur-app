@@ -212,6 +212,8 @@ header {
   justify-content: center; flex-direction: column;
   padding: 24px;
 }
+/* Zie het script in <head> van index.html: bekende sessie = geen flits van het inlogscherm. */
+html.sessie-bekend #login-scherm { display: none; }
 .login-box {
   width: 100%; max-width: 380px;
   background: var(--surface);

@@ -21,12 +21,14 @@
     (function(){
       var t = localStorage.getItem('emondt_theme');
       if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+      // Eerder ingelogd? Dan het inlogscherm niet even laten flitsen terwijl de sessie gecontroleerd wordt.
+      if (localStorage.getItem('emondt_sessie')) document.documentElement.classList.add('sessie-bekend');
     })();
   </script>
-  <link rel="stylesheet" href="css/layout.css?v=3.3.2">
-  <link rel="stylesheet" href="css/components.css?v=4.3.3">
+  <link rel="stylesheet" href="css/layout.css?v=4.4.4">
+  <link rel="stylesheet" href="css/components.css?v=4.4.4">
   <link rel="stylesheet" href="css/artikelen.css?v=3.3.2">
-  <link rel="stylesheet" href="css/pages.css?v=4.3.9">
+  <link rel="stylesheet" href="css/pages.css?v=4.4.4">
 </head>
 <body>
 
@@ -68,11 +70,6 @@
     <div class="d-item" onclick="toggleThema()">
       <span class="ico thema-toggle-icon"></span>
       <span class="thema-toggle-label">Lichte modus</span>
-    </div>
-    <div id="drawer-meldingen" class="d-item" style="display:none">
-      <span class="ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
-      <span id="meldingen-label" style="flex:1">Meldingen</span>
-      <span id="meldingen-toggle" class="toggle-switch" aria-hidden="true"></span>
     </div>
     <div id="drawer-account"></div>
     <div class="d-item" onclick="uitloggen()" style="color:var(--muted)">
@@ -276,69 +273,18 @@
   </div>
 
   <!-- Meldingen -->
-  <div class="gids-card" id="meldingen-card" style="display:none">
-    <div class="gids-titel" style="display:flex;align-items:center;gap:7px">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      Meldingen aanzetten
-    </div>
-    <p id="meldingen-card-tekst" style="font-size:.84rem;color:var(--text-secondary);line-height:1.5;margin:0 0 14px"></p>
-    <button id="meldingen-card-knop" class="btn btn-primary" onclick="zetMeldingenAan()" style="margin-bottom:0">Meldingen aanzetten</button>
-  </div>
-
-  <!-- PWA Installatie uitleg -->
-  <div class="pwa-uitleg-card inklapbaar" id="pwa-uitleg-card">
-    <div style="display:flex;align-items:center;gap:8px">
-      <button class="inklapbaar-header" onclick="toggleInklapbaar('pwa-uitleg-card')" aria-expanded="false" style="flex:1">
-        <div class="pwa-uitleg-titel" style="margin-bottom:0;color:var(--green)">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          App installeren op je telefoon
-        </div>
-        <svg class="inklapbaar-arrow" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-      </button>
-      <button id="pwa-welkom-btn" onclick="triggerPwaInstall()" style="display:none;align-items:center;gap:6px;background:var(--green);color:#000;border:none;border-radius:var(--radius-sm);padding:7px 14px;font-family:'Inter','DM Sans',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Installeren
-      </button>
-    </div>
+  <div class="gids-card inklapbaar" id="meldingen-card" style="display:none">
+    <button class="inklapbaar-header" onclick="toggleInklapbaar('meldingen-card')" aria-expanded="false">
+      <span class="gids-titel" style="margin-bottom:0;display:flex;align-items:center;gap:7px">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Meldingen aanzetten
+      </span>
+      <svg class="inklapbaar-arrow" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
     <div class="inklapbaar-body">
-      <p class="pwa-uitleg-sub" style="margin-top:10px">Voeg de app toe aan je beginscherm voor snelle toegang — geen App Store nodig.</p>
-      <div class="pwa-os">
-        <div class="pwa-os-blok">
-          <div class="pwa-os-naam">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-            iPhone / iPad (Safari)
-          </div>
-          <ol class="pwa-stappen">
-            <li>Open de app in <strong>Safari</strong></li>
-            <li>Tik op <strong>Deel</strong> <strong>⎙</strong> (onderin, of via het menu <strong>⋯</strong>)</li>
-            <li>Scroll en kies <strong>"Zet op beginscherm"</strong></li>
-            <li>Tik rechtsboven op <strong>Voeg toe</strong></li>
-            <li>Open de app voortaan via het icoon op je beginscherm</li>
-          </ol>
-        </div>
-        <div class="pwa-os-blok">
-          <div class="pwa-os-naam">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.64.22.99.14l12.16-7.02-2.76-2.76-10.39 9.64zm-1.7-20.1C1.18 4.04 1 4.53 1 5.13v13.74c0 .6.18 1.09.49 1.46l.08.07 7.7-7.7v-.18L1.56 3.59l-.08.07zm18.54 8.56l-2.19-1.27-3.06 3.06 3.06 3.06 2.2-1.27c.63-.36.63-.95 0-1.58zm-17.42 9.9l10.38-9.64-2.77-2.77L1.56 20.05l1.04.07z"/></svg>
-            Android (Chrome)
-          </div>
-          <ol class="pwa-stappen">
-            <li>Open in <strong>Chrome</strong></li>
-            <li>Tik op <strong>⋮</strong> menu rechts</li>
-            <li>Kies <strong>"Toevoegen aan startscherm"</strong></li>
-          </ol>
-        </div>
-      </div>
+      <p id="meldingen-card-tekst" style="font-size:.84rem;color:var(--text-secondary);line-height:1.5;margin:14px 0"></p>
+      <button id="meldingen-card-knop" class="btn btn-primary" onclick="meldingenKaartKnop()" style="margin-bottom:0">Meldingen aanzetten</button>
     </div>
-  </div>
-
-  <div class="home-sectie">
-    <div class="home-sectie-titel">Mededelingen</div>
-    <div id="home-mededelingen"><div class="home-leeg">⏳ Laden...</div></div>
-  </div>
-
-  <div class="home-sectie">
-    <div class="home-sectie-titel">Agenda</div>
-    <div id="home-agenda"><div class="home-leeg">⏳ Laden...</div></div>
   </div>
 
   <!-- Feedback -->
@@ -479,6 +425,15 @@
 </div>
 
 <div class="screen" id="tab-info">
+  <div class="page-header">
+    <button class="page-back-btn" id="info-terug-btn" onclick="infoTerug()" style="display:none"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2 id="info-titel">Monteur</h2>
+  </div>
+
+  <div id="info-menu"></div>
+
+  <!-- Mijn profiel -->
+  <div class="info-sectie" data-sectie="profiel">
   <div class="form-card">
     <div class="form-card-title">Mijn gegevens</div>
     <div class="field">
@@ -504,6 +459,27 @@
       <input type="email" id="ontvanger2" placeholder="jouw@email.nl" oninput="saveInfo()" />
     </div>
     <button id="profiel-opslaan-btn" class="btn btn-primary" onclick="slaProfielOp()" style="width:100%;margin-top:4px">Opslaan</button>
+  </div>
+  </div>
+
+  <!-- Meldingen -->
+  <div class="info-sectie" data-sectie="meldingen">
+    <div class="form-card">
+      <div class="form-card-title">Meldingen</div>
+      <p class="beheer-uitleg">Krijg een melding op dit toestel zodra je bestelling is afgerond, en bij nieuws van Emondt.</p>
+      <div class="info-rij" id="meldingen-schakelaar-rij" onclick="meldingenSchakelaar()">
+        <span>Meldingen op dit toestel</span>
+        <span style="display:flex;align-items:center;gap:10px">
+          <span id="meldingen-status-tekst" class="info-waarde"></span>
+          <span id="meldingen-toggle" class="toggle-switch" aria-hidden="true"></span>
+        </span>
+      </div>
+      <div class="info-rij">
+        <span>Toestemming</span>
+        <span id="meldingen-toestemming" class="info-waarde"></span>
+      </div>
+      <div id="meldingen-uitleg" class="info-uitleg"></div>
+    </div>
   </div>
 </div>
 
@@ -1027,15 +1003,16 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
   <script src="js/supabase.js?v=4.0.0" defer></script>
   <script src="js/config.js?v=4.2.4" defer></script>
-  <script src="js/ui.js?v=4.2.6" defer></script>
-  <script src="js/auth.js?v=4.1.9" defer></script>
+  <script src="js/ui.js?v=4.4.4" defer></script>
+  <script src="js/auth.js?v=4.4.4" defer></script>
   <script src="js/api.js?v=4.2.9" defer></script>
-  <script src="js/artikelen.js?v=4.3.2" defer></script>
-  <script src="js/cart.js?v=4.2.4" defer></script>
+  <script src="js/artikelen.js?v=4.4.4" defer></script>
+  <script src="js/cart.js?v=4.4.4" defer></script>
   <script src="js/beheer.js?v=4.3.3" defer></script>
   <script src="js/beheer-algemeen.js?v=4.4.2" defer></script>
   <script src="js/home.js?v=4.4.2" defer></script>
-  <script src="js/push.js?v=4.3.10" defer></script>
-  <script src="js/app.js?v=4.4.0" defer></script>
+  <script src="js/push.js?v=4.4.4" defer></script>
+  <script src="js/info.js?v=4.4.4" defer></script>
+  <script src="js/app.js?v=4.4.4" defer></script>
 </body>
 </html>

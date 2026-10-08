@@ -76,6 +76,7 @@ sb.auth.onAuthStateChange((event) => {
 // Opstartroutine — vervangt de oude synchrone check in app.js.
 async function bootAuth() {
   if (_isHerstelLink()) {
+    document.documentElement.classList.remove('sessie-bekend');
     // Wachten op het PASSWORD_RECOVERY-event hierboven; de app niet openen.
     openNieuwWachtwoordPopup();
     return;
@@ -88,6 +89,8 @@ async function bootAuth() {
     document.getElementById('login-scherm').classList.add('verborgen');
     initialiseerApp();
   } else {
+    // Sessie bleek niet (meer) geldig: nu pas het inlogscherm tonen.
+    document.documentElement.classList.remove('sessie-bekend');
     try { localStorage.removeItem('emondt_sessie'); } catch(e) {}
     setTimeout(() => document.getElementById('login-user')?.focus(), 100);
   }

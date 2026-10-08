@@ -161,8 +161,17 @@ function sluitVrijArtikel() {
 
 
 // ── FEEDBACK POPUP (eenmalig) ────────────────────────────────
-function toonFeedbackEenmalig() {
+async function toonFeedbackEenmalig() {
   try { if (localStorage.getItem('emondt_feedback_getoond')) return; } catch(e) { return; }
+  // Is de tip voor meldingen nog open? Dan krijgt die eerst de aandacht en wacht de
+  // feedbackpopup tot de 3e keer openen. De feedbackkaart op de homepage blijft altijd.
+  let status = 'aan';
+  try { status = await meldingenStatus(); } catch(e) {}
+  if (status === 'uit' || status === 'ios-installeren' || status === 'geblokkeerd') {
+    let keer = 0;
+    try { keer = parseInt(localStorage.getItem('emondt_feedback_wacht') || '0') + 1; localStorage.setItem('emondt_feedback_wacht', String(keer)); } catch(e) {}
+    if (keer < 3) return;
+  }
   setTimeout(() => {
     try { localStorage.setItem('emondt_feedback_getoond', '1'); } catch(e) {}
     _sheetOpen('feedback-overlay');

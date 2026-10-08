@@ -266,3 +266,19 @@ input[type="date"] {
   font-family: inherit; font-size: .76rem; font-weight: 600;
 }
 .beheer-rij-knop.gevaar { color: var(--danger); }
+
+/* ═══ MONTEUR-TAB (menu → onderdeel) ═════════════════════════ */
+.info-sectie { display: none; }
+.info-sectie.actief { display: block; }
+.info-rij {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 13px 0; border-bottom: 1px solid var(--border);
+  font-size: .9rem; color: var(--text); cursor: default;
+}
+#meldingen-schakelaar-rij { cursor: pointer; }
+.info-waarde { font-size: .84rem; font-weight: 600; color: var(--muted); }
+.info-waarde.goed { color: var(--green); }
+.info-waarde.let-op { color: #e0a030; }
+.info-uitleg { font-size: .82rem; color: var(--text-secondary); line-height: 1.65; margin-top: 14px; }
+.menu-punt { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: #e0a030; vertical-align: middle; }
+.menu-punt.goed { background: var(--green); }

@@ -83,29 +83,55 @@ async function zetMeldingenUit() {
   showToast('🔕 Meldingen uitgezet.');
 }
 
-async function updateMeldingKnop() {
-  renderMeldingenKaart();
-  const el = document.getElementById('drawer-meldingen');
-  if (!el) return;
-  if (!pushOndersteund()) { el.style.display = 'none'; return; }
-  el.style.display = '';
-
-  // "Aan" = toestemming gegeven én er is een actief abonnement.
-  let aan = false;
-  if (Notification.permission === 'granted') {
-    try {
-      const reg = await navigator.serviceWorker.ready;
-      aan = !!(await reg.pushManager.getSubscription());
-    } catch(e) {}
-  }
-
-  const label  = document.getElementById('meldingen-label');
-  const toggle = document.getElementById('meldingen-toggle');
-  if (label)  label.textContent = aan ? 'Meldingen staan aan' : 'Meldingen staan uit';
-  if (toggle) toggle.classList.toggle('aan', aan);
-  el.onclick = aan ? zetMeldingenUit : zetMeldingenAan;
+// Schakelaar op de pagina Monteur → Meldingen.
+function meldingenSchakelaar() {
+  meldingenStatus().then(status => {
+    if (status === 'aan') zetMeldingenUit();
+    else if (status === 'uit') zetMeldingenAan();
+  });
 }
 
+// Werkt alles bij wat de status van meldingen laat zien: de kaart op de homepage, de
+// pagina Monteur → Meldingen en de regel in het Monteur-menu.
+async function updateMeldingKnop() {
+  renderMeldingenKaart();
+  const status = await meldingenStatus();
+  const perm = (typeof Notification !== 'undefined') ? Notification.permission : null;
+
+  const toestemming = {
+    'ios-installeren': 'Niet beschikbaar',
+    'niet-ondersteund': 'Niet beschikbaar',
+  }[status] || ({ granted: 'Toegestaan', denied: 'Geblokkeerd', default: 'Nog niet gevraagd' }[perm] || '—');
+
+  const statusTekst = { 'aan': 'Aan', 'uit': 'Uit', 'geblokkeerd': 'Geblokkeerd', 'ios-installeren': 'Niet beschikbaar', 'niet-ondersteund': 'Niet beschikbaar' }[status];
+  const goed = status === 'aan';
+
+  const toggle = document.getElementById('meldingen-toggle');
+  if (toggle) {
+    toggle.classList.toggle('aan', goed);
+    toggle.style.opacity = (status === 'aan' || status === 'uit') ? '' : '.35';
+  }
+  const stEl = document.getElementById('meldingen-status-tekst');
+  if (stEl) { stEl.textContent = statusTekst; stEl.className = 'info-waarde ' + (goed ? 'goed' : 'let-op'); }
+  const tmEl = document.getElementById('meldingen-toestemming');
+  if (tmEl) { tmEl.textContent = toestemming; tmEl.className = 'info-waarde ' + (perm === 'granted' ? 'goed' : (perm === 'denied' ? 'let-op' : '')); }
+
+  const uitleg = {
+    'aan': 'Meldingen staan aan op dit toestel. Je krijgt een melding zodra je bestelling is afgerond.',
+    'uit': perm === 'granted'
+      ? 'Je hebt toestemming gegeven, maar meldingen staan uit in de app. Zet de schakelaar aan om ze weer te ontvangen.'
+      : 'Meldingen staan uit. Zet de schakelaar aan: je telefoon vraagt dan om toestemming.',
+    'geblokkeerd': '<strong>Meldingen zijn geblokkeerd.</strong> Zet ze weer aan in de instellingen van je telefoon:<br>• iPhone: Instellingen → Meldingen → deze app → Sta meldingen toe<br>• Android: houd het app-icoon ingedrukt → Info → Meldingen<br>• Browser: tik op het slotje naast de adresbalk → Machtigingen → Meldingen<br>Kom daarna terug naar deze pagina.',
+    'ios-installeren': '<strong>Op een iPhone werkt dit alleen als de app op je beginscherm staat.</strong><br>1. Open de app in Safari<br>2. Tik op Deel (onderin, of via het menu ⋯)<br>3. Scroll en kies "Zet op beginscherm"<br>4. Tik op Voeg toe<br>5. Open de app voortaan via het icoon en zet meldingen hier aan.',
+    'niet-ondersteund': 'Dit toestel of deze browser ondersteunt geen pushmeldingen.',
+  }[status];
+  const uitEl = document.getElementById('meldingen-uitleg');
+  if (uitEl) uitEl.innerHTML = uitleg;
+
+  // Regel in het Monteur-menu: duidelijk als meldingen nog niet aan staan.
+  const sub = document.getElementById('info-meldingen-sub');
+  if (sub) sub.innerHTML = '<span class="menu-punt' + (goed ? ' goed' : '') + '"></span>' + (goed ? 'Staan aan' : (status === 'uit' ? 'Staan uit' : statusTekst));
+}
 
 // ── ZICHTBAARHEID: hoe komen monteurs aan hun meldingen? ───────
 // Toestand van meldingen op dit toestel:
@@ -125,7 +151,8 @@ async function meldingenStatus() {
   return 'uit';
 }
 
-// Kaart op de homepage: alleen zichtbaar zolang meldingen nog niet aan staan.
+// Kaart op de homepage. Blijft staan zolang meldingen niet aan staan; alleen op een
+// toestel dat geen pushmeldingen kan ontvangen is er niets te doen en verdwijnt hij.
 async function renderMeldingenKaart() {
   const kaart = document.getElementById('meldingen-card');
   if (!kaart) return;
@@ -136,11 +163,21 @@ async function renderMeldingenKaart() {
   kaart.style.display = '';
   const teksten = {
     'uit': 'Krijg direct een melding zodra je bestelling is afgerond. Zo hoef je niet te wachten of te bellen.',
-    'ios-installeren': 'Op een iPhone werkt dit alleen als de app op je beginscherm staat. Tik in Safari op Delen, kies "Zet op beginscherm" en tik op Voeg toe. Open de app daarna via het icoon op je beginscherm en zet meldingen aan.',
-    'geblokkeerd': 'Meldingen zijn geblokkeerd in de instellingen van je browser of telefoon. Zet ze daar aan voor deze app en kom dan terug.',
+    'ios-installeren': 'Op een iPhone werkt dit alleen als de app op je beginscherm staat. Bekijk hoe je dat doet.',
+    'geblokkeerd': 'Meldingen zijn geblokkeerd voor deze app. Bekijk hoe je ze weer aanzet.',
   };
   tekst.textContent = teksten[status];
-  knop.style.display = status === 'uit' ? '' : 'none';
+  knop.textContent = status === 'uit' ? 'Meldingen aanzetten' : 'Bekijk uitleg';
+  knop.style.display = '';
+}
+
+// Knop in de kaart: aanzetten kan direct; bij een blokkade volgt de uitleg onder Monteur → Meldingen.
+function meldingenKaartKnop() {
+  meldingenStatus().then(status => {
+    if (status === 'uit') { zetMeldingenAan(); return; }
+    showTab('info');
+    if (typeof infoOpenSectie === 'function') infoOpenSectie('meldingen');
+  });
 }
 
 // Op het bevestigingsscherm na een bestelling: het moment waarop de meerwaarde

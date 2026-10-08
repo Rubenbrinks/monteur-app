@@ -3,7 +3,7 @@
  */
 
 // ── INIT ──────────────────────────────────────────────────────
-window.onload = () => {
+function startApp() {
   // Initialiseer thema-knop labels
   updateThemaKnop();
 
@@ -35,7 +35,11 @@ window.onload = () => {
   }
   // Sessie controleren via Supabase (async) — toont daarna app of login.
   bootAuth();
-};
+}
+// Deferred scripts zijn bij DOMContentLoaded allemaal uitgevoerd; wachten op window.onload
+// (lettertypen, externe bestanden) vertraagde het opstarten onnodig.
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startApp);
+else startApp();
 
 function initialiseerApp() {
   // Verberg PWA-uitleg als al geïnstalleerd
