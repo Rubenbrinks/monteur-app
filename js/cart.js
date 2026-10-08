@@ -487,6 +487,9 @@ function _renderHistorieLijst(hist) {
           </div>` : ''}
         </div>
 
+        ${(b.fotos && b.fotos.length) ? (fotosVerlopen(b.aangemaakt)
+          ? `<div style="margin-bottom:10px;font-size:.78rem;color:var(--muted)">📷 ${b.fotos.length} foto${b.fotos.length !== 1 ? "'s" : ''} (inmiddels gewist)</div>`
+          : `<button class="foto-knop-klein" style="margin:0 0 10px" onclick="event.stopPropagation();toonBestelFotos(_historieData[${i}].fotos, 'Foto’s bij bestelling')">📷 Foto's bekijken (${b.fotos.length})</button>`) : ''}
         ${kanHerbestellen ? `<button onclick="event.stopPropagation();herbestelHistorie(${i})" class="btn btn-primary" style="margin-bottom:0">
           🔁 Opnieuw bestellen
         </button>` : ''}
@@ -523,6 +526,8 @@ async function renderHistorie() {
       opmerkingen:   r.opmerkingen || '',
       status:        r.status || 'nieuw',
       besteldDoor:   r.besteld_door || '',
+      fotos:         Array.isArray(r.fotos) ? r.fotos : [],
+      aangemaakt:    r.aangemaakt_op || '',
       _artikelen:    Array.isArray(r.artikelen) ? r.artikelen : [],
     }));
     _renderHistorieLijst(_historieData);

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Foto's bij bestelling — Emondt</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif; margin: 0; min-height: 100vh;
+    background: #041c42; color: #fff; padding: 20px;
+  }
+  .kaart {
+    background: #0a2550; border: 1px solid #1c3a6b; border-radius: 16px;
+    padding: 26px 22px; max-width: 640px; width: 100%; margin: 0 auto;
+    box-shadow: 0 12px 40px rgba(0,0,0,.4);
+  }
+  .kop { color: #AEC336; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+  h1 { font-size: 21px; margin: 0 0 4px; }
+  p { color: #cfd8e6; font-size: 15px; line-height: 1.55; margin: 6px 0; }
+  .klein { font-size: 12px; color: #7a8aa0; margin-top: 18px; }
+  .foto { display: block; margin-top: 18px; text-decoration: none; color: inherit; }
+  .foto img { width: 100%; height: auto; border-radius: 10px; border: 1px solid #1c3a6b; display: block; background: #041c42; }
+  .foto span { display: block; margin-top: 8px; font-size: 15px; font-weight: bold; color: #fff; }
+</style>
+</head>
+<body>
+  <div class="kaart">
+    <div class="kop">Emondt Groep</div>
+    <h1 id="titel">Foto's bij bestelling</h1>
+    <p id="sub">⏳ Foto's laden...</p>
+    <div id="fotos"></div>
+    <div class="klein">Emondt Materiaalapp · Foto's worden na 7 dagen automatisch gewist.</div>
+  </div>
+
+<script>
+  const SUPABASE_URL = 'https://tjypxqquiseejzcwfgwm.supabase.co';
+  const p = new URLSearchParams(location.search);
+  const id = p.get('id');
+  const token = p.get('token');
+
+  const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  function melding(tekst) { document.getElementById('sub').innerHTML = tekst; }
+
+  async function laad() {
+    if (!id || !token) { melding('⚠️ Deze link is niet compleet.'); return; }
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/functions/v1/bestelling-fotos?id=${encodeURIComponent(id)}&token=${encodeURIComponent(token)}`,
+        { method: 'POST' }
+      );
+      const data = await res.json().catch(() => ({}));
+      switch (data.status) {
+        case 'ok': {
+          const naam = data.projectnaam ? ' voor <b>' + esc(data.projectnaam) + '</b>' : '';
+          melding(`Foto's bij de bestelling${naam}. Tik op een foto voor de volledige afbeelding.`);
+          document.getElementById('fotos').innerHTML = data.fotos.filter(f => f.url).map(f => `
+            <a class="foto" href="${esc(f.url)}" target="_blank" rel="noopener">
+              <img src="${esc(f.url)}" alt="${esc(f.titel)}">
+              ${f.titel ? `<span>${esc(f.titel)}</span>` : ''}
+            </a>`).join('');
+          break;
+        }
+        case 'verlopen': melding('ℹ️ De foto\'s bij deze bestelling zijn niet meer beschikbaar. Ze worden na 7 dagen gewist.'); break;
+        case 'geen_fotos': melding('ℹ️ Bij deze bestelling zijn geen foto\'s bijgevoegd.'); break;
+        case 'ongeldige_code': melding('⛔ De beveiligingscode klopt niet.'); break;
+        case 'niet_gevonden': melding('⚠️ Deze bestelling bestaat niet (meer).'); break;
+        default: melding('⚠️ Er ging iets mis. Probeer het later opnieuw.');
+      }
+    } catch (e) {
+      melding('⚠️ Verbinding mislukt. Controleer je internet en probeer opnieuw.');
+    }
+  }
+  laad();
+</script>
+</body>
+</html>

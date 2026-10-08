@@ -1,5 +1,5 @@
 // ── Emondt Materiaalapp – Service Worker ──────────────────────
-const CACHE_NAAM = 'emondt-materiaalapp-v4.4.4';
+const CACHE_NAAM = 'emondt-materiaalapp-v4.5.0';
 
 const TE_CACHEN = [
   './index.html',

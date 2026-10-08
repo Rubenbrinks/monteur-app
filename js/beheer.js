@@ -37,6 +37,8 @@ async function laadBestellingenOverzicht() {
   };
   const fmtLever = (raw) => (!raw || raw === 'zsm') ? 'z.s.m.' : fmtDatum(raw);
 
+  window._adminFotos = bestellingen.map(b => Array.isArray(b.fotos) ? b.fotos : []);
+
   lijstEl.innerHTML = bestellingen.map((b, i) => {
         const naam        = b.monteur_naam || '—';
         const afdeling    = b.afdeling     || '';
@@ -74,6 +76,9 @@ async function laadBestellingenOverzicht() {
             </div>
             <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:6px">Artikelen</div>
             <div class="best-artikelen-wrap">${artikelRegels || '<span style="color:var(--muted);font-size:.8rem;padding:8px 0;display:block">Geen artikeldetails beschikbaar</span>'}</div>
+            ${(Array.isArray(b.fotos) && b.fotos.length) ? (fotosVerlopen(b.aangemaakt_op)
+              ? `<div style="margin-top:8px;font-size:.78rem;color:var(--muted)">📷 ${b.fotos.length} foto${b.fotos.length !== 1 ? "'s" : ''} (inmiddels gewist)</div>`
+              : `<button class="foto-knop-klein" onclick="toonBestelFotos(_adminFotos[${i}], '${(titel || naam).replace(/['"<>&\\]/g, '')}')">📷 Foto's bekijken (${b.fotos.length})</button>`) : ''}
           </div>
         </div>`;
   }).join('');

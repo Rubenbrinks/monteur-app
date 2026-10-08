@@ -289,6 +289,17 @@ async function logBestellingSheets(data) {
   const totaalStuks = bestelItems.reduce((s, i) => s + i.qty, 0);
   const leverdatum  = data.leverdatum || localStorage.getItem('leverdatum') || 'zsm';
 
+  // 0. Foto's (optioneel) eerst uploaden; mislukt dat, dan blijft alles staan om opnieuw te proberen.
+  let fotos = [];
+  if (typeof bestelFotoAantal === 'function' && bestelFotoAantal() > 0) {
+    try {
+      fotos = await uploadBestelFotos(sessie?.id);
+    } catch(e) {
+      showToast("⚠️ Foto's uploaden mislukt: " + e.message + " Probeer opnieuw of verwijder de foto's.");
+      return;
+    }
+  }
+
   // 1. Opslaan in Supabase — de vaste registratie van de bestelling.
   let nieuweBestelling = null;
   try {
@@ -305,16 +316,18 @@ async function logBestellingSheets(data) {
       opmerkingen:    data.opmerkingen || '',
       artikelen:      bestelItems,
       totaal:         totaalStuks,
+      fotos:          fotos,
     }).select('id, status_token').single();
-    if (error) { showToast('⚠️ Opslaan mislukt: ' + error.message); return; }
+    if (error) { await verwijderUploads(fotos.map(f => f.pad)); showToast('⚠️ Opslaan mislukt: ' + error.message); return; }
     nieuweBestelling = rij;
   } catch(e) {
+    await verwijderUploads(fotos.map(f => f.pad));
     showToast('⚠️ Verbinding mislukt: ' + e.message);
     return;
   }
 
   // 2. Mail versturen via het Google-script (ongewijzigd; alleen voor de mail).
-  _verstuurBestelMail(data, nieuweBestelling);
+  _verstuurBestelMail(data, { ...nieuweBestelling, fotos_aantal: fotos.length });
 
   // 3. Bevestigingsscherm tonen.
   const leverdatumTxt = !leverdatum || leverdatum === 'zsm'
@@ -330,6 +343,9 @@ async function logBestellingSheets(data) {
 
   document.getElementById('bevestiging-overlay').style.display = 'flex';
   if (typeof toonMeldingenTipBijBevestiging === 'function') toonMeldingenTipBijBevestiging();
+
+  // Foto's zijn verstuurd; de keuze in de winkelmand leegmaken.
+  if (typeof wisBestelFotos === 'function') wisBestelFotos();
 
   // Winkelwagen legen.
   cart = {};
@@ -378,6 +394,15 @@ async function _verstuurBestelMail(data, bestelling) {
     statusUrl = u.href;
   }
 
+  // Link voor de knop "Foto's bijgevoegd" → fotos.html (toont de foto's via dezelfde code).
+  let fotosUrl = '';
+  if (bestelling?.id && bestelling?.status_token && bestelling?.fotos_aantal > 0) {
+    const u = new URL('fotos.html', location.href);
+    u.searchParams.set('id', bestelling.id);
+    u.searchParams.set('token', bestelling.status_token);
+    fotosUrl = u.href;
+  }
+
   // Mail formaat: artikelnr×aantal×beschrijving×eenheid×leverancier
   const mailArtikelStr = (data.items || [])
     .map(i => [
@@ -403,6 +428,8 @@ async function _verstuurBestelMail(data, bestelling) {
     ontvanger2:    data.ontvanger2     || '',
     ontvangers:    ontvangers,
     status_url:    statusUrl,
+    fotos_url:     fotosUrl,
+    fotos_aantal:  bestelling?.fotos_aantal || 0,
     gebruiker:     getAuthSessie()?.gebruiker || '',
     artikelen:     mailArtikelStr,
     // regels = aantal bestelregels, totaal = opgetelde aantallen

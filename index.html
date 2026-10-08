@@ -26,7 +26,7 @@
     })();
   </script>
   <link rel="stylesheet" href="css/layout.css?v=4.4.4">
-  <link rel="stylesheet" href="css/components.css?v=4.4.4">
+  <link rel="stylesheet" href="css/components.css?v=4.5.0">
   <link rel="stylesheet" href="css/artikelen.css?v=3.3.2">
   <link rel="stylesheet" href="css/pages.css?v=4.4.4">
 </head>
@@ -557,6 +557,19 @@
     </div>
   </div>
 
+  <div class="form-card inklapbaar" id="cart-fotos-card">
+    <button class="inklapbaar-header" onclick="toggleInklapbaar('cart-fotos-card')" aria-expanded="false">
+      <span class="form-card-title" style="margin-bottom:0">Foto's <span id="foto-teller" style="color:var(--green)"></span></span>
+      <svg class="inklapbaar-arrow" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+    <div class="inklapbaar-body">
+      <p class="beheer-uitleg" style="margin-top:14px">Weet je de productnaam niet precies? Voeg een foto toe van de situatie of van een voorbeeld. De werkvoorbereiding ziet de foto's via een knop in de bestelmail. Ze worden na 7 dagen automatisch gewist.</p>
+      <div id="foto-lijst"></div>
+      <input type="file" id="foto-input" accept="image/*" multiple style="display:none" onchange="fotosToegevoegd(this)" />
+      <button class="btn btn-secondary" id="foto-knop" onclick="document.getElementById('foto-input').click()" style="margin-bottom:0">📷 Foto toevoegen</button>
+    </div>
+  </div>
+
   <div class="summary-box" id="cart-samenvatting" style="display:none"></div>
 
   <div id="cart-actie-btns" style="display:none">
@@ -617,6 +630,17 @@
     <div class="vrij-sub">Beantwoord een paar korte vragen over de materiaalapp. Het kost ongeveer 2 minuten.</div>
     <a href="https://docs.google.com/forms/d/e/1FAIpQLSd37_8kPLDBl1Zeb-hY6kPFL5gIH8KjUItCjTdtfGgrBy5Cqw/viewform" target="_blank" rel="noopener" onclick="sluitFeedbackPopup()" class="btn btn-primary" style="margin-bottom:0;text-decoration:none">Feedback geven</a>
     <button onclick="sluitFeedbackPopup()" class="btn btn-secondary" style="margin-bottom:0;margin-top:8px">Later</button>
+  </div>
+</div>
+
+<!-- FOTO'S BEKIJKEN -->
+<div id="foto-overlay" onclick="sluitBestelFotos()">
+  <div class="foto-venster" onclick="event.stopPropagation()">
+    <div class="foto-venster-kop">
+      <strong id="foto-venster-titel">Foto's</strong>
+      <button onclick="sluitBestelFotos()" aria-label="Sluiten">✕</button>
+    </div>
+    <div id="foto-venster-inhoud"></div>
   </div>
 </div>
 
@@ -1005,14 +1029,15 @@
   <script src="js/config.js?v=4.2.4" defer></script>
   <script src="js/ui.js?v=4.4.4" defer></script>
   <script src="js/auth.js?v=4.4.4" defer></script>
-  <script src="js/api.js?v=4.2.9" defer></script>
+  <script src="js/api.js?v=4.5.0" defer></script>
   <script src="js/artikelen.js?v=4.4.4" defer></script>
-  <script src="js/cart.js?v=4.4.4" defer></script>
-  <script src="js/beheer.js?v=4.3.3" defer></script>
+  <script src="js/cart.js?v=4.5.0" defer></script>
+  <script src="js/beheer.js?v=4.5.0" defer></script>
   <script src="js/beheer-algemeen.js?v=4.4.2" defer></script>
   <script src="js/home.js?v=4.4.2" defer></script>
   <script src="js/push.js?v=4.4.4" defer></script>
   <script src="js/info.js?v=4.4.4" defer></script>
+  <script src="js/fotos.js?v=4.5.0" defer></script>
   <script src="js/app.js?v=4.4.4" defer></script>
 </body>
 </html>
