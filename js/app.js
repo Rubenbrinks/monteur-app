@@ -281,7 +281,7 @@ function testBestellingLog() {
   fetch(`${url}?${params.toString()}`)
     .then(r => r.json())
     .then(r => setBeheerStatus(r.status === 'ok'
-      ? '<span style="color:green">✅ Test bestelling gelogd in Sheets!</span>'
+      ? '<span style="color:green">✅ Testbestelling verstuurd: controleer de mailbox.</span>'
       : `<span style="color:var(--danger)">❌ Fout: ${r.message || JSON.stringify(r)}</span>`))
     .catch(err => setBeheerStatus(`<span style="color:var(--danger)">${corsErrorMsg(err)}</span>`));
 }
