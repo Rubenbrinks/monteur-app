@@ -363,8 +363,9 @@ function showTab(name) {
   window.scrollTo({ top: 0, behavior: 'instant' });
   if (name === 'welkom' && typeof laadHome === 'function') laadHome();
   if (name === 'info' && typeof infoNaarMenu === 'function') infoNaarMenu();
-  if (name === 'winkelwagen') renderCart();
+  if (name === 'winkelwagen') { renderCart(); if (typeof projectenVulBestelKeuze === 'function') projectenVulBestelKeuze(); }
   if (name === 'telefoonlijst') laadTelefoonlijst();
+  if (name === 'projecten' && typeof projectenOpen === 'function') projectenOpen();
   if (name === 'favorieten') renderFavorieten();
   if (name === 'historie') renderHistorie();
   if (name === 'artikelen' && ARTIKELEN.length === 0) laadArtikelenUitSheets();

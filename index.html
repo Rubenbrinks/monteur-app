@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="css/layout.css?v=4.4.4">
   <link rel="stylesheet" href="css/components.css?v=4.5.0">
   <link rel="stylesheet" href="css/artikelen.css?v=3.3.2">
-  <link rel="stylesheet" href="css/pages.css?v=4.4.4">
+  <link rel="stylesheet" href="css/pages.css?v=4.6.1">
 </head>
 <body>
 
@@ -52,6 +52,10 @@
     <div class="d-item" onclick="showTab('favorieten');closeDrawer()">
       <span class="ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
       Favorieten
+    </div>
+    <div id="drawer-projecten" class="d-item" style="display:none" onclick="showTab('projecten');closeDrawer()">
+      <span class="ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+      Projecten
     </div>
     <div class="d-item" onclick="showTab('historie');closeDrawer()">
       <span class="ico"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
@@ -338,6 +342,11 @@
     <div id="home-mededelingen"><div class="home-leeg">⏳ Laden...</div></div>
   </div>
 
+  <div class="home-sectie" id="home-projecten-blok" style="display:none">
+    <div class="home-sectie-titel">Mijn projecten</div>
+    <div id="home-projecten"></div>
+  </div>
+
   <div class="home-sectie">
     <div class="home-sectie-titel">Agenda</div>
     <div id="home-agenda"><div class="home-leeg">⏳ Laden...</div></div>
@@ -548,14 +557,19 @@
     </button>
     <div class="inklapbaar-body">
       <div style="height:14px"></div>
+      <div class="field" id="project-kies-veld" style="display:none">
+        <label>Kies een lopend project</label>
+        <input type="text" id="project-kies" list="project-datalist" placeholder="Zoek op nummer of naam, of vul hieronder zelf in" oninput="bestelProjectGekozen()" autocomplete="off" />
+        <datalist id="project-datalist"></datalist>
+      </div>
       <div class="field-2">
         <div class="field">
           <label>Projectnummer</label>
-          <input type="text" id="projectnummer" placeholder="bijv. 2024-0123" oninput="saveInfo();cartAutoExpand()" />
+          <input type="text" id="projectnummer" placeholder="bijv. 2024-0123" oninput="bestelProjectHandmatig();saveInfo();cartAutoExpand()" />
         </div>
         <div class="field">
           <label>Projectnaam <span class="req">*</span></label>
-          <input type="text" id="projectnaam" placeholder="Omschrijving" oninput="saveInfo();cartAutoExpand()" />
+          <input type="text" id="projectnaam" placeholder="Omschrijving" oninput="bestelProjectHandmatig();saveInfo();cartAutoExpand()" />
         </div>
       </div>
     </div>
@@ -642,6 +656,39 @@
       <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       App installeren op dit apparaat
     </button>
+  </div>
+</div>
+
+<div class="screen" id="tab-projecten">
+  <div class="page-header">
+    <button class="page-back-btn" onclick="projectenTerug()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2 id="projecten-titel">Projecten</h2>
+  </div>
+
+  <div id="projecten-lijstweergave">
+    <div class="search-box" style="margin-bottom:10px">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="projecten-zoek" placeholder="Zoek op nummer, naam of plaats..." oninput="projectenFilter()" autocomplete="off" />
+    </div>
+    <div class="proj-filters">
+      <select id="projecten-afdeling" onchange="projectenFilter()"><option value="">Alle afdelingen</option><option>Multiclima</option><option>Koeltechniek</option></select>
+      <select id="projecten-status" onchange="projectenFilter()"><option value="">Alle statussen</option><option>Open</option><option>Bezig</option><option>Wacht</option><option>Gereed</option><option>Archief</option></select>
+    </div>
+    <label class="proj-mijn"><input type="checkbox" id="projecten-mijn" onchange="projectenFilter()" /> Alleen projecten waar ik hoofdmonteur van ben</label>
+    <div id="projecten-aantal" class="proj-aantal"></div>
+    <div id="projecten-lijst"></div>
+  </div>
+
+  <div id="projecten-detail" style="display:none">
+    <div id="projecten-detail-kop"></div>
+    <div class="form-card">
+      <div class="form-card-title">Opvolging toevoegen</div>
+      <div class="field"><label>Datum</label><input type="date" id="log-datum" /></div>
+      <div class="field"><label>Wat is er gebeurd of afgesproken?</label><textarea id="log-tekst" rows="3" maxlength="2000" placeholder="Bijv. leidingwerk begaan afgerond, wachten op materiaal"></textarea></div>
+      <button id="log-knop" class="btn btn-primary" onclick="projectVoegOpvolgingToe()" style="margin-bottom:0">Toevoegen</button>
+    </div>
+    <div class="home-sectie-titel" style="margin-top:6px">Logboek</div>
+    <div id="projecten-logboek"></div>
   </div>
 </div>
 
@@ -964,6 +1011,27 @@
     </div>
   </div>
 
+  <!-- Projecten -->
+  <div class="admin-card beheer-sectie" data-sectie="projecten">
+    <div class="admin-kaart-body">
+      <p class="beheer-uitleg">Importeer wekelijks de projectlijst uit Syntess Atrium (CSV, per afdeling één bestand). Alleen projecten in Werkvoorbereiding en Opdracht worden overgenomen, en alleen projectnummer, naam en projectleider. Klant, calculator, bedragen en uren verlaten je toestel niet. Hoofdmonteur, status en logboek blijven bij een nieuwe import behouden; projecten die niet meer in het bestand staan gaan naar het archief.</p>
+      <div id="tu-dropzone" onclick="document.getElementById('proj-csv-input').click()">
+        <svg width="28" height="28" fill="none" stroke="var(--muted)" stroke-width="1.5" viewBox="0 0 24 24" style="margin-bottom:8px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <div style="font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:2px">Tik om het Syntess-bestand te kiezen</div>
+        <div style="font-size:.74rem;color:var(--muted)">eerst een voorbeeld, dan pas importeren</div>
+      </div>
+      <input type="file" id="proj-csv-input" accept=".csv,.txt" style="display:none" onchange="projVerwerkBestand(this.files[0])" />
+      <div id="proj-import-status" style="font-size:.84rem;min-height:18px;margin-top:8px"></div>
+      <div id="proj-import-voorbeeld" style="display:none;margin-top:8px"></div>
+
+      <div class="proj-imp-kop" style="margin-top:20px">Stand</div>
+      <div id="proj-beheer-overzicht"></div>
+
+      <div class="proj-imp-kop" style="margin-top:20px">Uitrol</div>
+      <label class="proj-mijn" style="margin-bottom:0"><input type="checkbox" id="proj-uitrol" onchange="projZetUitrol(this.checked)" /> Projecten zichtbaar voor alle gebruikers (uit = alleen beheerders)</label>
+    </div>
+  </div>
+
   <!-- Agenda -->
   <div class="admin-card beheer-sectie" data-sectie="agenda">
     <div id="kaart-agenda" class="admin-kaart-body">
@@ -1086,15 +1154,17 @@
   <script src="js/config.js?v=4.2.4" defer></script>
   <script src="js/ui.js?v=4.4.4" defer></script>
   <script src="js/auth.js?v=4.4.4" defer></script>
-  <script src="js/api.js?v=4.5.0" defer></script>
-  <script src="js/artikelen.js?v=4.4.4" defer></script>
+  <script src="js/api.js?v=4.6.2" defer></script>
+  <script src="js/artikelen.js?v=4.6.2" defer></script>
   <script src="js/cart.js?v=4.5.0" defer></script>
   <script src="js/beheer.js?v=4.5.0" defer></script>
-  <script src="js/beheer-algemeen.js?v=4.4.2" defer></script>
-  <script src="js/home.js?v=4.4.2" defer></script>
+  <script src="js/beheer-algemeen.js?v=4.6.1" defer></script>
+  <script src="js/home.js?v=4.6.1" defer></script>
+  <script src="js/projecten.js?v=4.6.2" defer></script>
+  <script src="js/beheer-projecten.js?v=4.6.1" defer></script>
   <script src="js/push.js?v=4.4.4" defer></script>
   <script src="js/info.js?v=4.4.4" defer></script>
   <script src="js/fotos.js?v=4.5.0" defer></script>
-  <script src="js/app.js?v=4.5.2" defer></script>
+  <script src="js/app.js?v=4.6.1" defer></script>
 </body>
 </html>

@@ -94,6 +94,7 @@ async function laadHome(forceer) {
     // krijgen alles terug en moeten verlopen items hier alsnog kwijt.
     _toonMededelingen((med.data || []).filter(m => m.zichtbaar !== false && (!m.vervalt_op || m.vervalt_op >= vandaag)));
     _toonAgenda((ag.data || []).filter(a => (a.einddatum || a.datum) >= vandaag));
+    if (typeof projectenHome === 'function') projectenHome();
   } catch(e) {
     _homeLaatstGeladen = 0;
     ['home-mededelingen', 'home-agenda'].forEach(id => {

@@ -92,6 +92,7 @@ const BEHEER_MENU = [
     { sectie: 'agenda',       label: 'Agenda',       laad: () => laadAgendaBeheer() },
     { sectie: 'mededelingen', label: 'Mededelingen', laad: () => laadMededelingenBeheer() },
     { sectie: 'gebruikers',   label: 'Gebruikers',   laad: () => laadGebruikers() },
+    { sectie: 'projecten',    label: 'Projecten',    laad: () => projLaadBeheer() },
   ]},
 ];
 
