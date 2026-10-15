@@ -317,7 +317,6 @@ async function logBestellingSheets(data) {
       artikelen:      bestelItems,
       totaal:         totaalStuks,
       fotos:          fotos,
-      ...(typeof bestelProjectId === 'function' && bestelProjectId() ? { project_id: bestelProjectId() } : {}),
     }).select('id, status_token').single();
     if (error) { await verwijderUploads(fotos.map(f => f.pad)); showToast('⚠️ Opslaan mislukt: ' + error.message); return; }
     nieuweBestelling = rij;
@@ -358,7 +357,6 @@ async function logBestellingSheets(data) {
   ['projectnummer','projectnaam','opmerkingen'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
-  if (typeof bestelProjectWis === 'function') bestelProjectWis();
   const locKeuze = document.getElementById('locatie-keuze');
   const locInput = document.getElementById('locatie');
   if (locKeuze) { locKeuze.value = ''; }

@@ -72,7 +72,6 @@ function initialiseerApp() {
     try { localStorage.setItem('emondt_actieve_user', sessie.gebruiker); } catch(e) {}
   }
   document.getElementById('di-all')?.classList.add('active');
-  if (typeof projectenBepaalZichtbaar === 'function') projectenBepaalZichtbaar();
   zetHomeGroet();
   showTab('welkom');
   toonFeedbackEenmalig();
