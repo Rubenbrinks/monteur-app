@@ -69,6 +69,7 @@ async function projectenOpen() {
   _projectOpen = null;
   document.getElementById('projecten-lijstweergave').style.display = '';
   document.getElementById('projecten-detail').style.display = 'none';
+  document.getElementById('projecten-verslag').style.display = 'none';
   document.getElementById('projecten-titel').textContent = 'Projecten';
   const el = document.getElementById('projecten-lijst');
   if (!_projectenLijst.length) el.innerHTML = '<div class="laad-indicator"><div class="laad-spinner"></div><span>Projecten laden...</span></div>';
@@ -116,9 +117,11 @@ async function projectOpenId(id) {
   window.scrollTo({ top: 0, behavior: 'instant' });
   projectTeken();
   projectLaadLogboek();
+  if (typeof verslagenLaad === 'function') verslagenLaad();
 }
 
 function projectenTerug() {
+  if (typeof _verslag !== 'undefined' && _verslag) { verslagSluit(); return; }
   if (_projectOpen) { projectenOpen(); return; }
   showTab('welkom');
 }
