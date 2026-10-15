@@ -423,31 +423,3 @@ footer a:hover { color: var(--text-secondary); }
 .proj-imp-rij { padding: 4px 0; color: var(--text-secondary); font-size: .78rem; border-top: 1px solid var(--border); margin-top: 4px; }
 .proj-imp-waarschuwing { background: rgba(230,160,30,.14); border: 1px solid #d99a1b; border-radius: 8px; padding: 10px 12px; margin-top: 10px; font-size: .84rem; }
 .proj-imp-waarschuwing label { display: flex; gap: 8px; align-items: center; margin-top: 8px; font-weight: 600; }
-
-/* Verslagen */
-.verslag-rij { display: flex; gap: 8px; margin-top: 8px; }
-.verslag-open {
-  flex: 1; display: flex; flex-direction: column; gap: 2px; text-align: left; cursor: pointer;
-  background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
-  padding: 10px 14px; font-family: inherit; color: var(--text); font-size: .88rem;
-}
-.verslag-open span { font-size: .74rem; color: var(--muted); }
-.verslag-pdf {
-  background: var(--green); color: #000; border: none; border-radius: var(--radius-sm);
-  padding: 0 16px; font-family: inherit; font-weight: 700; font-size: .82rem; cursor: pointer;
-}
-.vs-check { padding: 10px 0; border-top: 1px solid var(--border); }
-.vs-check:first-of-type { border-top: none; padding-top: 0; }
-.vs-check-tekst { font-size: .88rem; margin-bottom: 8px; }
-.vs-keuze { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.vs-keuze button {
-  border: 1px solid var(--border); background: var(--surface2); color: var(--text-secondary);
-  border-radius: var(--radius-sm); padding: 9px 4px; font-family: inherit; font-size: .8rem; font-weight: 600; cursor: pointer;
-}
-.vs-keuze button.ok { border-color: var(--green); color: var(--green); background: rgba(120,170,40,.14); }
-.vs-keuze button.nog { border-color: #d99a1b; color: #d99a1b; background: rgba(230,160,30,.14); }
-.vs-mat { display: grid; grid-template-columns: 1fr 70px 34px; gap: 6px; margin-bottom: 6px; align-items: center; }
-.vs-mat input {
-  background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
-  color: var(--text); font-family: inherit; font-size: .86rem; padding: 10px; min-width: 0;
-}

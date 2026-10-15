@@ -13,10 +13,6 @@ verify_jwt = false
 [functions.fotos-opruimen]
 verify_jwt = false
 
-# Verslag-PDF: alleen ingelogde gebruikers (de functie controleert maker of beheerder zelf).
-[functions.verslag-pdf]
-verify_jwt = true
-
 # Beheerpaneel: alleen ingelogde beheerders (de functie controleert de rol zelf).
 [functions.meldingen-beheer]
 verify_jwt = true

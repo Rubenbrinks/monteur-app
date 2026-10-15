@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="css/layout.css?v=4.4.4">
   <link rel="stylesheet" href="css/components.css?v=4.5.0">
   <link rel="stylesheet" href="css/artikelen.css?v=3.3.2">
-  <link rel="stylesheet" href="css/pages.css?v=4.7.0">
+  <link rel="stylesheet" href="css/pages.css?v=4.6.1">
 </head>
 <body>
 
@@ -681,7 +681,6 @@
 
   <div id="projecten-detail" style="display:none">
     <div id="projecten-detail-kop"></div>
-    <div id="projecten-verslagen"></div>
     <div class="form-card">
       <div class="form-card-title">Opvolging toevoegen</div>
       <div class="field"><label>Datum</label><input type="date" id="log-datum" /></div>
@@ -691,8 +690,6 @@
     <div class="home-sectie-titel" style="margin-top:6px">Logboek</div>
     <div id="projecten-logboek"></div>
   </div>
-
-  <div id="projecten-verslag" style="display:none"></div>
 </div>
 
 <div class="screen" id="tab-telefoonlijst">
@@ -1030,11 +1027,6 @@
       <div class="proj-imp-kop" style="margin-top:20px">Stand</div>
       <div id="proj-beheer-overzicht"></div>
 
-      <div class="proj-imp-kop" style="margin-top:20px">Afvinklijst vertrekverslag</div>
-      <p class="beheer-uitleg" style="margin-bottom:8px">Eén punt per regel. Monteurs vinken per punt aan: uitgevoerd of nog te doen. Bestaande verslagen blijven ongewijzigd.</p>
-      <div class="field"><textarea id="proj-checklist" rows="10"></textarea></div>
-      <button class="btn btn-secondary" onclick="projSlaChecklistOp()">Lijst opslaan</button>
-
       <div class="proj-imp-kop" style="margin-top:20px">Uitrol</div>
       <label class="proj-mijn" style="margin-bottom:0"><input type="checkbox" id="proj-uitrol" onchange="projZetUitrol(this.checked)" /> Projecten zichtbaar voor alle gebruikers (uit = alleen beheerders)</label>
     </div>
@@ -1168,9 +1160,8 @@
   <script src="js/beheer.js?v=4.5.0" defer></script>
   <script src="js/beheer-algemeen.js?v=4.6.1" defer></script>
   <script src="js/home.js?v=4.6.1" defer></script>
-  <script src="js/projecten.js?v=4.7.0" defer></script>
-  <script src="js/verslagen.js?v=4.7.0" defer></script>
-  <script src="js/beheer-projecten.js?v=4.7.0" defer></script>
+  <script src="js/projecten.js?v=4.6.2" defer></script>
+  <script src="js/beheer-projecten.js?v=4.6.1" defer></script>
   <script src="js/push.js?v=4.4.4" defer></script>
   <script src="js/info.js?v=4.4.4" defer></script>
   <script src="js/fotos.js?v=4.5.0" defer></script>

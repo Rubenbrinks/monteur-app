@@ -153,11 +153,6 @@ async function projLaadBeheer() {
     sb.from('project_imports').select('*').order('aangemaakt_op', { ascending: false }).limit(5),
   ]);
   if (sch) sch.checked = inst.data?.waarde === '1';
-  try {
-    const cl = await sb.from('instellingen').select('waarde').eq('sleutel', 'verslag_checklist').maybeSingle();
-    const veld = document.getElementById('proj-checklist');
-    if (veld && cl.data?.waarde) veld.value = JSON.parse(cl.data.waarde).join('\n');
-  } catch(e) {}
   const per = {};
   (pr.data || []).forEach(p => {
     const a = per[p.afdeling] = per[p.afdeling] || { actief: 0, archief: 0, verborgen: 0 };
@@ -172,11 +167,4 @@ async function projZetUitrol(aan) {
   const { error } = await sb.from('instellingen').upsert({ sleutel: 'projecten_zichtbaar', waarde: aan ? '1' : '0' });
   if (error) { showToast('⚠️ ' + error.message); projLaadBeheer(); return; }
   showToast(aan ? '✅ Projecten zijn nu zichtbaar voor iedereen' : 'Projecten zijn weer alleen voor beheerders');
-}
-
-async function projSlaChecklistOp() {
-  const lijst = document.getElementById('proj-checklist').value.split('\n').map(s => s.trim()).filter(Boolean);
-  if (!lijst.length) { showToast('Vul minstens één punt in'); return; }
-  const { error } = await sb.from('instellingen').upsert({ sleutel: 'verslag_checklist', waarde: JSON.stringify(lijst) });
-  showToast(error ? '⚠️ ' + error.message : '✅ Lijst opgeslagen');
 }
